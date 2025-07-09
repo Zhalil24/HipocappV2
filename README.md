@@ -1,8 +1,4 @@
-# React Project Template with Structured Folder Organization
 
-This repository serves as a foundational template for kickstarting React applications while maintaining a clean and organized project structure. The structure is designed to enhance code readability, maintainability, and scalability. Here's an overview of the key components and technologies used:
-
-### How to run the project
 
 ```javascript
 npm i
@@ -11,17 +7,6 @@ and
 ```javascript
 npm run dev
 ```
-
-## Used Technologies
-
-- Axios: For making HTTP requests to your API.
-- Tailwind CSS: A utility-first CSS framework for rapidly building custom designs.
-- React Icons: A library providing popular icon packs as React components.
-- React Router Dom (v6): For declarative routing and navigation within the app.
-- Prop Types: Runtime type checking for React props to catch bugs early.
-- Redux Toolkit: A Redux library that simplifies state management.
-
-## Most Used Folder Structure
 
 ```javascript
 React Folder Structure
@@ -110,12 +95,3 @@ React Folder Structure
 - `.gitignore`
 - `package.json`
 - `.vite.config.js`
-
-## How to Use
-1. Clone this repository to your local machine.
-2. Customize the components, styles, and logic to match your application's requirements.
-3. Leverage the provided structure to maintain a clean codebase as your project scales.
-4. Utilize the predefined utilities, routing, and state management for a smoother development experience.
-
-
-Feel free to explore the various directories and components to understand how everything fits together. This template provides a solid foundation, allowing you to focus on building features rather than setting up the project structure from scratch.
