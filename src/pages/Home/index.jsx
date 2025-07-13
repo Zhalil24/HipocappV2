@@ -20,12 +20,6 @@ const HomePage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#FDF6EC] font-sans">
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          activeMenu={activeMenu}
-          setActiveMenu={setActiveMenu}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-        />
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
