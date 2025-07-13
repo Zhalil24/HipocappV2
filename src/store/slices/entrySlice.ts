@@ -1,23 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { BaseResponse, lastEntriesInitialState, LastEntryModel } from '../../core/models';
+import { BaseService } from '../../core/services/baseService';
 
-export const fetchLastEntries = createAsyncThunk(
-  'entries/fetchLastEntries',
-  async () => {
-    const response = await axios.get(
-      'https://hipocapp.com/Entry/GetLastEntries'
-    );
-    return response.data;
-  }
-);
+const baseService = new BaseService();
+
+export const fetchLastEntries = createAsyncThunk<
+  BaseResponse<LastEntryModel[]>
+>('entries/fetchLastEntries', async () => {
+  const response = await baseService.get<LastEntryModel[]>('/Entry/GetLastEntries');
+  return response;
+});
 
 const entrySlice = createSlice({
   name: 'entries',
-  initialState: {
-    data: [],
-    loading: false,
-    error: null,
-  },
+  initialState: lastEntriesInitialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -26,15 +22,12 @@ const entrySlice = createSlice({
         state.error = null;
       })
       .addCase(fetchLastEntries.fulfilled, (state, action) => {
-  state.loading = false;
-
-  // action.payload: API cevabı objesi
-  // İhtiyacımız olan entries, action.payload.data içinde (dizi)
-  state.data = Array.isArray(action.payload.data) ? action.payload.data : [];
-})
+        state.loading = false;
+        state.data = action.payload.data ?? [];
+      })
       .addCase(fetchLastEntries.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error.message ?? 'Bir hata oluştu.';
       });
   },
 });
