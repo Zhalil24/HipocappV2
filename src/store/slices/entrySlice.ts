@@ -4,6 +4,7 @@ import { BaseService } from '../../core/services/baseService';
 
 const baseService = new BaseService();
 
+// Daily entries
 export const fetchLastEntries = createAsyncThunk<
   BaseResponse<LastEntryModel[]>
 >('entries/fetchLastEntries', async () => {
