@@ -1,44 +1,77 @@
-import React from "react";
+import AuthInput from "@/components/AuthInput";
+import React, { useEffect } from "react";
 import { FaEnvelope, FaLock } from "react-icons/fa";
+import { useFormik } from 'formik';
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { fetchLogin } from "@/store/slices/loginSlice";
+import logo from '../../layout/layouts/Header/logo.png';
 
 const Login = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FDF6EC] px-4">
-      <div className="bg-white border-2 border-[#FFD700] rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <h2 className="text-3xl font-extrabold text-center text-[#2B4560] mb-6 tracking-tight">
-          Giriş Yap
-        </h2>
+  const dispatch = useDispatch<AppDispatch>();
+  const userLoginState = useSelector((state: RootState) => state.login);
 
-        <form className="space-y-5">
+  const formik = useFormik({
+    initialValues: {
+      userName: '',
+      password: ''
+    },
+    onSubmit: (values) => {
+      dispatch(fetchLogin(values))
+    }
+  });
+
+  useEffect(() => {
+    if (userLoginState.userRole == 'kullanıcı') {
+      // anasayfa git 
+    }
+    else{
+      // admin paneline git 
+    }
+  })
+
+  return (
+    <form onSubmit={formik.handleSubmit} className="space-y-5">
+      <div className="min-h-screen flex items-center justify-center  px-4">
+        <div className="bg-white border-2 border-[#FFB700] rounded-3xl shadow-2xl p-8 w-full max-w-md space-y-5">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="w-20 h-20 rounded-full bg-[#2b4560] flex items-center justify-center">
+              <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+            </div>
+            <h2 className="text-3xl font-extrabold text-[#2B4560] tracking-tight">
+              Giriş Yap
+            </h2>
+          </div>
+
           <div>
             <label className="block text-[#2B4560] font-semibold mb-1">
-              E-posta
+              Kullanıcı adı
             </label>
-            <div className="flex items-center border rounded-lg px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-[#FFD700] transition">
-              <FaEnvelope className="text-[#2B4560] mr-3" />
-              <input
-                type="email"
-                placeholder="ornek@mail.com"
-                className="w-full outline-none bg-transparent text-[#2B4560] placeholder-gray-400"
-              />
-            </div>
+            <AuthInput
+              type="text"
+              placeholder="Kullanıcı adı"
+              icon="user"
+              value={formik.values.userName}
+              onChange={formik.handleChange}
+              name="userName"
+            />
           </div>
           <div>
             <label className="block text-[#2B4560] font-semibold mb-1">
               Şifre
             </label>
-            <div className="flex items-center border rounded-lg px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-[#FFD700] transition">
-              <FaLock className="text-[#2B4560] mr-3" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full outline-none bg-transparent text-[#2B4560] placeholder-gray-400"
-              />
-            </div>
+            <AuthInput
+              type="text"
+              placeholder="********"
+              icon="lock"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              name="password"
+            />
           </div>
           <button
             type="submit"
-            className="w-full bg-[#FFD700] text-[#2B4560] font-bold py-2.5 rounded-lg hover:brightness-105 shadow-md transition-all"
+            className="w-full bg-[#2B4560] text-[#ffffff] font-bold py-2.5 rounded-lg hover:brightness-105 shadow-md transition-all"
           >
             Giriş
           </button>
@@ -53,9 +86,10 @@ const Login = () => {
               Hemen Kaydolun
             </button>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
+    </form>
+
   );
 };
 

@@ -1,26 +1,27 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { BaseResponse, lastEntriesInitialState, LastEntryModel } from '../../core/models';
+import { BaseResponseModel, lastEntriesInitialState } from '../../core/models'
+import { randomEntriesInitialState, RandomEntryModel } from '@/core/models/entries/randomEntryModel';
 import { BaseService } from '../../core/services/baseService';
 
 const baseService = new BaseService();
 
-// Random (stream) entries
 export const fetchRandomEntries = createAsyncThunk<
-  BaseResponse<LastEntryModel[]>
+  BaseResponseModel<RandomEntryModel[]>
 >('randomEntries/fetchRandomEntries', async () => {
-  const response = await baseService.get<LastEntryModel[]>('/Entry/GetRandomEntries');
+  const response = await baseService.get<RandomEntryModel[]>('/Entry/GetRandomEntries');
   return response;
 });
 
 const randomEntrySlice = createSlice({
   name: 'randomEntries',
-  initialState: lastEntriesInitialState,
+  initialState: randomEntriesInitialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchRandomEntries.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.halil = "halil bekle"
       })
       .addCase(fetchRandomEntries.fulfilled, (state, action) => {
         state.loading = false;

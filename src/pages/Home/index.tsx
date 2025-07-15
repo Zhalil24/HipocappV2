@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchLastEntries } from '../../store/slices/entrySlice'; // daily
-import { fetchRandomEntries } from '../../store/slices/randomEntrySlice'; // stream
+import { fetchLastEntries } from '../../store/slices/entrySlice'; 
+import { fetchRandomEntries } from '../../store/slices/randomEntrySlice'; 
 import EntryCard from '../../components/EntryCard';
 import { AppDispatch, RootState } from '../../store/store';
 
@@ -11,12 +11,8 @@ const HomePage: React.FC = () => {
   const [entryMode, setEntryMode] = useState<'daily' | 'stream'>('daily');
 
   const dailyEntriesState = useSelector((state: RootState) => state.entries);
-  const randomEntriesState = useSelector(
-    (state: RootState) => state.randomEntries
-  );
+  const randomEntriesState = useSelector((state: RootState) => state.randomEntries);
 
-  const currentEntries =
-    entryMode === 'daily' ? dailyEntriesState : randomEntriesState;
 
   useEffect(() => {
     if (entryMode === 'daily') {
@@ -41,54 +37,65 @@ const HomePage: React.FC = () => {
                 <div className="space-x-2">
                   <button
                     onClick={() => handleModeChange('daily')}
-                    className={`px-4 py-2 rounded-lg border ${
-                      entryMode === 'daily'
-                        ? 'bg-[#2B4560] text-white'
-                        : 'bg-white text-[#2B4560] border-[#2B4560]'
-                    }`}
+                    className={`px-4 py-2 rounded-lg border ${entryMode === 'daily'
+                      ? 'bg-[#011f26] text-white'
+                      : 'bg-white text-[#2B4560] border-[#2B4560]'
+                      }`}
                   >
                     Daily
                   </button>
                   <button
                     onClick={() => handleModeChange('stream')}
-                    className={`px-4 py-2 rounded-lg border ${
-                      entryMode === 'stream'
-                        ? 'bg-[#2B4560] text-white'
-                        : 'bg-white text-[#2B4560] border-[#2B4560]'
-                    }`}
+                    className={`px-4 py-2 rounded-lg border ${entryMode === 'stream'
+                      ? 'bg-[#011f26] text-white'
+                      : 'bg-white text-[#2B4560] border-[#2B4560]'
+                      }`}
                   >
                     Stream
                   </button>
                 </div>
               </div>
 
-              {currentEntries.loading && (
-                <p className="text-[#2B4560]">Yükleniyor...</p>
-              )}
-              {currentEntries.error && (
-                <p className="text-red-500">Hata: {currentEntries.error}</p>
-              )}
-
-              <div className="grid gap-6">
-                {currentEntries.data?.length === 0 && (
-                  <p className="text-gray-600">Gösterilecek entry yok.</p>
+              <div>
+                {entryMode === 'daily' && dailyEntriesState.loading && (
+                  <p className="text-[#2B4560]">Günlük entry'ler yükleniyor...</p>
+                )}
+                {entryMode === 'stream' && randomEntriesState.loading && (
+                  <p className="text-[#2B4560]">Anlık entry'ler yükleniyor...</p>
                 )}
 
-                {currentEntries.data?.map((entry) => (
-                  <EntryCard
-                    key={entry.id}
-                    titleName={entry.titleName}
-                    entryDescription={
-                      entry.entryDescription ||
-                      entry.description ||
-                      'Açıklama bulunamadı.'
-                    }
-                    userNameSurname={entry.userNameSurname}
-                    userName={entry.userName}
-                    date={entry.date}
-                  />
-                ))}
+                {entryMode === 'daily' && dailyEntriesState.error && (
+                  <p className="text-red-500">Hata: {dailyEntriesState.error}</p>
+                )}
+                {entryMode === 'stream' && randomEntriesState.error && (
+                  <p className="text-red-500">Hata: {randomEntriesState.error}</p>
+                )}
+
+                <div className="grid gap-6">
+                  {entryMode === 'daily' &&
+                    dailyEntriesState.data?.map((entry) => (
+                      <EntryCard
+                        key={entry.id}
+                        titleName={entry.titleName}
+                        entryDescription={entry.entryDescription}
+                        userName={entry.userName}
+                        userNameSurname={entry.userNameSurname}
+                        date={entry.date}
+                      />
+                    ))}
+
+                  {entryMode === 'stream' &&
+                    randomEntriesState.data?.map((entry) => (
+                      <EntryCard
+                        key={entry.id}
+                        titleName={entry.titleName}
+                        description={entry.description}
+                        createDate={entry.createDate}
+                      />
+                    ))}
+                </div>
               </div>
+
             </div>
           </main>
         </div>

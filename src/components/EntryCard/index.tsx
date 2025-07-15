@@ -1,25 +1,41 @@
 import React, { useState } from 'react';
 
-const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName, date }) => {
+type EntryCardProps = {
+  titleName?: string;
+  entryDescription?: string;
+  description?: string;
+  userNameSurname?: string;
+  userName?: string;
+  createDate?: string;
+  date?: string;
+};
+const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName, date, description, createDate }: EntryCardProps) => {
   const [expanded, setExpanded] = useState(false);
 
-  const formattedDate = date
-    ? new Date(date).toLocaleDateString("tr-TR", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+  const rawDate = date || createDate;
+
+  const formattedDate = rawDate
+    ? new Date(rawDate).toLocaleDateString("tr-TR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : '';
 
-  const isLong = entryDescription.length > 250;
-  const displayedDescription = expanded || !isLong
-    ? entryDescription
-    : entryDescription.slice(0, 250) + '...';
+
+  const fallbackDescription = entryDescription || description || '';
+  const isLong = fallbackDescription.length > 250;
+
+  const displayedDescription =
+    expanded || !isLong
+      ? fallbackDescription
+      : fallbackDescription.slice(0, 250) + '...';
+
 
   return (
-    <div className="bg-[#FDF6EC] p-6 rounded-xl shadow-md border">
+    <div className="bg-[#FFFDD0] p-6 rounded-xl shadow-md border">
       {titleName && (
         <h3 className="text-xl font-semibold text-[#2B4560] mb-2">
           {titleName}

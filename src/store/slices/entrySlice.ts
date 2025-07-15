@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { BaseResponse, lastEntriesInitialState, LastEntryModel } from '../../core/models';
+import { BaseResponseModel, lastEntriesInitialState, LastEntryModel } from '../../core/models';
 import { BaseService } from '../../core/services/baseService';
 
 const baseService = new BaseService();
 
 // Daily entries
 export const fetchLastEntries = createAsyncThunk<
-  BaseResponse<LastEntryModel[]>
+  BaseResponseModel<LastEntryModel[]>
 >('entries/fetchLastEntries', async () => {
   const response = await baseService.get<LastEntryModel[]>('/Entry/GetLastEntries');
   return response;

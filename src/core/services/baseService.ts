@@ -3,7 +3,7 @@ import axios, {
   AxiosRequestConfig,
   AxiosResponse,
 } from 'axios';
-import { BaseResponse } from '../models/baseModel';
+import { BaseResponseModel } from '../models/base/baseResponseModel';
 
 export class BaseService {
   private axiosInstance: AxiosInstance;
@@ -42,9 +42,9 @@ export class BaseService {
     url: string,
     params?: Record<string, any>,
     config?: AxiosRequestConfig
-  ): Promise<BaseResponse<TResponse>> {
+  ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponse<TResponse>> = await this.axiosInstance.get(url, {
+      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.get(url, {
         ...config,
         params,
       });
@@ -66,9 +66,9 @@ export class BaseService {
     url: string,
     data?: TRequest,
     config?: AxiosRequestConfig
-  ): Promise<BaseResponse<TResponse>> {
+  ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponse<TResponse>> = await this.axiosInstance.post(url, data, config);
+      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.post(url, data, config);
       return {
         success: response.data.success,
         data: response.data.data,
@@ -87,9 +87,9 @@ export class BaseService {
     url: string,
     data?: TRequest,
     config?: AxiosRequestConfig
-  ): Promise<BaseResponse<TResponse>> {
+  ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponse<TResponse>> = await this.axiosInstance.put(url, data, config);
+      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.put(url, data, config);
       return {
         success: response.data.success,
         data: response.data.data,
@@ -108,9 +108,9 @@ export class BaseService {
     url: string,
     data?: TRequest,
     config?: AxiosRequestConfig
-  ): Promise<BaseResponse<TResponse>> {
+  ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponse<TResponse>> = await this.axiosInstance.patch(url, data, config);
+      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.patch(url, data, config);
       return {
         success: response.data.success,
         data: response.data.data,
@@ -128,9 +128,9 @@ export class BaseService {
   public async delete<TResponse>(
     url: string,
     config?: AxiosRequestConfig
-  ): Promise<BaseResponse<TResponse>> {
+  ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponse<TResponse>> = await this.axiosInstance.delete(url, config);
+      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.delete(url, config);
       return {
         success: response.data.success,
         data: response.data.data,

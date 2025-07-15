@@ -1,4 +1,4 @@
-export interface BaseResponse<T> {
+export interface BaseResponseModel<T> {
   success: boolean;
   data?: T;
   message?: string;
