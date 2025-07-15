@@ -35,12 +35,9 @@ const Login = () => {
       <div className="min-h-screen flex items-center justify-center  px-4">
         <div className="bg-white border-2 border-[#FFB700] rounded-3xl shadow-2xl p-8 w-full max-w-md space-y-5">
           <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="w-20 h-20 rounded-full bg-[#2b4560] flex items-center justify-center">
+            <div className="w-40 h-40 rounded-full bg-[#2b4560] flex items-center justify-center">
               <img src={logo} alt="Logo" className="w-full h-full object-cover" />
             </div>
-            <h2 className="text-3xl font-extrabold text-[#2B4560] tracking-tight">
-              Giriş Yap
-            </h2>
           </div>
 
           <div>
