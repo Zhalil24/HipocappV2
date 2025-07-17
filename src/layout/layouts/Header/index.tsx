@@ -8,7 +8,8 @@ const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="bg-[#011f26] text-[#FDF6EC] shadow-md px-6 py-1 flex items-center justify-between flex-wrap gap-8">
+    <header className="bg-[#011f26] text-[#FDF6EC] shadow-md px-6 py-1 flex items-center justify-between flex-wrap gap-8
+                       fixed top-0 left-0 w-full">
       <div className="flex items-center gap-4">
         <div className="w-15 h-20 rounded-full bg-[#2b4560] flex items-center justify-center overflow-hidden">
           <img src={logo} alt="Logo" className="w-full h-full object-cover" />
