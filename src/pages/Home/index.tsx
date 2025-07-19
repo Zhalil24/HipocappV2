@@ -2,14 +2,36 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchLastEntries } from '../../store/slices/entrySlice';
 import { fetchRandomEntries } from '../../store/slices/randomEntrySlice';
-import { fetchTitlesByHeaderName } from '../../store/slices/titleListSlice';
+import {
+  fetchTitlesByHeaderName,
+  clearTitles,
+} from '../../store/slices/titleListSlice';
+import { fetchEntriesByTitleName } from '../../store/slices/titleEntrySlice';
 import EntryCard from '../../components/EntryCard';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { AppDispatch, RootState } from '../../store/store';
 
+const MenuIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1.5}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 6h18M3 12h18M3 18h18"
+    />
+  </svg>
+);
+
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [entryMode, setEntryMode] = useState<'daily' | 'stream'>('daily');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -18,9 +40,26 @@ const HomePage: React.FC = () => {
     (state: RootState) => state.randomEntries
   );
   const titleListState = useSelector((state: RootState) => state.titleList);
+  const titleEntryState = useSelector((state: RootState) => state.titleEntry);
 
   const currentEntries =
-    entryMode === 'daily' ? dailyEntriesState : randomEntriesState;
+    selectedCategory && titleEntryState.entries.length > 0
+      ? titleEntryState.entries
+      : entryMode === 'daily'
+      ? dailyEntriesState.data
+      : randomEntriesState.data;
+
+  const loading = selectedCategory
+    ? titleEntryState.loading
+    : entryMode === 'daily'
+    ? dailyEntriesState.loading
+    : randomEntriesState.loading;
+
+  const error = selectedCategory
+    ? titleEntryState.error
+    : entryMode === 'daily'
+    ? dailyEntriesState.error
+    : randomEntriesState.error;
 
   useEffect(() => {
     if (!selectedCategory) {
@@ -35,21 +74,47 @@ const HomePage: React.FC = () => {
   const handleModeChange = (mode: 'daily' | 'stream') => {
     setEntryMode(mode);
     setSelectedCategory(null);
+    dispatch(clearTitles());
   };
 
   const handleSidebarSelect = (subItemApiName: string) => {
-    console.log('Seçilen kategori apiName:', subItemApiName);
-
     setSelectedCategory(subItemApiName);
     dispatch(fetchTitlesByHeaderName(subItemApiName));
   };
 
-  return (
-    <div className="min-h-screen flex font-sans">
-      <Sidebar onSelect={handleSidebarSelect} />
+  const handleTitleSelect = (titleName: string) => {
+    dispatch(fetchEntriesByTitleName(titleName));
+  };
 
-      <div className="flex-1 ml-64 flex flex-col overflow-hidden">
+  return (
+    <div className="min-h-screen flex font-sans bg-gray-50">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onSelect={handleSidebarSelect}
+        titles={titleListState.titles}
+        loadingTitles={titleListState.loading}
+        titlesError={titleListState.error}
+        onTitleSelect={handleTitleSelect}
+      />
+
+      <div
+        className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? 'ml-64' : 'ml-0'
+        }`}
+      >
         <main className="flex-grow overflow-y-auto mt-10 px-6 py-10 pt-[88.5px]">
+          <button
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className={`fixed top-[90px] left-4 z-20 p-2 rounded-md transition-colors ${
+              isSidebarOpen
+                ? 'bg-white text-green-700'
+                : 'bg-[#011f26] text-white'
+            }`}
+            aria-label="Toggle sidebar"
+          >
+            <MenuIcon />
+          </button>
+
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="space-x-2">
@@ -76,67 +141,30 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {selectedCategory && (
-              <p className="mb-4 text-[#2B4560] font-medium">
-                Seçilen Alt Başlık: {selectedCategory}
-              </p>
-            )}
+            <>
+              {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
+              {error && <p className="text-red-500">Hata: {error}</p>}
 
-            {selectedCategory && (
-              <>
-                {titleListState.loading && (
-                  <p className="text-[#2B4560]">Başlıklar yükleniyor...</p>
+              <div className="grid gap-6">
+                {currentEntries?.length === 0 && !loading && (
+                  <p className="text-gray-600">Gösterilecek entry yok.</p>
                 )}
-                {titleListState.error && (
-                  <p className="text-red-500">{titleListState.error}</p>
-                )}
-                {titleListState.titles.length > 0 && (
-                  <div className="grid gap-6 mb-10">
-                    {titleListState.titles.map((title) => (
-                      <div
-                        key={title.id}
-                        className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
-                      >
-                        <p className="text-[#2B4560] font-medium">
-                          {title.name}
-                          
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {!selectedCategory && (
-              <>
-                {currentEntries.loading && (
-                  <p className="text-[#2B4560]">Yükleniyor...</p>
-                )}
-                {currentEntries.error && (
-                  <p className="text-red-500">Hata: {currentEntries.error}</p>
-                )}
-                <div className="grid gap-6">
-                  {currentEntries.data?.length === 0 && (
-                    <p className="text-gray-600">Gösterilecek entry yok.</p>
-                  )}
-                  {currentEntries.data?.map((entry) => (
-                    <EntryCard
-                      key={entry.id}
-                      titleName={entry.titleName}
-                      entryDescription={
-                        entry.entryDescription ||
-                        entry.description ||
-                        'Açıklama bulunamadı.'
-                      }
-                      userNameSurname={entry.userNameSurname}
-                      userName={entry.userName}
-                      date={entry.date}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+                {currentEntries?.map((entry) => (
+                  <EntryCard
+                    key={entry.id}
+                    titleName={entry.titleName}
+                    entryDescription={
+                      entry.entryDescription ||
+                      entry.description ||
+                      'Açıklama bulunamadı.'
+                    }
+                    userNameSurname={entry.userNameSurname}
+                    userName={entry.userName}
+                    date={entry.date}
+                  />
+                ))}
+              </div>
+            </>
           </div>
         </main>
       </div>
