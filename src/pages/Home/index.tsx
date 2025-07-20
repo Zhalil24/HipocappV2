@@ -11,27 +11,10 @@ import EntryCard from '../../components/EntryCard';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { AppDispatch, RootState } from '../../store/store';
 
-const MenuIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3 6h18M3 12h18M3 18h18"
-    />
-  </svg>
-);
-
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const isSidebarOpen = true;
   const [entryMode, setEntryMode] = useState<'daily' | 'stream'>('daily');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -98,24 +81,12 @@ const HomePage: React.FC = () => {
       />
 
       <div
-        className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? 'ml-64' : 'ml-0'
-        }`}
+        className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ml-64`}
       >
         <main className="flex-grow overflow-y-auto mt-10 px-6 py-10 pt-[88.5px]">
-          <button
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className={`fixed top-[90px] left-4 z-20 p-2 rounded-md transition-colors ${
-              isSidebarOpen
-                ? 'bg-white text-green-700'
-                : 'bg-[#011f26] text-white'
-            }`}
-            aria-label="Toggle sidebar"
-          >
-            <MenuIcon />
-          </button>
+          
 
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-[165px]">
             <div className="flex items-center justify-between mb-6">
               <div className="space-x-2">
                 <button
