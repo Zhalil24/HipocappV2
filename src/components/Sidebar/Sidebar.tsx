@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>("Tıp");
 
   const handleCategoryClick = (category: string) => {
     setSelectedCategory(category);

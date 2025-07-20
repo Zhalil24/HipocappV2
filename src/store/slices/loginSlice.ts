@@ -1,4 +1,5 @@
 import { BaseResponseModel, UserLoginModel, userLoginModelState } from "@/core/models";
+import { LoginResponseModel } from "@/core/models/user/loginResponseModel";
 import { BaseService } from "@/core/services/baseService";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
@@ -6,12 +7,12 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const baseService = new BaseService();
 
 export const fetchLogin = createAsyncThunk<
-    BaseResponseModel<UserLoginModel>,
+    BaseResponseModel<LoginResponseModel>,
     UserLoginModel
 >(
     'api/user/Login',
     async (loginData) => {
-        const response = await baseService.post<UserLoginModel, UserLoginModel>(
+        const response = await baseService.post<UserLoginModel, LoginResponseModel>(
             'api/user/Login',
             loginData
         );
@@ -23,25 +24,27 @@ export const fetchLogin = createAsyncThunk<
 const loginSlice = createSlice({
     name: 'login',
     initialState: userLoginModelState,
-    reducers: {},
+    reducers: {
+        clearMessage(state) {
+            state.message = "";
+        }
+    },
     extraReducers(builder) {
         builder
             .addCase(fetchLogin.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.isLogin = false;
             })
             .addCase(fetchLogin.fulfilled, (state, action) => {
                 state.loading = false;
                 state.data = action.payload.data ?? null;
-                state.isLogin = true;
-                // state.userRole = action.payload.data.roleDTO.name
-                // _localStorgeSaveItem(state.data.token)
+                state.userRole = action.payload.data?.roleDTO?.name ?? '';
+                state.message = action.payload.message ?? 'Tekrar Deneyiniz';
+                localStorage.setItem("user", JSON.stringify(action.payload.data));
             })
             .addCase(fetchLogin.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message ?? 'Bir hata oluştu.';
-                state.isLogin = false;
             });
     },
 })

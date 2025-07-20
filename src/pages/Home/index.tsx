@@ -13,8 +13,6 @@ import { AppDispatch, RootState } from '../../store/store';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-
-  const isSidebarOpen = true;
   const [entryMode, setEntryMode] = useState<'daily' | 'stream'>('daily');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -68,51 +66,49 @@ const HomePage: React.FC = () => {
   const handleTitleSelect = (titleName: string) => {
     dispatch(fetchEntriesByTitleName(titleName));
   };
+  
 
   return (
-    <div className="min-h-screen flex font-sans bg-gray-50">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onSelect={handleSidebarSelect}
-        titles={titleListState.titles}
-        loadingTitles={titleListState.loading}
-        titlesError={titleListState.error}
-        onTitleSelect={handleTitleSelect}
-      />
+    <div className="min-h-screen flex justify-center font-sans bg-gray-50">
+      <div className="w-full max-w-6xl flex">
+        {/* Sidebar */}
+        <Sidebar
+          onSelect={handleSidebarSelect}
+          titles={titleListState.titles}
+          loadingTitles={titleListState.loading}
+          titlesError={titleListState.error}
+          onTitleSelect={handleTitleSelect}
+        />
 
-      <div
-        className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ml-64`}
-      >
-        <main className="flex-grow overflow-y-auto mt-10 px-6 py-10 pt-[88.5px]">
-          
-
-          <div className="max-w-4xl mx-[165px]">
-            <div className="flex items-center justify-between mb-6">
-              <div className="space-x-2">
-                <button
-                  onClick={() => handleModeChange('daily')}
-                  className={`px-4 py-2 rounded-lg border ${
-                    entryMode === 'daily'
-                      ? 'bg-[#2B4560] text-white'
-                      : 'bg-white text-[#2B4560] border-[#2B4560]'
-                  }`}
-                >
-                  Daily
-                </button>
-                <button
-                  onClick={() => handleModeChange('stream')}
-                  className={`px-4 py-2 rounded-lg border ${
-                    entryMode === 'stream'
-                      ? 'bg-[#2B4560] text-white'
-                      : 'bg-white text-[#2B4560] border-[#2B4560]'
-                  }`}
-                >
-                  Stream
-                </button>
+        {/* İçerik */}
+        <div className="flex-1 flex flex-col overflow-hidden ml-6">
+          <main className="flex-grow overflow-y-auto mt-10 px-6 py-10 pt-[88.5px]">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div className="space-x-2">
+                  <button
+                    onClick={() => handleModeChange('daily')}
+                    className={`px-4 py-2 rounded-lg border ${
+                      entryMode === 'daily'
+                        ? 'bg-[#2B4560] text-white'
+                        : 'bg-white text-[#2B4560] border-[#2B4560]'
+                    }`}
+                  >
+                    Daily
+                  </button>
+                  <button
+                    onClick={() => handleModeChange('stream')}
+                    className={`px-4 py-2 rounded-lg border ${
+                      entryMode === 'stream'
+                        ? 'bg-[#2B4560] text-white'
+                        : 'bg-white text-[#2B4560] border-[#2B4560]'
+                    }`}
+                  >
+                    Stream
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <>
               {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
               {error && <p className="text-red-500">Hata: {error}</p>}
 
@@ -120,6 +116,7 @@ const HomePage: React.FC = () => {
                 {currentEntries?.length === 0 && !loading && (
                   <p className="text-gray-600">Gösterilecek entry yok.</p>
                 )}
+
                 {currentEntries?.map((entry) => (
                   <EntryCard
                     key={entry.id}
@@ -135,9 +132,9 @@ const HomePage: React.FC = () => {
                   />
                 ))}
               </div>
-            </>
-          </div>
-        </main>
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );
