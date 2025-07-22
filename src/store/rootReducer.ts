@@ -4,6 +4,8 @@ import randomEntryReducer from './slices/randomEntrySlice';
 import loginReducer from './slices/loginSlice';
 import titleListReducer from "./slices/titleListSlice";
 import titleEntryReducer from "./slices/titleEntrySlice"; 
+import registerReducer from './slices/registerSlice';
+
 
 
 const rootReducer = combineReducers({
@@ -12,6 +14,7 @@ const rootReducer = combineReducers({
   login: loginReducer,
   titleList: titleListReducer,
   titleEntry: titleEntryReducer,
+  register: registerReducer,
 
 });
 
