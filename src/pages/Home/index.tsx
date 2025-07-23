@@ -83,7 +83,7 @@ const HomePage: React.FC = () => {
         {/* İçerik */}
         <div className="flex-1 flex flex-col overflow-hidden ml-6">
           <main className="flex-grow overflow-y-auto mt-10 px-6 py-10 pt-[88.5px]">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto ml-[400px]">
               <div className="flex items-center justify-between mb-6">
                 <div className="space-x-2">
                   <button
