@@ -4,6 +4,7 @@ import titleListReducer from './slices/titleListSlice';
 import titleEntryReducer from "./slices/titleEntrySlice";
 
 
+
 const store = configureStore({
   reducer: rootReducer,
   titleList: titleListReducer,

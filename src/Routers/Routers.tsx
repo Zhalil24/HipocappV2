@@ -1,17 +1,18 @@
-import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import { Home, Login, SignUp, Error } from '@/pages';
-const Routers = () => {
-    return (
-        <div>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/sign-up" element={<SignUp />} />
-                <Route path="*" element={<Error />} />
-            </Routes>
-        </div>
-    )
-}
+import Profile from '../pages/ProfilePage/';
 
-export default Routers
+const Routers = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/sign-up" element={<SignUp />} />
+      <Route path="*" element={<Error />} />
+      <Route path="/profile" element={<Profile />} />
+    </Routes>
+  );
+};
+
+export default Routers;

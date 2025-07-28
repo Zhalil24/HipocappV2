@@ -1,6 +1,6 @@
+// src/models/UserProfileModel.ts
 import { RoleDTO } from "../role/roleModel";
 import { AccessToken } from "../token/accessTokenModel";
-import { AuthItemModel } from "./authItemModel";
 
 export interface UserDataModel {
   id: number;
@@ -20,12 +20,11 @@ export interface UserDataModel {
   passwordRe: string | null;
   password: string | null;
   passwordRefreshToken: string;
-  entries: any[]; 
-  titles: any[];  
-  degree: any | null; 
+  entries: any[];
+  titles: any[];
+  degree: any | null;
   roleDTO: RoleDTO;
-  iconDTO: any | null; 
-  authList: AuthItemModel[];
+  iconDTO: any | null;
   isOnline: boolean | null;
   isTermsAccepted: boolean | null;
 }

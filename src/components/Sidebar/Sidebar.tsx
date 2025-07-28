@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className="sticky top-[100px] bg-white p-5 rounded-xl shadow-lg border border-gray-300 z-20 ml-[-550px] mr-8"
+className="sticky top-[100px] bg-white p-5 rounded-xl shadow-lg border border-gray-300 z-20"
       style={{
         maxWidth: '320px',
         width: '90%',

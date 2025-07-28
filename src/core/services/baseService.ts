@@ -4,6 +4,8 @@ import axios, {
   AxiosResponse,
 } from 'axios';
 import { BaseResponseModel } from '../models/base/baseResponseModel';
+import { UserDataModel } from '../models/user/userDataModel';
+
 
 export class BaseService {
   private axiosInstance: AxiosInstance;
@@ -44,20 +46,18 @@ export class BaseService {
     config?: AxiosRequestConfig
   ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.get(url, {
-        ...config,
-        params,
-      });
-      return {
-        success: response.data.success,
-        data: response.data.data,
-        message: response.data.message,
-      };
+      const response: AxiosResponse<BaseResponseModel<TResponse>> =
+        await this.axiosInstance.get(url, {
+          ...config,
+          params,
+        });
+      return response.data;
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error,
+        data: null,
         message: error.response?.data?.message || 'GET hatası',
+        error: ''
       };
     }
   }
@@ -68,17 +68,15 @@ export class BaseService {
     config?: AxiosRequestConfig
   ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.post(url, data, config);
-      return {
-        success: response.data.success,
-        data: response.data.data,
-        message: response.data.message,
-      };
+      const response: AxiosResponse<BaseResponseModel<TResponse>> =
+        await this.axiosInstance.post(url, data, config);
+      return response.data;
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error,
+        data: null,
         message: error.response?.data?.message || 'POST hatası',
+        error: ''
       };
     }
   }
@@ -89,17 +87,15 @@ export class BaseService {
     config?: AxiosRequestConfig
   ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.put(url, data, config);
-      return {
-        success: response.data.success,
-        data: response.data.data,
-        message: response.data.message,
-      };
+      const response: AxiosResponse<BaseResponseModel<TResponse>> =
+        await this.axiosInstance.put(url, data, config);
+      return response.data;
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error,
+        data: null,
         message: error.response?.data?.message || 'PUT hatası',
+        error: ''
       };
     }
   }
@@ -110,17 +106,15 @@ export class BaseService {
     config?: AxiosRequestConfig
   ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.patch(url, data, config);
-      return {
-        success: response.data.success,
-        data: response.data.data,
-        message: response.data.message,
-      };
+      const response: AxiosResponse<BaseResponseModel<TResponse>> =
+        await this.axiosInstance.patch(url, data, config);
+      return response.data;
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error,
+        data: null,
         message: error.response?.data?.message || 'PATCH hatası',
+        error: ''
       };
     }
   }
@@ -130,18 +124,19 @@ export class BaseService {
     config?: AxiosRequestConfig
   ): Promise<BaseResponseModel<TResponse>> {
     try {
-      const response: AxiosResponse<BaseResponseModel<TResponse>> = await this.axiosInstance.delete(url, config);
-      return {
-        success: response.data.success,
-        data: response.data.data,
-        message: response.data.message,
-      };
+      const response: AxiosResponse<BaseResponseModel<TResponse>> =
+        await this.axiosInstance.delete(url, config);
+      return response.data;
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error,
+        data: null,
         message: error.response?.data?.message || 'DELETE hatası',
+        error: ''
       };
     }
   }
+
 }
+
+export const BaseServiceInstance = new BaseService();
