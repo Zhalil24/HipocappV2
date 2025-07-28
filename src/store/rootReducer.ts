@@ -5,6 +5,7 @@ import loginReducer from './slices/loginSlice';
 import titleListReducer from "./slices/titleListSlice";
 import titleEntryReducer from "./slices/titleEntrySlice"; 
 import registerReducer from './slices/registerSlice';
+import profileReducer from './slices/profileSlice';
 
 
 
@@ -15,6 +16,8 @@ const rootReducer = combineReducers({
   titleList: titleListReducer,
   titleEntry: titleEntryReducer,
   register: registerReducer,
+  profile: profileReducer,
+
 
 });
 
