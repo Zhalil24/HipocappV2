@@ -57,10 +57,7 @@ export class BaseService {
         success: false,
         data: null,
         message: error.response?.data?.message || 'GET hatası',
-        isLastPackage: null,
-        resultType: 0,
-        html: null,
-        messagesParameters: null,
+        error: ''
       };
     }
   }
@@ -79,10 +76,7 @@ export class BaseService {
         success: false,
         data: null,
         message: error.response?.data?.message || 'POST hatası',
-        isLastPackage: null,
-        resultType: 0,
-        html: null,
-        messagesParameters: null,
+        error: ''
       };
     }
   }
@@ -101,10 +95,7 @@ export class BaseService {
         success: false,
         data: null,
         message: error.response?.data?.message || 'PUT hatası',
-        isLastPackage: null,
-        resultType: 0,
-        html: null,
-        messagesParameters: null,
+        error: ''
       };
     }
   }
@@ -123,10 +114,7 @@ export class BaseService {
         success: false,
         data: null,
         message: error.response?.data?.message || 'PATCH hatası',
-        isLastPackage: null,
-        resultType: 0,
-        html: null,
-        messagesParameters: null,
+        error: ''
       };
     }
   }
@@ -144,39 +132,11 @@ export class BaseService {
         success: false,
         data: null,
         message: error.response?.data?.message || 'DELETE hatası',
-        isLastPackage: null,
-        resultType: 0,
-        html: null,
-        messagesParameters: null,
+        error: ''
       };
     }
   }
-  async getUserProfile(id: number): Promise<UserDataModel> {
-  const resp = await this.axiosInstance.get<BaseResponseModel<UserDataModel>>(
-    `/api/User/GetProfile?id=${id}`
-  );
-  return resp.data.data;
-}
 
-  async updateUserProfile(model: Partial<UserDataModel>): Promise<UserDataModel> {
-    const resp = await this.axios.post<BaseResponseModel<UserDataModel>>(
-      `/api/User/UpdateProfile`, model
-    );
-    return resp.data.data;
-  }
-
-  async changePassword(payload: { userId: number; oldPassword: string; newPassword: string; }): Promise<void> {
-    await this.axios.post<BaseResponseModel<null>>(
-      `/api/User/ChangePassword`, payload
-    );
-  }
-
-  async getUserEntries(id: number): Promise<any[]> {
-    const resp = await this.axios.get<BaseResponseModel<any[]>>(
-      `/api/Entry/GetByUser?id=${id}`
-    );
-    return resp.data.data;
-  }
 }
 
 export const BaseServiceInstance = new BaseService();

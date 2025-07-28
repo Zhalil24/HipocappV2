@@ -1,9 +1,8 @@
 // src/models/UserProfileModel.ts
 import { RoleDTO } from "../role/roleModel";
 import { AccessToken } from "../token/accessTokenModel";
-import { AuthItemModel } from "./authItemModel";
 
-export interface UserProfileModel {
+export interface UserDataModel {
   id: number;
   rolId: number;
   iconId: number;
@@ -26,7 +25,6 @@ export interface UserProfileModel {
   degree: any | null;
   roleDTO: RoleDTO;
   iconDTO: any | null;
-  authList: AuthItemModel[];
   isOnline: boolean | null;
   isTermsAccepted: boolean | null;
 }

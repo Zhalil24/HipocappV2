@@ -1,38 +1,50 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
-import { UserProfileModel } from '../../core/models/user/userDataModel';
-import { BaseServiceInstance } from '../../core/services/baseService';
+import { InitialStateProfileState, UserProfileModel, } from '../../core/models/user/userProfileModel';
+import { BaseService } from '../../core/services/baseService';
 
-interface ProfileState {
-  data: UserProfileModel | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
-
-  activeComponent: 'profile' | 'edit' | 'password' | 'entries';
-}
-
-const initialState: ProfileState = {
-  data: null,
-  status: 'idle',
-  error: null,
-  activeComponent: 'profile',
-};
+const baseService = new BaseService();
 
 export const fetchUserProfile = createAsyncThunk(
   'profile/fetchUserProfile',
   async (userId: string, { rejectWithValue }) => {
-    try {
-      const data = await BaseServiceInstance.getUserProfile(Number(userId));
-      return data;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Profil bilgileri alınamadı.');
+
+    const response = await baseService.get<UserProfileModel>(
+      'api/user/GetProfile',
+      { id: userId }
+    );
+    if (response.data) {
+      console.log("response", response)
+      return response.data;
+    } else {
+      return rejectWithValue(response.message || 'Kullanıcı profili alınamadı.');
     }
   }
 );
 
+export const changePassword = createAsyncThunk(
+  'profile/changePassword',
+  async (
+    payload: PasswordChangeDto,
+    { rejectWithValue }
+  ) => {
+    const response = await baseService.post<PasswordChangeDto, UserProfileModel>(
+      'api/user/PasswordChange',
+      payload
+    );
+
+    if (response.success && response.data) {
+      return response.data;
+    } else {
+      return rejectWithValue(response.message || 'Şifre değiştirilemedi.');
+    }
+  }
+);
+
+
 const profileSlice = createSlice({
   name: 'profile',
-  initialState,
+  initialState: InitialStateProfileState,
   reducers: {
     setActiveComponent: (
       state,
@@ -55,6 +67,20 @@ const profileSlice = createSlice({
         }
       )
       .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      });
+
+    builder
+      .addCase(changePassword.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.status = 'succeeded';
+        state.message = state.message;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       });

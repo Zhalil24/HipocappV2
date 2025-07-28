@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
+  changePassword,
   fetchUserProfile,
   setActiveComponent,
 } from '../../store/slices/profileSlice';
@@ -13,12 +14,18 @@ import UserEntries from '@/components/Profile/UserEntries';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const {
-    data: profile,
-    status,
-    error,
-    activeComponent,
-  } = useAppSelector((state) => state.profile);
+  const [userId, setUserId] = useState<number>(0);
+  const { data: profile, status, error, activeComponent } = useAppSelector((state) => state.profile);
+  const [showError, setShowError] = useState(true);
+
+
+  const handlePasswordChange = async (payload: PasswordChangeDto): Promise<void> => {
+    try {
+      await dispatch(changePassword(payload)).unwrap();
+    } catch (err: any) {
+      throw new Error(err);
+    }
+  };
 
   useEffect(() => {
     if (status === 'idle') {
@@ -26,6 +33,8 @@ const ProfilePage: React.FC = () => {
       if (userString) {
         const { id: userId } = JSON.parse(userString);
         if (userId) {
+          setUserId(userId);
+          console.log("userID", userId)
           dispatch(fetchUserProfile(userId));
         }
       }
@@ -39,9 +48,14 @@ const ProfilePage: React.FC = () => {
       case 'edit':
         return <EditProfile />;
       case 'password':
-        return <ChangePassword />;
+        return (
+          <ChangePassword
+            userId={userId}
+            onChange={handlePasswordChange}
+          />
+        );
       case 'entries':
-        return <UserEntries />;
+        return <UserEntries entries={profile?.entries || []} />;
       default:
         return profile ? <ProfileView profile={profile} /> : null;
     }
@@ -53,11 +67,10 @@ const ProfilePage: React.FC = () => {
   }> = ({ tab, label }) => (
     <button
       onClick={() => dispatch(setActiveComponent(tab))}
-      className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 focus:outline-none ${
-        activeComponent === tab
-          ? 'bg-cyan-600 text-white shadow-md scale-105'
-          : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:scale-105'
-      }`}
+      className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 focus:outline-none ${activeComponent === tab
+        ? 'bg-cyan-600 text-white shadow-md scale-105'
+        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:scale-105'
+        }`}
     >
       {label}
     </button>
@@ -78,10 +91,16 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (status === 'failed') {
+  if (status === 'failed' && showError) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen bg-gray-900 text-white p-4">
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center shadow-lg">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center shadow-lg relative">
+          <button
+            className="absolute top-2 right-2 text-red-300 hover:text-white text-lg"
+            onClick={() => setShowError(false)}
+          >
+            ✖
+          </button>
           <h2 className="text-2xl font-bold text-red-400 mb-2">
             Oops! Bir Hata Oluştu
           </h2>
@@ -92,6 +111,7 @@ const ProfilePage: React.FC = () => {
       </div>
     );
   }
+
 
   if (!profile) return null;
 

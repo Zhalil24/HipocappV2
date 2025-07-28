@@ -1,23 +1,23 @@
 // src/pages/Profile/components/EditProfile.tsx
 import React, { useState, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { UserDataModel } from '../../core/models/user/userDataModel';
+import { UserProfileModel } from '../../core/models/user/userProfileModel';
 import { BaseService } from '../../core/services/baseService';
 import { fetchUserProfile } from '../../store/slices/profileSlice';
 import { Save } from 'lucide-react';
 
-const EditProfile: React.FC = () => {
+const EditProfile: React.FC = () => { 
   const profile = useAppSelector((s) => s.profile.data);
   const dispatch = useAppDispatch();
-  const [form, setForm] = useState<Partial<UserDataModel>>({});
+  const [form, setForm] = useState<Partial<UserProfileModel>>({});
 
   useEffect(() => {
     if (profile) setForm(profile);
   }, [profile]);
 
   const onSubmit = async () => {
-    await new BaseService().updateUserProfile(form);
-    dispatch(fetchUserProfile(profile!.id));
+    //await new BaseService().updateUserProfile(form);
+    dispatch(fetchUserProfile(profile!.id.toString()));
   };
 
   return (
