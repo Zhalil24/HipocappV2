@@ -1,16 +1,31 @@
 import { Routes, Route } from 'react-router-dom';
 
-import { Home, Login, SignUp, Error } from '@/pages';
+import { Home, Login, SignUp, Error, About} from '@/pages';
 import Profile from '../pages/ProfilePage/';
+import MarketPage from '@/pages/Market/MarketPage';
+import AdsPage from '@/pages/Ads/AdsPage';
+import EducationPage from '@/pages/Educations/EducationPage';
+import PartnersPage from '@/pages/Partners/PartnersPage';
+import ContactPage from '@/pages/Contact';
+import KvkkPage from '@/pages/KVKK/KVKK';
+
+
 
 const Routers = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/about" element={<About />} />
       <Route path="/login" element={<Login />} />
       <Route path="/sign-up" element={<SignUp />} />
       <Route path="*" element={<Error />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/market" element={<MarketPage />} />
+        <Route path="/ads" element={<AdsPage />} />
+        <Route path="/educations" element={<EducationPage />} />
+        <Route path="/partners" element={<PartnersPage />} />
+        <Route path="/KVKK" element={<KvkkPage />} />
     </Routes>
   );
 };

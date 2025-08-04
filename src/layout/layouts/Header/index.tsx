@@ -1,68 +1,123 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import logo from './logo.png';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const navigate = useNavigate();
-  const userString = localStorage.getItem("user");
+  const userString = localStorage.getItem('user');
   const user = userString ? JSON.parse(userString) : null;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    window.location.href = "/login";
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+    navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`);
   };
 
   return (
-    <header className="bg-[#011f26] text-[#FDF6EC] shadow-md px-6 py-1 flex items-center justify-between flex-wrap gap-8
-                       fixed top-0 left-0 w-full h-35 z-50">
-      <div className="flex items-center gap-4">
-        <div className="w-15 h-20 rounded-full bg-[#2b4560] flex items-center justify-center overflow-hidden">
+    <header
+      className="bg-[#011f26] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 px-6 flex items-center justify-between"
+      style={{ height: '88.5px' }}
+    >
+      
+      <div
+        className="flex items-center gap-4 cursor-pointer select-none"
+        onClick={() => navigate('/')}
+      >
+        <div className="w-16 h-16 rounded-full bg-[#2b4560] flex items-center justify-center overflow-hidden shadow-inner">
           <img src={logo} alt="Logo" className="w-full h-full object-cover" />
         </div>
-        <h1 className="text-3xl font-bold" style={{ fontFamily: "Times New Roman, Times, serif" }} >
+        <h1 className="text-3xl font-serif font-extrabold tracking-wide select-none leading-none">
           Hipocapp
         </h1>
       </div>
-      {
-        user === null ? <div className="flex items-center gap-4">
-          <button className="px-4 py-2 rounded-md bg-[#011f26] text-white hover:bg-[#1f3347] transition" onClick={() => navigate('/login')}>
-            Giriş Yap
-          </button>
-          <button className="px-4 py-2 rounded-md border border-[#011f26] text-[#FDF6EC] hover:bg-[#1f3347] hover:text-white transition" onClick={() => navigate('/sign-up')}  >
-            Kaydol
-          </button>
-        </div> :
+
+      
+      <form
+        onSubmit={handleSearchSubmit}
+        role="search"
+        className="max-w-md ml-10 flex-1"
+      >
+        <input
+          type="text"
+          name="search"
+          placeholder="Başlık ara..."
+          className="w-full rounded-md py-2 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2B4560]"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          aria-label="Başlık ara"
+          autoComplete="off"
+        />
+      </form>
+
+      
+      <div className="flex items-center gap-4 ml-6">
+        {user === null ? (
+          <>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-5 py-2 rounded-md bg-[#2b4560] hover:bg-[#3e5b78] shadow-md transition-colors font-semibold"
+            >
+              Giriş Yap
+            </button>
+            <button
+              onClick={() => navigate('/sign-up')}
+              className="px-5 py-2 rounded-md border-2 border-[#2b4560] text-[#2b4560] hover:bg-[#3e5b78] hover:text-white shadow-md transition-colors font-semibold"
+            >
+              Kaydol
+            </button>
+          </>
+        ) : (
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="text-lg font-semibold hover:underline focus:outline-none flex items-center gap-1"
+              className="flex items-center gap-1 bg-[#2b4560] hover:bg-[#3e5b78] px-4 py-2 rounded-md shadow-md font-semibold transition-colors focus:outline-none"
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
             >
               {user.username}
-              <span className="text-sm">▼</span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-300 ${
+                  menuOpen ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+              </svg>
             </button>
+
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-44 bg-white text-gray-800 rounded-lg shadow-xl overflow-hidden z-50">
                 <button
                   onClick={() => {
                     setMenuOpen(false);
-                    navigate("/profile");
+                    navigate('/profile');
                   }}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition text-sm"
                 >
                   Profil
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition text-sm"
                 >
                   Çıkış Yap
                 </button>
               </div>
             )}
           </div>
-      }
-
+        )}
+      </div>
     </header>
   );
 };
