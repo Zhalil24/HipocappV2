@@ -96,6 +96,7 @@ const Login = () => {
             <div className="flex justify-center">
               <button
                 type="button"
+                onClick={() => navigate("/sign-up")}
                 className="bg-[#2B4560] hover:bg-[#1f3550] text-white font-bold py-2.5 px-6 mt-2 rounded-full shadow-lg transform transition hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#2B4560]/50"
               >
                 Hemen Kaydolun

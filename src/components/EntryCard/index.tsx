@@ -8,8 +8,10 @@ type EntryCardProps = {
   userName?: string;
   createDate?: string;
   date?: string;
+  showDelete?: boolean;
+  onDelete?: () => void;
 };
-const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName, date, description, createDate }: EntryCardProps) => {
+const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName, date, description, createDate, showDelete, onDelete }: EntryCardProps) => {
   const [expanded, setExpanded] = useState(false);
 
   const rawDate = date || createDate;
@@ -41,6 +43,16 @@ const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName
           {titleName}
         </h3>
       )}
+      {showDelete && (
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={onDelete}
+            className="text-sm text-red-600 font-medium hover:underline focus:outline-none"
+          >
+            Sil
+          </button>
+        </div>
+      )}
 
       <p className="text-gray-700 text-sm whitespace-pre-line">{displayedDescription}</p>
 
@@ -64,6 +76,8 @@ const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName
       {formattedDate && (
         <p className="text-xs text-gray-400 mt-1">{formattedDate}</p>
       )}
+
+
     </div>
   );
 };

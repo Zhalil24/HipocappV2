@@ -2,22 +2,32 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   changePassword,
+  deleteEntry,
   fetchUserProfile,
   setActiveComponent,
 } from '../../store/slices/profileSlice';
-import logo from './logo.png';
 
 import ProfileView from '@/components/Profile/ProfileView';
 import EditProfile from '@/components/Profile/EditProfile';
 import ChangePassword from '@/components/Profile/ChangePassword';
 import UserEntries from '@/components/Profile/UserEntries';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
+import InfoPopup from '@/components/InfoPopup/InfoPopup';
+import LoadingWidget from '@/components/Loading/loadingWidget';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const [userId, setUserId] = useState<number>(0);
   const { data: profile, status, error, activeComponent } = useAppSelector((state) => state.profile);
-  const [showError, setShowError] = useState(true);
+  const serviceMessage = useSelector((state: RootState) => state.profile.message);
+  const [showPopup, setShowPopup] = useState(false);
 
+  useEffect(() => {
+    if (serviceMessage) {
+      setShowPopup(true);
+    }
+  }, [serviceMessage]);
 
   const handlePasswordChange = async (payload: PasswordChangeDto): Promise<void> => {
     try {
@@ -25,6 +35,10 @@ const ProfilePage: React.FC = () => {
     } catch (err: any) {
       throw new Error(err);
     }
+  };
+
+  const handleDelete = (id: number) => {
+    dispatch(deleteEntry(id));
   };
 
   useEffect(() => {
@@ -55,7 +69,10 @@ const ProfilePage: React.FC = () => {
           />
         );
       case 'entries':
-        return <UserEntries entries={profile?.entries || []} />;
+        return <UserEntries
+          entries={profile?.entries || []}
+          onDelete={handleDelete}
+        />;
       default:
         return profile ? <ProfileView profile={profile} /> : null;
     }
@@ -77,44 +94,10 @@ const ProfilePage: React.FC = () => {
   );
 
   if (status === 'loading') {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-900">
-        <div className="relative flex justify-center items-center">
-          <div className="absolute animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-cyan-500"></div>
-          <img
-            src={logo}
-            alt="Yükleniyor..."
-            className="rounded-full h-28 w-28"
-          />
-        </div>
-      </div>
-    );
+    return <LoadingWidget />;
   }
-
-  if (status === 'failed' && showError) {
-    return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-900 text-white p-4">
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center shadow-lg relative">
-          <button
-            className="absolute top-2 right-2 text-red-300 hover:text-white text-lg"
-            onClick={() => setShowError(false)}
-          >
-            ✖
-          </button>
-          <h2 className="text-2xl font-bold text-red-400 mb-2">
-            Oops! Bir Hata Oluştu
-          </h2>
-          <p className="text-gray-300">
-            {error || 'Beklenmedik bir hata oluştu.'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
 
   if (!profile) return null;
-
   return (
     <div className="w-full h-screen overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <header className="h-16 flex items-center justify-between px-8 bg-gray-900 border-b border-gray-800 shadow-sm">
@@ -127,7 +110,9 @@ const ProfilePage: React.FC = () => {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4">
+
         <div className="w-full max-w-6xl h-[60%] bg-gray-800/80 border border-cyan-500/20 rounded-3xl shadow-xl flex overflow-hidden">
+
           <div className="w-[280px] bg-gray-900/70 p-6 flex flex-col items-start justify-start border-r border-gray-700">
             <img
               src={
@@ -153,7 +138,16 @@ const ProfilePage: React.FC = () => {
               <NavButton tab="entries" label="Entry'lerim" />
             </div>
           </div>
-
+          {
+            showPopup && (
+              <InfoPopup
+                message={serviceMessage!}
+                type="info"
+                onClose={() => setShowPopup(false)}
+                onTime={true}
+              />
+            )
+          }
           <div className="flex-1 p-6 overflow-hidden">
             <div className="bg-gray-900/60 border border-gray-700 rounded-xl h-full p-4 overflow-y-auto">
               {renderActiveComponent()}

@@ -8,13 +8,14 @@ import EntryCard from '../EntryCard';
 
 interface UserEntriesProps {
   entries: RandomEntryModel[];
+  onDelete?: (entryId: number) => void;
 }
 
-const UserEntries: React.FC<UserEntriesProps> = ({ entries }) => {
+const UserEntries: React.FC<UserEntriesProps> = ({ entries, onDelete }) => {
   return (
     <div className="w-full h-screen bg-gradient-to-br from-slate-900 to-gray-800 flex items-center justify-center overflow-hidden">
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl w-[90vw] max-w-2xl p-6 shadow-2xl text-white flex flex-col max-h-[90vh]">
-        
+
         {/* Başlık sabit */}
         <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center gap-2 border-b border-white/20 pb-2">
           <BookText size={24} /> Açtığınız Entry'ler
@@ -24,6 +25,8 @@ const UserEntries: React.FC<UserEntriesProps> = ({ entries }) => {
         <div className="overflow-y-auto space-y-4 pr-2">
           {entries.map((entry) => (
             <EntryCard
+              onDelete={() => onDelete?.(entry.id)}
+              showDelete={true}
               key={entry.id}
               createDate={entry.createDate}
               description={entry.description}

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 import { InitialStateProfileState, UserProfileModel, } from '../../core/models/user/userProfileModel';
 import { BaseService } from '../../core/services/baseService';
+import { BaseResponseModel } from '@/core/models/base/baseResponseModel';
 
 const baseService = new BaseService();
 
@@ -33,10 +34,30 @@ export const changePassword = createAsyncThunk(
       payload
     );
 
-    if (response.success && response.data) {
-      return response.data;
+    if (response.data) {
+      return response;
     } else {
       return rejectWithValue(response.message || 'Şifre değiştirilemedi.');
+    }
+  }
+);
+
+export const deleteEntry = createAsyncThunk(
+  'entries/deleteEntry',
+  async (entryId: number, { rejectWithValue }) => {
+    try {
+      const response = await baseService.delete<BaseResponseModel<null>>(
+        'api/entry/DeleteEntry',
+        { params: { id: entryId } } 
+      );
+
+      if (response.success) {
+        return entryId; 
+      } else {
+        return rejectWithValue(response.message);
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Silme işlemi başarısız.');
     }
   }
 );
@@ -51,6 +72,11 @@ const profileSlice = createSlice({
       action: PayloadAction<'profile' | 'edit' | 'password' | 'entries'>
     ) => {
       state.activeComponent = action.payload;
+    },
+    clearServiceMessage: (state) => {
+      state.message = null;
+      state.error = null;
+      state.status = 'idle'; 
     },
   },
   extraReducers: (builder) => {
@@ -76,9 +102,9 @@ const profileSlice = createSlice({
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(changePassword.fulfilled, (state) => {
+      .addCase(changePassword.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.message = state.message;
+        state.message = action.payload.message!;
       })
       .addCase(changePassword.rejected, (state, action) => {
         state.status = 'failed';

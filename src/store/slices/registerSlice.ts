@@ -5,28 +5,36 @@ interface RegisterState {
   loading: boolean;
   error: string | null;
   success: boolean;
+  message: string | null;
 }
 
 const initialState: RegisterState = {
   loading: false,
   error: null,
   success: false,
+  message: ''
 };
 
 export const registerUser = createAsyncThunk(
   "register/registerUser",
-  async (
-    userData: { userName: string; email: string; password: string },
-    { rejectWithValue }
-  ) => {
+  async (formData: FormData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("https://hipocapp.com/Auth/Register", userData);
+      const response = await axios.post(
+        "https://hipocapp.com/Auth/Register",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Kayıt sırasında hata oluştu.");
     }
   }
 );
+
 
 const registerSlice = createSlice({
   name: "register",

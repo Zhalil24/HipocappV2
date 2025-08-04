@@ -16,7 +16,7 @@ export const InitialStateProfileState : ProfileState = {
   status: 'idle',
   error: null,
   activeComponent: 'profile',
-  message: ""
+  message: null
 };
 
 export interface UserProfileModel {

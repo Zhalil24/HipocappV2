@@ -92,29 +92,34 @@ const Register = () => {
       passwordRepeat: "",
       title: "",
       institutionIdFile: null as File | null,
+      isTermsAccepted: false,
     },
     validate: (values) => {
       const errors: Record<string, string> = {};
       if (values.password !== values.passwordRepeat) {
         errors.passwordRepeat = "Şifreler eşleşmiyor.";
       }
+      if (!values.isTermsAccepted) {
+        errors.isTermsAccepted = "Kullanım şartlarını kabul etmelisiniz.";
+      }
       return errors;
     },
     onSubmit: (values) => {
       // FormData ile dosya dahil gönderim
       const formData = new FormData();
-      formData.append("firstName", values.firstName);
-      formData.append("lastName", values.lastName);
+      formData.append("name", values.firstName);
+      formData.append("surname", values.lastName);
       formData.append("userName", values.userName);
       formData.append("phoneNumber", values.phoneNumber);
       formData.append("email", values.email);
       formData.append("password", values.password);
-      formData.append("title", values.title);
+      formData.append("passwordRepeat", values.passwordRepeat);
+      formData.append("degreeId", "1");
+      formData.append("isTermsAccepted", values.isTermsAccepted.toString());
       if (values.institutionIdFile) {
-        formData.append("institutionIdFile", values.institutionIdFile);
+        formData.append("image", values.institutionIdFile);
       }
 
-      // Burada registerUser'ı formData destekleyecek şekilde düzenlemelisin
       dispatch(registerUser(formData));
     },
   });
@@ -131,7 +136,6 @@ const Register = () => {
     }
   }, [registerState.success, navigate]);
 
-  // Dosya input değişim handler'ı
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.currentTarget.files && e.currentTarget.files[0]) {
       formik.setFieldValue("institutionIdFile", e.currentTarget.files[0]);
@@ -172,7 +176,7 @@ const Register = () => {
                 name="firstName"
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
-                required
+
               />
             </div>
 
@@ -187,7 +191,7 @@ const Register = () => {
                 name="lastName"
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
-                required
+
               />
             </div>
 
@@ -202,7 +206,7 @@ const Register = () => {
                 name="userName"
                 value={formik.values.userName}
                 onChange={formik.handleChange}
-                required
+
               />
             </div>
 
@@ -213,11 +217,11 @@ const Register = () => {
               <AuthInput
                 type="tel"
                 placeholder="Telefon numaranız"
-                icon="phone"
+                //icon="phone"
                 name="phoneNumber"
                 value={formik.values.phoneNumber}
                 onChange={formik.handleChange}
-                required
+
               />
             </div>
 
@@ -228,11 +232,11 @@ const Register = () => {
               <AuthInput
                 type="email"
                 placeholder="E-posta adresiniz"
-                icon="envelope"
+                //icon="envelope"
                 name="email"
                 value={formik.values.email}
                 onChange={formik.handleChange}
-                required
+
               />
             </div>
 
@@ -247,7 +251,7 @@ const Register = () => {
                 name="password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
-                required
+
               />
             </div>
 
@@ -262,7 +266,7 @@ const Register = () => {
                 name="passwordRepeat"
                 value={formik.values.passwordRepeat}
                 onChange={formik.handleChange}
-                required
+
               />
               {formik.errors.passwordRepeat && (
                 <p className="text-red-500 text-sm mt-1">
@@ -284,6 +288,26 @@ const Register = () => {
               name="institutionIdFile"
               onChange={handleFileChange}
             />
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isTermsAccepted"
+                name="isTermsAccepted"
+                checked={formik.values.isTermsAccepted}
+                onChange={formik.handleChange}
+                className="form-checkbox h-5 w-5 text-[#2B4560] rounded"
+              />
+              <label htmlFor="isTermsAccepted" className="text-sm text-[#2B4560]">
+                Kullanım şartlarını kabul ediyorum
+              </label>
+            </div>
+            {formik.errors.isTermsAccepted && (
+              <p className="text-red-500 text-sm mt-1">
+                {formik.errors.isTermsAccepted}
+              </p>
+            )}
+
 
             <button
               type="submit"
