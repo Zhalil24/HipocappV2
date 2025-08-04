@@ -16,9 +16,7 @@ const Header = () => {
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Eğer boş arama yapılmasın istersen:
     if (!searchTerm.trim()) return;
-    // Arama query paramı ile ana sayfaya yönlendirme
     navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`);
   };
 
@@ -27,7 +25,7 @@ const Header = () => {
       className="bg-[#011f26] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 px-6 flex items-center justify-between"
       style={{ height: '88.5px' }}
     >
-      {/* Sol: Logo + Başlık */}
+      
       <div
         className="flex items-center gap-4 cursor-pointer select-none"
         onClick={() => navigate('/')}
@@ -40,7 +38,7 @@ const Header = () => {
         </h1>
       </div>
 
-      {/* Orta: Arama Formu */}
+      
       <form
         onSubmit={handleSearchSubmit}
         role="search"
@@ -58,7 +56,7 @@ const Header = () => {
         />
       </form>
 
-      {/* Sağ: Kullanıcı menüsü */}
+      
       <div className="flex items-center gap-4 ml-6">
         {user === null ? (
           <>

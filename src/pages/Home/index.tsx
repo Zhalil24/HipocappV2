@@ -38,17 +38,17 @@ const HomePage: React.FC = () => {
     { name: 'İletişim', path: '/contact' },
   ];
 
-  // URL parametrelerini oku
+  
   useEffect(() => {
     const params = queryString.parse(location.search);
 
-    // Search parametresi varsa state güncelle
+    
     const newSearch =
       typeof params.search === 'string' && params.search.trim() !== ''
         ? params.search.trim()
         : '';
 
-    // Category parametresi varsa state güncelle (sadece search yoksa)
+    
     const newCategory =
       !newSearch && typeof params.category === 'string' && params.category.trim() !== ''
         ? params.category.trim()
@@ -56,24 +56,24 @@ const HomePage: React.FC = () => {
 
     if (newSearch !== searchTerm) {
       setSearchTerm(newSearch);
-      setSelectedCategory(null); // Arama varsa category iptal
+      setSelectedCategory(null); 
     } else if (newCategory !== selectedCategory && !newSearch) {
       setSelectedCategory(newCategory);
       setSearchTerm('');
     }
   }, [location.search]);
 
-  // Arama varsa arama API çağrısı, yoksa category ya da entryMode'a göre çağrı
+  
   useEffect(() => {
     if (searchTerm) {
-      // Arama terimi varsa titleName bazlı entryleri getir
+      
       dispatch(fetchEntriesByTitleName(searchTerm));
       dispatch(clearTitles());
     } else if (selectedCategory) {
-      // Kategori seçiliyse başlıkları getir
+      
       dispatch(fetchTitlesByHeaderName(selectedCategory));
     } else {
-      // Hiçbiri yoksa entryMode'a göre entryleri getir
+      
       if (entryMode === 'daily') {
         dispatch(fetchLastEntries());
       } else {
@@ -115,7 +115,7 @@ const HomePage: React.FC = () => {
     setSelectedCategory(null);
     setSearchTerm('');
     dispatch(clearTitles());
-    navigate('/'); // Query temizlemek için
+    navigate('/'); 
   };
 
   const handleSidebarSelect = (subItemApiName: string) => {
@@ -142,9 +142,9 @@ const HomePage: React.FC = () => {
         />
       </div>
 
-      {/* İçerik */}
+      
       <div className="flex-1 flex flex-col mt-8 mr-20">
-        {/* Sayfa butonları */}
+       
         <div className="mt-[88.5px] mb-6 w-full px-6">
           <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-4">
             {pages.map((page) => (
@@ -159,7 +159,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Daily / Stream butonları ve entry listesi */}
+        
         <main className="flex-1 w-full px-6 pb-12 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
