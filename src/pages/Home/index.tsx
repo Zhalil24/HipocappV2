@@ -12,6 +12,7 @@ import Sidebar from '../../components/Sidebar/Sidebar';
 import { AppDispatch, RootState } from '../../store/store';
 import { useNavigate, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
+import PageButtons from '@/components/PageButtons';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -38,17 +39,17 @@ const HomePage: React.FC = () => {
     { name: 'İletişim', path: '/contact' },
   ];
 
-  
+
   useEffect(() => {
     const params = queryString.parse(location.search);
 
-    
+
     const newSearch =
       typeof params.search === 'string' && params.search.trim() !== ''
         ? params.search.trim()
         : '';
 
-    
+
     const newCategory =
       !newSearch && typeof params.category === 'string' && params.category.trim() !== ''
         ? params.category.trim()
@@ -56,24 +57,24 @@ const HomePage: React.FC = () => {
 
     if (newSearch !== searchTerm) {
       setSearchTerm(newSearch);
-      setSelectedCategory(null); 
+      setSelectedCategory(null);
     } else if (newCategory !== selectedCategory && !newSearch) {
       setSelectedCategory(newCategory);
       setSearchTerm('');
     }
   }, [location.search]);
 
-  
+
   useEffect(() => {
     if (searchTerm) {
-      
+
       dispatch(fetchEntriesByTitleName(searchTerm));
       dispatch(clearTitles());
     } else if (selectedCategory) {
-      
+
       dispatch(fetchTitlesByHeaderName(selectedCategory));
     } else {
-      
+
       if (entryMode === 'daily') {
         dispatch(fetchLastEntries());
       } else {
@@ -87,35 +88,35 @@ const HomePage: React.FC = () => {
     searchTerm
       ? titleEntryState.entries
       : selectedCategory && titleEntryState.entries.length > 0
-      ? titleEntryState.entries
-      : entryMode === 'daily'
-      ? dailyEntriesState.data
-      : randomEntriesState.data;
+        ? titleEntryState.entries
+        : entryMode === 'daily'
+          ? dailyEntriesState.data
+          : randomEntriesState.data;
 
   const loading =
     searchTerm
       ? titleEntryState.loading
       : selectedCategory
-      ? titleEntryState.loading
-      : entryMode === 'daily'
-      ? dailyEntriesState.loading
-      : randomEntriesState.loading;
+        ? titleEntryState.loading
+        : entryMode === 'daily'
+          ? dailyEntriesState.loading
+          : randomEntriesState.loading;
 
   const error =
     searchTerm
       ? titleEntryState.error
       : selectedCategory
-      ? titleEntryState.error
-      : entryMode === 'daily'
-      ? dailyEntriesState.error
-      : randomEntriesState.error;
+        ? titleEntryState.error
+        : entryMode === 'daily'
+          ? dailyEntriesState.error
+          : randomEntriesState.error;
 
   const handleModeChange = (mode: 'daily' | 'stream') => {
     setEntryMode(mode);
     setSelectedCategory(null);
     setSearchTerm('');
     dispatch(clearTitles());
-    navigate('/'); 
+    navigate('/');
   };
 
   const handleSidebarSelect = (subItemApiName: string) => {
@@ -130,91 +131,91 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50 font-sans">
-      {/* Sidebar */}
-      <div className="w-84 min-w-64 ml-7">
-        <Sidebar
-          onSelect={handleSidebarSelect}
-          titles={titleListState.titles}
-          loadingTitles={titleListState.loading}
-          titlesError={titleListState.error}
-          onTitleSelect={handleTitleSelect}
-        />
-      </div>
+    <div className="min-h-screen flex justify-center items-start bg-gray-50 font-sans">
+      {/* Dikey yapı: Üstte butonlar, altta yan yana sidebar + content */}
+      <div className="flex flex-col w-full max-w-6xl px-6 mt-32">
 
-      
-      <div className="flex-1 flex flex-col mt-8 mr-20">
-       
-        <div className="mt-[88.5px] mb-6 w-full px-6">
-          <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-4">
-            {pages.map((page) => (
-              <button
-                key={page.name}
-                onClick={() => navigate(page.path)}
-                className="text-[#2B4560] border border-[#2B4560] px-6 py-3 rounded-lg font-medium hover:bg-[#2B4560] hover:text-white transition-all duration-200 shadow-sm"
-              >
-                {page.name}
-              </button>
-            ))}
+        {/* ✅ Sidebar + Content yatay yapısı */}
+        <div className="flex w-full gap-2">
+          {/* Sidebar */}
+          <div className="w-84 min-w-84 ml-8">
+            <Sidebar
+              onSelect={handleSidebarSelect}
+              titles={titleListState.titles}
+              loadingTitles={titleListState.loading}
+              titlesError={titleListState.error}
+              onTitleSelect={handleTitleSelect}
+            />
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 flex flex-col">
+            <main className="flex-1 w-full pb-12 overflow-y-auto">
+              <div className="max-w-3xl mx-auto">
+
+                {/* ✅ Daily / Stream + Sayfa Butonları Aynı Satırda */}
+                <div className="flex items-center justify-between mb-6 w-full max-w-3xl mx-auto gap-4">
+
+                  {/* Sol: Daily / Stream */}
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => handleModeChange('daily')}
+                      className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'daily'
+                          ? 'bg-[#2B4560] text-white'
+                          : 'bg-white text-[#2B4560] border-[#2B4560]'
+                        }`}
+                    >
+                      Daily
+                    </button>
+                    <button
+                      onClick={() => handleModeChange('stream')}
+                      className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'stream'
+                          ? 'bg-[#2B4560] text-white'
+                          : 'bg-white text-[#2B4560] border-[#2B4560]'
+                        }`}
+                    >
+                      Stream
+                    </button>
+                  </div>
+
+                  {/* Sağ: Otomatik Kayan Sayfa Butonları */}
+                  <div className="flex-1 overflow-hidden">
+                    <PageButtons pages={pages} navigate={navigate} />
+                  </div>
+                </div>
+
+
+                {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
+                {error && <p className="text-red-500">Hata: {error}</p>}
+
+                <div className="grid gap-5">
+                  {currentEntries?.length === 0 && !loading && (
+                    <p className="text-gray-600">Gösterilecek entry yok.</p>
+                  )}
+
+                  {currentEntries?.map((entry) => (
+                    <EntryCard
+                      key={entry.id}
+                      titleName={entry.titleName}
+                      entryDescription={
+                        entry.entryDescription ||
+                        entry.description ||
+                        'Açıklama bulunamadı.'
+                      }
+                      userNameSurname={entry.userNameSurname}
+                      userName={entry.userName}
+                      date={entry.date}
+                    />
+                  ))}
+                </div>
+              </div>
+            </main>
           </div>
         </div>
-
-        
-        <main className="flex-1 w-full px-6 pb-12 overflow-y-auto">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="space-x-4">
-                <button
-                  onClick={() => handleModeChange('daily')}
-                  className={`px-6 py-3 rounded-lg border font-semibold text-lg ${
-                    entryMode === 'daily'
-                      ? 'bg-[#2B4560] text-white'
-                      : 'bg-white text-[#2B4560] border-[#2B4560]'
-                  }`}
-                >
-                  Daily
-                </button>
-                <button
-                  onClick={() => handleModeChange('stream')}
-                  className={`px-6 py-3 rounded-lg border font-semibold text-lg ${
-                    entryMode === 'stream'
-                      ? 'bg-[#2B4560] text-white'
-                      : 'bg-white text-[#2B4560] border-[#2B4560]'
-                  }`}
-                >
-                  Stream
-                </button>
-              </div>
-            </div>
-
-            {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
-            {error && <p className="text-red-500">Hata: {error}</p>}
-
-            <div className="grid gap-6">
-              {currentEntries?.length === 0 && !loading && (
-                <p className="text-gray-600">Gösterilecek entry yok.</p>
-              )}
-
-              {currentEntries?.map((entry) => (
-                <EntryCard
-                  key={entry.id}
-                  titleName={entry.titleName}
-                  entryDescription={
-                    entry.entryDescription ||
-                    entry.description ||
-                    'Açıklama bulunamadı.'
-                  }
-                  userNameSurname={entry.userNameSurname}
-                  userName={entry.userName}
-                  date={entry.date}
-                />
-              ))}
-            </div>
-          </div>
-        </main>
       </div>
     </div>
   );
+
 };
 
 export default HomePage;
