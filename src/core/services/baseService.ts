@@ -11,7 +11,7 @@ export class BaseService {
   private axiosInstance: AxiosInstance;
 
   constructor() {
-    const baseURL = "https://hipocapp.com";
+    const baseURL = "https://hipocapp.com/";
     this.axiosInstance = axios.create({
       baseURL,
       headers: {

@@ -13,7 +13,8 @@ const Header = () => {
     localStorage.removeItem('user');
     window.location.href = '/login';
   };
-
+  
+// searchBox query parametrs
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;

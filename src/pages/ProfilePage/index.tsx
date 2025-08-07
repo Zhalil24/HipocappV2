@@ -5,6 +5,7 @@ import {
   deleteEntry,
   fetchUserProfile,
   setActiveComponent,
+  updateProfile,
 } from '../../store/slices/profileSlice';
 
 import ProfileView from '@/components/Profile/ProfileView';
@@ -15,6 +16,7 @@ import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
 import InfoPopup from '@/components/InfoPopup/InfoPopup';
 import LoadingWidget from '@/components/Loading/loadingWidget';
+import { UserProfileModel } from '@/core/models/user/userProfileModel';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -41,6 +43,20 @@ const ProfilePage: React.FC = () => {
     dispatch(deleteEntry(id));
   };
 
+  // ✅ Güncellenmiş profil düzenleme fonksiyonu (photoFile dahil)
+  const handleProfileUpdate = (updated: {
+    name: string;
+    surname: string;
+    email: string;
+    username: string;
+    photo?: File | null;
+  }) => {
+    if (profile) {
+      // photoFile varsa, onu FormData ile backend'e göndermen gerekebilir, burada sadece store'a aktarıyoruz
+      dispatch(updateProfile({ ...profile, ...updated }));
+    }
+  };
+
   useEffect(() => {
     if (status === 'idle') {
       const userString = localStorage.getItem('user');
@@ -48,7 +64,6 @@ const ProfilePage: React.FC = () => {
         const { id: userId } = JSON.parse(userString);
         if (userId) {
           setUserId(userId);
-          console.log("userID", userId)
           dispatch(fetchUserProfile(userId));
         }
       }
@@ -60,7 +75,9 @@ const ProfilePage: React.FC = () => {
       case 'profile':
         return profile ? <ProfileView profile={profile} /> : null;
       case 'edit':
-        return <EditProfile />;
+        return profile ? (
+          <EditProfile userData={profile} onSubmit={handleProfileUpdate} />
+        ) : null;
       case 'password':
         return (
           <ChangePassword
@@ -69,10 +86,12 @@ const ProfilePage: React.FC = () => {
           />
         );
       case 'entries':
-        return <UserEntries
-          entries={profile?.entries || []}
-          onDelete={handleDelete}
-        />;
+        return (
+          <UserEntries
+            entries={profile?.entries || []}
+            onDelete={handleDelete}
+          />
+        );
       default:
         return profile ? <ProfileView profile={profile} /> : null;
     }
@@ -84,10 +103,11 @@ const ProfilePage: React.FC = () => {
   }> = ({ tab, label }) => (
     <button
       onClick={() => dispatch(setActiveComponent(tab))}
-      className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 focus:outline-none ${activeComponent === tab
-        ? 'bg-cyan-600 text-white shadow-md scale-105'
-        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:scale-105'
-        }`}
+      className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 focus:outline-none ${
+        activeComponent === tab
+          ? 'bg-cyan-600 text-white shadow-md scale-105'
+          : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:scale-105'
+      }`}
     >
       {label}
     </button>
@@ -98,6 +118,7 @@ const ProfilePage: React.FC = () => {
   }
 
   if (!profile) return null;
+
   return (
     <div className="w-full h-screen overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <header className="h-16 flex items-center justify-between px-8 bg-gray-900 border-b border-gray-800 shadow-sm">
@@ -110,9 +131,7 @@ const ProfilePage: React.FC = () => {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4">
-
         <div className="w-full max-w-6xl h-[60%] bg-gray-800/80 border border-cyan-500/20 rounded-3xl shadow-xl flex overflow-hidden">
-
           <div className="w-[280px] bg-gray-900/70 p-6 flex flex-col items-start justify-start border-r border-gray-700">
             <img
               src={
@@ -138,16 +157,16 @@ const ProfilePage: React.FC = () => {
               <NavButton tab="entries" label="Entry'lerim" />
             </div>
           </div>
-          {
-            showPopup && (
-              <InfoPopup
-                message={serviceMessage!}
-                type="info"
-                onClose={() => setShowPopup(false)}
-                onTime={true}
-              />
-            )
-          }
+
+          {showPopup && (
+            <InfoPopup
+              message={serviceMessage!}
+              type="info"
+              onClose={() => setShowPopup(false)}
+              onTime={true}
+            />
+          )}
+
           <div className="flex-1 p-6 overflow-hidden">
             <div className="bg-gray-900/60 border border-gray-700 rounded-xl h-full p-4 overflow-y-auto">
               {renderActiveComponent()}

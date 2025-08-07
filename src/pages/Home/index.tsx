@@ -39,19 +39,29 @@ const HomePage: React.FC = () => {
     { name: 'İletişim', path: '/contact' },
   ];
 
+<<<<<<< Updated upstream
 
   useEffect(() => {
     const params = queryString.parse(location.search);
 
 
+=======
+  useEffect(() => {
+    const params = queryString.parse(location.search);
+>>>>>>> Stashed changes
     const newSearch =
       typeof params.search === 'string' && params.search.trim() !== ''
         ? params.search.trim()
         : '';
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     const newCategory =
-      !newSearch && typeof params.category === 'string' && params.category.trim() !== ''
+      !newSearch &&
+      typeof params.category === 'string' &&
+      params.category.trim() !== ''
         ? params.category.trim()
         : null;
 
@@ -64,6 +74,7 @@ const HomePage: React.FC = () => {
     }
   }, [location.search]);
 
+<<<<<<< Updated upstream
 
   useEffect(() => {
     if (searchTerm) {
@@ -75,6 +86,17 @@ const HomePage: React.FC = () => {
       dispatch(fetchTitlesByHeaderName(selectedCategory));
     } else {
 
+=======
+  
+
+  useEffect(() => {
+    if (searchTerm) {
+      dispatch(fetchEntriesByTitleName(searchTerm));
+      dispatch(clearTitles());
+    } else if (selectedCategory) {
+      dispatch(fetchTitlesByHeaderName(selectedCategory));
+    } else {
+>>>>>>> Stashed changes
       if (entryMode === 'daily') {
         dispatch(fetchLastEntries());
       } else {
@@ -84,6 +106,7 @@ const HomePage: React.FC = () => {
     }
   }, [dispatch, searchTerm, selectedCategory, entryMode]);
 
+<<<<<<< Updated upstream
   const currentEntries =
     searchTerm
       ? titleEntryState.entries
@@ -110,6 +133,33 @@ const HomePage: React.FC = () => {
         : entryMode === 'daily'
           ? dailyEntriesState.error
           : randomEntriesState.error;
+=======
+
+
+  const currentEntries = searchTerm
+    ? titleEntryState.entries
+    : selectedCategory && titleEntryState.entries.length > 0
+    ? titleEntryState.entries
+    : entryMode === 'daily'
+    ? dailyEntriesState.data
+    : randomEntriesState.data;
+
+  const loading = searchTerm
+    ? titleEntryState.loading
+    : selectedCategory
+    ? titleEntryState.loading
+    : entryMode === 'daily'
+    ? dailyEntriesState.loading
+    : randomEntriesState.loading;
+
+  const error = searchTerm
+    ? titleEntryState.error
+    : selectedCategory
+    ? titleEntryState.error
+    : entryMode === 'daily'
+    ? dailyEntriesState.error
+    : randomEntriesState.error;
+>>>>>>> Stashed changes
 
   const handleModeChange = (mode: 'daily' | 'stream') => {
     setEntryMode(mode);
@@ -135,6 +185,7 @@ const HomePage: React.FC = () => {
       {/* Dikey yapı: Üstte butonlar, altta yan yana sidebar + content */}
       <div className="flex flex-col w-full max-w-6xl px-6 mt-32">
 
+<<<<<<< Updated upstream
         {/* ✅ Sidebar + Content yatay yapısı */}
         <div className="flex w-full gap-2">
           {/* Sidebar */}
@@ -212,6 +263,75 @@ const HomePage: React.FC = () => {
             </main>
           </div>
         </div>
+=======
+      <div className="flex-1 flex flex-col mt-8 mr-20">
+        <div className="mt-[88.5px] mb-6 w-full px-6">
+          <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-4">
+            {pages.map((page) => (
+              <button
+                key={page.name}
+                onClick={() => navigate(page.path)}
+                className="text-[#2B4560] border border-[#2B4560] px-6 py-3 rounded-lg font-medium hover:bg-[#2B4560] hover:text-white transition-all duration-200 shadow-sm"
+              >
+                {page.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <main className="flex-1 w-full px-6 pb-12 overflow-y-auto">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-x-4">
+                <button
+                  onClick={() => handleModeChange('daily')}
+                  className={`px-6 py-3 rounded-lg border font-semibold text-lg ${
+                    entryMode === 'daily'
+                      ? 'bg-[#2B4560] text-white'
+                      : 'bg-white text-[#2B4560] border-[#2B4560]'
+                  }`}
+                >
+                  Daily
+                </button>
+                <button
+                  onClick={() => handleModeChange('stream')}
+                  className={`px-6 py-3 rounded-lg border font-semibold text-lg ${
+                    entryMode === 'stream'
+                      ? 'bg-[#2B4560] text-white'
+                      : 'bg-white text-[#2B4560] border-[#2B4560]'
+                  }`}
+                >
+                  Stream
+                </button>
+              </div>
+            </div>
+
+            {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
+            {error && <p className="text-red-500">Hata: {error}</p>}
+
+            <div className="grid gap-6">
+              {currentEntries?.length === 0 && !loading && (
+                <p className="text-gray-600">Gösterilecek entry yok.</p>
+              )}
+
+              {currentEntries?.map((entry) => (
+                <EntryCard
+                  key={entry.id}
+                  titleName={entry.titleName}
+                  entryDescription={
+                    entry.entryDescription ||
+                    entry.description ||
+                    'Açıklama bulunamadı.'
+                  }
+                  userNameSurname={entry.userNameSurname}
+                  userName={entry.userName}
+                  date={entry.date}
+                />
+              ))}
+            </div>
+          </div>
+        </main>
+>>>>>>> Stashed changes
       </div>
     </div>
   );

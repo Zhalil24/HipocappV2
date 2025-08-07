@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { InitialStateProfileState, UserProfileModel, } from '../../core/models/user/userProfileModel';
 import { BaseService } from '../../core/services/baseService';
 import { BaseResponseModel } from '@/core/models/base/baseResponseModel';
+import { UserProfileEditModel } from '@/core/models/user/userProfileditModel';
 
 const baseService = new BaseService();
 
@@ -62,6 +63,27 @@ export const deleteEntry = createAsyncThunk(
   }
 );
 
+// ✅ SADECE BU KISIM EKLENDİ
+export const updateProfile = createAsyncThunk(
+  'api/profile/updateProfile',
+  async (payload: UserProfileEditModel, { rejectWithValue }) => {
+    try {
+      const response = await baseService.post<UserProfileEditModel,UserProfileModel>(
+        'api/User/UpdateProfile',
+        payload
+      );
+
+      if (response.success) {
+        return payload;
+      } else {
+        return rejectWithValue(response.message || 'Profil güncellenemedi.');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Bir hata oluştu.');
+    }
+  }
+);
+// ✅ EKLENDİ BİTTİ
 
 const profileSlice = createSlice({
   name: 'profile',
@@ -110,6 +132,23 @@ const profileSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       });
+
+    // ✅ SADECE BU KISIM EKLENDİ
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action: PayloadAction<UserProfileEditModel>) => {
+        state.status = 'succeeded';
+        //state.data = action.payload;
+        state.message = 'Profil başarıyla güncellendi.';
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      });
+    // ✅ EKLENDİ BİTTİ
   },
 });
 
