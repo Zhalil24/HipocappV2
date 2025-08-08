@@ -2,19 +2,24 @@ import React, { useState, useEffect } from 'react';
 
 interface EditProfileProps {
   userData: {
+    id: number;
     name: string;
     surname: string;
     email: string;
     username: string;
-    photo: string;
+    photo: string | null;
   };
   onSubmit: (updatedData: {
+    id: number;
     name: string;
     surname: string;
     username: string;
     email: string;
-    photoFile?: File | null;
+    photo?: File | null;
+    password: 'a';
+    passwordRe: 'a';
   }) => void;
+
 }
 
 const EditProfile: React.FC<EditProfileProps> = ({ userData, onSubmit }) => {
@@ -55,10 +60,14 @@ const EditProfile: React.FC<EditProfileProps> = ({ userData, onSubmit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
+      id: userData.id,
       ...formData,
-      photoFile,
+      photo: photoFile,
+      password: 'a',
+      passwordRe: 'a'
     });
   };
+
 
   return (
     <form

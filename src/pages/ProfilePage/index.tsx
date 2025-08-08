@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   changePassword,
+  clearServiceMessage,
   deleteEntry,
   fetchUserProfile,
   setActiveComponent,
@@ -17,13 +18,25 @@ import { useSelector } from 'react-redux';
 import InfoPopup from '@/components/InfoPopup/InfoPopup';
 import LoadingWidget from '@/components/Loading/loadingWidget';
 import { UserProfileModel } from '@/core/models/user/userProfileModel';
+import { fileToBase64 } from '@/Utilities/fileToBase64Helper';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const [userId, setUserId] = useState<number>(0);
   const { data: profile, status, error, activeComponent } = useAppSelector((state) => state.profile);
-  const serviceMessage = useSelector((state: RootState) => state.profile.message);
+  const serviceMessage = useSelector((state: RootState) => state.profile);
   const [showPopup, setShowPopup] = useState(false);
+  const [prevMessage, setPrevMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      const { id } = JSON.parse(userString);
+      if (id) {
+        setUserId(id);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (serviceMessage) {
@@ -43,32 +56,42 @@ const ProfilePage: React.FC = () => {
     dispatch(deleteEntry(id));
   };
 
-  // ✅ Güncellenmiş profil düzenleme fonksiyonu (photoFile dahil)
+  useEffect(() => {
+    dispatch(clearServiceMessage());
+  }, [activeComponent, dispatch]);
+
   const handleProfileUpdate = (updated: {
+    id: number;
     name: string;
     surname: string;
     email: string;
     username: string;
     photo?: File | null;
+    password: 'a';
+    passwordRe: 'a';
   }) => {
-    if (profile) {
-      // photoFile varsa, onu FormData ile backend'e göndermen gerekebilir, burada sadece store'a aktarıyoruz
-      dispatch(updateProfile({ ...profile, ...updated }));
+    const formData = new FormData();
+    formData.append('Id', updated.id.toString());
+    formData.append('Name', updated.name);
+    formData.append('Surname', updated.surname);
+    formData.append('Email', updated.email);
+    formData.append('Username', updated.username);
+    formData.append('Password', 'a');
+    formData.append('PasswordRe', 'a');
+
+    if (updated.photo) {
+      formData.append('Photo', updated.photo);
     }
+
+    dispatch(updateProfile(formData));
   };
 
+
   useEffect(() => {
-    if (status === 'idle') {
-      const userString = localStorage.getItem('user');
-      if (userString) {
-        const { id: userId } = JSON.parse(userString);
-        if (userId) {
-          setUserId(userId);
-          dispatch(fetchUserProfile(userId));
-        }
-      }
+    if (userId !== 0 && status === 'idle') {
+      dispatch(fetchUserProfile(userId.toString()));
     }
-  }, [status, dispatch]);
+  }, [userId, status, dispatch]);
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
@@ -97,17 +120,17 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+
   const NavButton: React.FC<{
     tab: 'profile' | 'edit' | 'password' | 'entries';
     label: string;
   }> = ({ tab, label }) => (
     <button
       onClick={() => dispatch(setActiveComponent(tab))}
-      className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 focus:outline-none ${
-        activeComponent === tab
-          ? 'bg-cyan-600 text-white shadow-md scale-105'
-          : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:scale-105'
-      }`}
+      className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 focus:outline-none ${activeComponent === tab
+        ? 'bg-cyan-600 text-white shadow-md scale-105'
+        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:scale-105'
+        }`}
     >
       {label}
     </button>
@@ -160,7 +183,7 @@ const ProfilePage: React.FC = () => {
 
           {showPopup && (
             <InfoPopup
-              message={serviceMessage!}
+              message={serviceMessage.message!}
               type="info"
               onClose={() => setShowPopup(false)}
               onTime={true}
