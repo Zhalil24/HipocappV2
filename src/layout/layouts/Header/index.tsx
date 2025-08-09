@@ -13,8 +13,8 @@ const Header = () => {
     localStorage.removeItem('user');
     window.location.href = '/login';
   };
-  
-// searchBox query parametrs
+
+  // searchBox query parametrs
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
@@ -36,7 +36,6 @@ const Header = () => {
           </h1>
         </div>
 
-        {/* Arama inputu */}
         <form
           onSubmit={handleSearchSubmit}
           role="search"
@@ -53,9 +52,36 @@ const Header = () => {
             autoComplete="off"
           />
         </form>
+
+        <ul className="flex flex-wrap justify-center gap-6 text-white text-sm font-medium tracking-wide">
+          <li>
+            <a
+              href="/about"
+              className="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-[#FFD700] after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full hover:text-[#FFD700]"
+            >
+              Hakkımızda
+            </a>
+          </li>
+          <li>
+            <a
+              href="/contact"
+              className="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-[#FFD700] after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full hover:text-[#FFD700]"
+            >
+              İletişim
+            </a>
+          </li>
+          <li>
+            <a
+              href="/KVKK"
+              className="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-[#FFD700] after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full hover:text-[#FFD700]"
+            >
+              KVKK
+            </a>
+          </li>
+        </ul>
+
       </div>
 
-      {/* 🔹 SAĞ KISIM: Giriş/Kaydol veya Kullanıcı Menüsü */}
       <div className="flex items-center gap-4 ml-6">
         {user === null ? (
           <>
@@ -90,6 +116,7 @@ const Header = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+
 
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-44 bg-white text-gray-800 rounded-lg shadow-xl overflow-hidden z-50">

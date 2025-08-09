@@ -1,47 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ItemList from '../../components/Common/ItemList';
 import ItemDetail from '../../components/Common/ItemDetail';
+import { AppDispatch, RootState } from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchGetCampains } from '@/store/slices/contentSlice';
+import { ContentModel } from '@/core/models/content/contentModel';
+import SearchBar from '@/components/Searchbar/Searchbar';
 
-const marketItems = [
-  {
-    id: 1,
-    title: 'Market Ürünü 1',
-    imageUrl: 'https://via.placeholder.com/150?text=Ürün+1',
-    description: 'Bu ürün 1 ile ilgili detaylı açıklama.',
-  },
-  {
-    id: 2,
-    title: 'Market Ürünü 2',
-    imageUrl: 'https://via.placeholder.com/150?text=Ürün+2',
-    description: 'Bu ürün 2 hakkında bilgi.',
-  },
-  {
-    id: 3,
-    title: 'Market Ürünü 3',
-    imageUrl: 'https://via.placeholder.com/150?text=Ürün+3',
-    description: 'Ürün 3\'ün özellikleri burada anlatılır.',
-  },
-];
 
 const MarketPage: React.FC = () => {
-  const [selectedItem, setSelectedItem] = useState<typeof marketItems[0] | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const contentState = useSelector((state: RootState) => state.content.data);
+  const [selectedItem, setSelectedItem] = useState<ContentModel | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    dispatch(fetchGetCampains())
+  }, []);
+
+  const filteredItems = contentState.filter(item =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="max-w-7xl mx-auto mt-20 p-6">
       <div className="bg-gradient-to-br from-white to-gray-100 rounded-xl shadow-xl p-6 min-h-[75vh]">
         <h1 className="text-3xl font-bold text-center text-[#2B4560] mb-8">Market</h1>
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Liste */}
           <div className="md:w-1/3 bg-white rounded-xl border border-gray-200 shadow-md p-4 overflow-y-auto max-h-[65vh]">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Ürün Listesi</h2>
+
+            <SearchBar
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Ürün ara..."
+            />
+
             <ItemList
-              items={marketItems}
+              items={filteredItems}
               onSelect={setSelectedItem}
               selectedId={selectedItem?.id}
             />
           </div>
 
-          {/* Detay */}
           <div className="md:w-2/3 bg-white rounded-xl border border-gray-300 shadow-md p-6">
             {selectedItem ? (
               <ItemDetail item={selectedItem} />
@@ -56,5 +57,4 @@ const MarketPage: React.FC = () => {
     </div>
   );
 };
-
 export default MarketPage;
