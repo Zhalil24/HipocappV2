@@ -35,8 +35,6 @@ const HomePage: React.FC = () => {
     { name: 'İlanlar', path: '/ads' },
     { name: 'Eğitimler', path: '/educations' },
     { name: 'Partnerlerimiz', path: '/partners' },
-    { name: 'Hakkımızda', path: '/about' },
-    { name: 'İletişim', path: '/contact' },
   ];
 
 
