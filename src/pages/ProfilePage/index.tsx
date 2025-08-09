@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   changePassword,
+  clearServiceMessage,
   deleteEntry,
   fetchUserProfile,
   setActiveComponent,
+  updateProfile,
 } from '../../store/slices/profileSlice';
 
 import ProfileView from '@/components/Profile/ProfileView';
@@ -15,13 +17,26 @@ import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
 import InfoPopup from '@/components/InfoPopup/InfoPopup';
 import LoadingWidget from '@/components/Loading/loadingWidget';
+import { UserProfileModel } from '@/core/models/user/userProfileModel';
+import { fileToBase64 } from '@/Utilities/fileToBase64Helper';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const [userId, setUserId] = useState<number>(0);
   const { data: profile, status, error, activeComponent } = useAppSelector((state) => state.profile);
-  const serviceMessage = useSelector((state: RootState) => state.profile.message);
+  const serviceMessage = useSelector((state: RootState) => state.profile);
   const [showPopup, setShowPopup] = useState(false);
+  const [prevMessage, setPrevMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      const { id } = JSON.parse(userString);
+      if (id) {
+        setUserId(id);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (serviceMessage) {
@@ -42,25 +57,50 @@ const ProfilePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (status === 'idle') {
-      const userString = localStorage.getItem('user');
-      if (userString) {
-        const { id: userId } = JSON.parse(userString);
-        if (userId) {
-          setUserId(userId);
-          console.log("userID", userId)
-          dispatch(fetchUserProfile(userId));
-        }
-      }
+    dispatch(clearServiceMessage());
+  }, [activeComponent, dispatch]);
+
+  const handleProfileUpdate = (updated: {
+    id: number;
+    name: string;
+    surname: string;
+    email: string;
+    username: string;
+    photo?: File | null;
+    password: 'a';
+    passwordRe: 'a';
+  }) => {
+    const formData = new FormData();
+    formData.append('Id', updated.id.toString());
+    formData.append('Name', updated.name);
+    formData.append('Surname', updated.surname);
+    formData.append('Email', updated.email);
+    formData.append('Username', updated.username);
+    formData.append('Password', 'a');
+    formData.append('PasswordRe', 'a');
+
+    if (updated.photo) {
+      formData.append('Photo', updated.photo);
     }
-  }, [status, dispatch]);
+
+    dispatch(updateProfile(formData));
+  };
+
+
+  useEffect(() => {
+    if (userId !== 0 && status === 'idle') {
+      dispatch(fetchUserProfile(userId.toString()));
+    }
+  }, [userId, status, dispatch]);
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
       case 'profile':
         return profile ? <ProfileView profile={profile} /> : null;
       case 'edit':
-        return <EditProfile />;
+        return profile ? (
+          <EditProfile userData={profile} onSubmit={handleProfileUpdate} />
+        ) : null;
       case 'password':
         return (
           <ChangePassword
@@ -69,14 +109,17 @@ const ProfilePage: React.FC = () => {
           />
         );
       case 'entries':
-        return <UserEntries
-          entries={profile?.entries || []}
-          onDelete={handleDelete}
-        />;
+        return (
+          <UserEntries
+            entries={profile?.entries || []}
+            onDelete={handleDelete}
+          />
+        );
       default:
         return profile ? <ProfileView profile={profile} /> : null;
     }
   };
+
 
   const NavButton: React.FC<{
     tab: 'profile' | 'edit' | 'password' | 'entries';
@@ -98,6 +141,7 @@ const ProfilePage: React.FC = () => {
   }
 
   if (!profile) return null;
+
   return (
     <div className="w-full h-screen overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <header className="h-16 flex items-center justify-between px-8 bg-gray-900 border-b border-gray-800 shadow-sm">
@@ -110,9 +154,7 @@ const ProfilePage: React.FC = () => {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4">
-
         <div className="w-full max-w-6xl h-[60%] bg-gray-800/80 border border-cyan-500/20 rounded-3xl shadow-xl flex overflow-hidden">
-
           <div className="w-[280px] bg-gray-900/70 p-6 flex flex-col items-start justify-start border-r border-gray-700">
             <img
               src={
@@ -138,16 +180,16 @@ const ProfilePage: React.FC = () => {
               <NavButton tab="entries" label="Entry'lerim" />
             </div>
           </div>
-          {
-            showPopup && (
-              <InfoPopup
-                message={serviceMessage!}
-                type="info"
-                onClose={() => setShowPopup(false)}
-                onTime={true}
-              />
-            )
-          }
+
+          {showPopup && (
+            <InfoPopup
+              message={serviceMessage.message!}
+              type="info"
+              onClose={() => setShowPopup(false)}
+              onTime={true}
+            />
+          )}
+
           <div className="flex-1 p-6 overflow-hidden">
             <div className="bg-gray-900/60 border border-gray-700 rounded-xl h-full p-4 overflow-y-auto">
               {renderActiveComponent()}

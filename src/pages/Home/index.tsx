@@ -49,9 +49,10 @@ const HomePage: React.FC = () => {
         ? params.search.trim()
         : '';
 
-
     const newCategory =
-      !newSearch && typeof params.category === 'string' && params.category.trim() !== ''
+      !newSearch &&
+      typeof params.category === 'string' &&
+      params.category.trim() !== ''
         ? params.category.trim()
         : null;
 
@@ -64,17 +65,15 @@ const HomePage: React.FC = () => {
     }
   }, [location.search]);
 
+  
 
   useEffect(() => {
     if (searchTerm) {
-
       dispatch(fetchEntriesByTitleName(searchTerm));
       dispatch(clearTitles());
     } else if (selectedCategory) {
-
       dispatch(fetchTitlesByHeaderName(selectedCategory));
     } else {
-
       if (entryMode === 'daily') {
         dispatch(fetchLastEntries());
       } else {

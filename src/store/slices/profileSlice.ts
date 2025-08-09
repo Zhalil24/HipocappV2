@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { InitialStateProfileState, UserProfileModel, } from '../../core/models/user/userProfileModel';
 import { BaseService } from '../../core/services/baseService';
 import { BaseResponseModel } from '@/core/models/base/baseResponseModel';
+import { UserProfileEditModel } from '@/core/models/user/userProfileEditModel';
 
 const baseService = new BaseService();
 
@@ -42,17 +43,35 @@ export const changePassword = createAsyncThunk(
   }
 );
 
+export const updateProfile = createAsyncThunk(
+  'api/user/EditForMobile',
+  async (payload: FormData, { rejectWithValue }) => {
+      const response = await baseService.post<FormData, UserProfileModel>(
+        'api/User/EditForMobile',
+        payload,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
+      if (response.data) {
+        return response;
+      } else {
+        return rejectWithValue(response.message || 'Profil güncellenemedi.');
+      }
+  }
+);
+
 export const deleteEntry = createAsyncThunk(
   'entries/deleteEntry',
   async (entryId: number, { rejectWithValue }) => {
     try {
       const response = await baseService.delete<BaseResponseModel<null>>(
         'api/entry/DeleteEntry',
-        { params: { id: entryId } } 
+        { params: { id: entryId } }
       );
 
       if (response.success) {
-        return entryId; 
+        return entryId;
       } else {
         return rejectWithValue(response.message);
       }
@@ -76,7 +95,7 @@ const profileSlice = createSlice({
     clearServiceMessage: (state) => {
       state.message = null;
       state.error = null;
-      state.status = 'idle'; 
+      state.status = 'idle';
     },
   },
   extraReducers: (builder) => {
@@ -110,8 +129,23 @@ const profileSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       });
+
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.data = action.payload.data;
+        state.message = action.payload.message!;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const { setActiveComponent } = profileSlice.actions;
+export const { setActiveComponent,clearServiceMessage  } = profileSlice.actions;
 export default profileSlice.reducer;

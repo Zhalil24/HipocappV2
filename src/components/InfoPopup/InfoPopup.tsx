@@ -13,6 +13,11 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
   onClose,
   onTime = false,
 }) => {
+
+    if (!message || message.trim() === '') {
+    return null; 
+  }
+
   const bgColor = {
     success: 'bg-green-500',
     error: 'bg-red-500',
