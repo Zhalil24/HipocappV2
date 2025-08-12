@@ -13,12 +13,13 @@ export const fetchUsers = createAsyncThunk<UserDataModel[], void, ThunkConfig>(
     'user/fetchUsers',
     async (_, { rejectWithValue }) => {
         const res = await baseService.get<UserDataModel[]>('/api/user/all');
-        if (!res.success || !res.data) {
-            return rejectWithValue(res.message ?? 'Kullanıcılar alınamadı');
+        if (!Array.isArray(res)) {
+            return rejectWithValue('Kullanıcılar alınamadı');
         }
-        return res.data;
+        return res;
     }
 );
+
 
 const chatSlice = createSlice({
     name: "chat",
@@ -40,7 +41,6 @@ const chatSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-
             .addCase(fetchUsers.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -49,13 +49,10 @@ const chatSlice = createSlice({
                 state.loading = false;
                 state.users = action.payload;
             })
-
-
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message ?? "Bir hata oluştu.";
             });
-
     },
 });
 

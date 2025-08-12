@@ -1,19 +1,9 @@
+import { ChatListItem } from "@/components/ChatListItem";
 import { UserDataModel } from "@/core/models/user/userDataModel";
 import { fetchUsers } from "@/store/slices/chatSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-// type Conversation = {
-//     id: string;
-//     name: string;
-//     avatar: string;
-//     isOnline: boolean | null;
-//     unread?: number;
-//     kind: "person" | "group";
-// };
-
-
 
 const EmptyState: React.FC = () => (
     <div className="h-full w-full flex flex-col items-center justify-center text-center">
@@ -25,32 +15,6 @@ const EmptyState: React.FC = () => (
     </div>
 );
 
-const ChatListItem: React.FC<{
-    item: UserDataModel;
-    active?: boolean;
-    onClick: () => void;
-}> = ({ item, active, onClick }) => (
-    <button
-        onClick={onClick}
-        className={[
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition",
-            "backdrop-blur [box-shadow:inset_0_1px_0_rgba(255,255,255,.04)]",
-            active ? "bg-white/10 ring-1 ring-white/15" : "hover:bg-white/5 ring-1 ring-white/5"
-        ].join(" ")}
-    >
-        <span className="relative">
-            <img src={item.imageURL} alt={item.username} className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10" />
-            {item.isOnline && <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-[#0B1530]" />}
-        </span>
-
-        <div className="flex flex-col text-left min-w-0">
-            <span className="text-sm font-medium text-white truncate">{item.username}</span>
-
-        </div>
-
-
-    </button>
-);
 
 const ChatPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -82,23 +46,7 @@ const ChatPage: React.FC = () => {
         chatState.chats,
     ]);
 
-    useEffect(() => {
-        console.log("CHATSTATE", chatState.users);
-        console.log("CHATSTATE", chatState.groups);
-        console.log("CHATSTATE", chatState.chats);
-    }, [chatState]);
-    
-    useEffect(() => {
-        if (section === "people") {
-            dispatch(fetchUsers());
-        }
-    }, [section, dispatch]);
-    useEffect(() => {
-  dispatch(fetchUsers());
-}, [dispatch]);
-
-
-    const onlineUser =
+    const filterUser =
         filtered.find((x) => x.isOnline === true) ??
         null;
 
@@ -202,12 +150,12 @@ const ChatPage: React.FC = () => {
                         <section className="col-span-8 bg-[#0A0F1F] relative" style={{ minHeight: "80vh" }}>
                             <div className="h-14 px-5 border-b border-white/10 flex items-center justify-between bg-[#0C1226]/70 backdrop-blur sticky top-0">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    {onlineUser ? (
+                                    {filterUser ? (
                                         <>
-                                            <img src={onlineUser.imageURL} className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10" />
+                                            <img src={`https://hipocapp.com/${filterUser.imageURL}`} className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10" />
                                             <div className="min-w-0">
-                                                <div className="text-white/90 text-sm font-medium truncate">{onlineUser.username}</div>
-                                                <div className="text-[11px] text-gray-400">{onlineUser.isOnline ? "Çevrimiçi" : "Çevrimdışı"}</div>
+                                                <div className="text-white/90 text-sm font-medium truncate">{filterUser.username}</div>
+                                                <div className="text-[11px] text-gray-400">{filterUser.isOnline ? "Çevrimiçi" : "Çevrimdışı"}</div>
                                             </div>
                                         </>
                                     ) : (
