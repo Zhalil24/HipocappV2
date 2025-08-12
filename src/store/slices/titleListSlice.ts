@@ -10,12 +10,14 @@ interface TitleListState {
   titles: Title[];
   loading: boolean;
   error: string | null;
+  headerId: number | null;
 }
 
 const initialState: TitleListState = {
   titles: [],
   loading: false,
   error: null,
+  headerId: null,
 };
 
 export const fetchTitlesByHeaderName = createAsyncThunk(
@@ -36,6 +38,7 @@ export const fetchTitlesByHeaderName = createAsyncThunk(
       return {
         titles: titlesRes.data.data ?? [],
         message: titlesRes.data.message,
+        headerId: headerId,
       };
     } catch (err: any) {
       return rejectWithValue(err.message || 'Başlıklar getirilemedi.');
@@ -51,6 +54,7 @@ const titleListSlice = createSlice({
       state.titles = [];
       state.loading = false;
       state.error = null;
+      state.headerId = null;
     },
   },
   extraReducers: (builder) => {
@@ -62,7 +66,7 @@ const titleListSlice = createSlice({
       })
       .addCase(fetchTitlesByHeaderName.fulfilled, (state, action) => {
         state.loading = false;
-
+        state.headerId = action.payload.headerId;
         state.titles = action.payload.titles;
         if (action.payload.titles.length === 0) {
           state.error = action.payload.message || 'Başlık bulunamadı.';

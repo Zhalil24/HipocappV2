@@ -46,38 +46,30 @@ export const changePassword = createAsyncThunk(
 export const updateProfile = createAsyncThunk(
   'api/user/EditForMobile',
   async (payload: FormData, { rejectWithValue }) => {
-      const response = await baseService.post<FormData, UserProfileModel>(
-        'api/User/EditForMobile',
-        payload,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        }
-      );
-      if (response.data) {
-        return response;
-      } else {
-        return rejectWithValue(response.message || 'Profil güncellenemedi.');
+    const response = await baseService.post<FormData, UserProfileModel>(
+      'api/User/EditForMobile',
+      payload,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' }
       }
+    );
+    if (response.data) {
+      return response;
+    } else {
+      return rejectWithValue(response.message || 'Profil güncellenemedi.');
+    }
   }
 );
 
 export const deleteEntry = createAsyncThunk(
   'entries/deleteEntry',
   async (entryId: number, { rejectWithValue }) => {
-    try {
-      const response = await baseService.delete<BaseResponseModel<null>>(
-        'api/entry/DeleteEntry',
-        { params: { id: entryId } }
-      );
 
-      if (response.success) {
-        return entryId;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Silme işlemi başarısız.');
-    }
+    const response = await baseService.delete<BaseResponseModel<null>>(
+      'api/entry/DeleteEntry',
+      { params: { id: entryId } }
+    );
+    return response;
   }
 );
 
@@ -144,8 +136,27 @@ const profileSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       });
+
+    builder
+      .addCase(deleteEntry.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(deleteEntry.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.message = action.payload.message!;
+
+        const deletedId = action.meta.arg;
+        if (state.data?.entries) {
+          state.data.entries = state.data.entries.filter(e => e.id !== deletedId);
+        }
+      })
+      .addCase(deleteEntry.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const { setActiveComponent,clearServiceMessage  } = profileSlice.actions;
+export const { setActiveComponent, clearServiceMessage } = profileSlice.actions;
 export default profileSlice.reducer;

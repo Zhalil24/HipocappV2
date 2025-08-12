@@ -54,9 +54,13 @@ const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName
         </div>
       )}
 
-      <p className="text-gray-700 text-[11px] whitespace-pre-line">
+      <p
+        className="text-gray-700 text-[11px] whitespace-pre-line"
+        style={{ wordBreak: 'break-word' }}
+      >
         {displayedDescription}
       </p>
+
 
       {isLong && (
         <div className="flex justify-center mt-3">

@@ -78,8 +78,9 @@ const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const registerState = useSelector((state: RootState) => state.register);
-  const serviceMessage = registerState.message;
   const [showPopup, setShowPopup] = useState(false);
+  const serviceMessage = useSelector((state: RootState) => state.register.message);
+
 
   const formik = useFormik({
     initialValues: {
@@ -129,6 +130,7 @@ const Register = () => {
       setShowPopup(true);
     }
   }, [serviceMessage]);
+
 
   useEffect(() => {
     if (registerState.success) {

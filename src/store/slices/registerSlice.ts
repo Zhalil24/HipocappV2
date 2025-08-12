@@ -1,3 +1,5 @@
+import { BaseResponseModel } from "@/core/models/base/baseResponseModel";
+import { BaseService } from "@/core/services/baseService";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -15,12 +17,18 @@ const initialState: RegisterState = {
   message: ''
 };
 
-export const registerUser = createAsyncThunk(
+const baseService = new BaseService();
+
+export const registerUser = createAsyncThunk<
+  BaseResponseModel<null>,
+  FormData,               
+  { rejectValue: string } 
+>(
   "register/registerUser",
-  async (formData: FormData, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        "https://hipocapp.com/Auth/Register",
+      const response = await baseService.post<FormData, null>(
+        "Auth/Register",
         formData,
         {
           headers: {
@@ -28,9 +36,12 @@ export const registerUser = createAsyncThunk(
           },
         }
       );
-      return response.data;
+
+      return response; 
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Kayıt sırasında hata oluştu.");
+      return rejectWithValue(
+        error.response?.data?.message || "Kayıt sırasında hata oluştu."
+      );
     }
   }
 );
@@ -47,9 +58,10 @@ const registerSlice = createSlice({
         state.error = null;
         state.success = false;
       })
-      .addCase(registerUser.fulfilled, (state) => {
+      .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
+        state.message = action.payload.message!;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
