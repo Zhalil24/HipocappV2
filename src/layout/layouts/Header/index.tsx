@@ -99,6 +99,36 @@ const Header = () => {
             </button>
           </>
         ) : (
+          <>
+            {/* Chat ikonu */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/chat');
+                }}
+                className="p-2 rounded-full hover:bg-[#2b4560] transition-colors"
+                title="Mesajlar"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-6 text-white hover:text-[#FFD700]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.518 0-2.94-.336-4.162-.93L3 20l1.07-3.276C3.388 15.982 3 14.538 3 13c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+                {/* İstersen unread badge ekle
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">3</span>
+                */}
+              </button>
+            </div>
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -138,6 +168,7 @@ const Header = () => {
               </div>
             )}
           </div>
+          </>
         )}
       </div>
     </header>

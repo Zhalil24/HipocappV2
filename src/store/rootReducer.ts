@@ -7,6 +7,7 @@ import titleEntryReducer from "./slices/titleEntrySlice";
 import registerReducer from './slices/registerSlice';
 import profileReducer from './slices/profileSlice';
 import contentReducer from './slices/contentSlice';
+import chatReducer from './slices/chatSlice';
 
 
 
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   register: registerReducer,
   profile: profileReducer,
   content: contentReducer,
+  chat: chatReducer,
 });
 
 export default rootReducer;

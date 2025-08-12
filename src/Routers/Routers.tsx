@@ -8,6 +8,7 @@ import EducationPage from '@/pages/Educations/EducationPage';
 import PartnersPage from '@/pages/Partners/PartnersPage';
 import ContactPage from '@/pages/Contact';
 import KvkkPage from '@/pages/KVKK/KVKK';
+import ChatPage from '@/pages/Chat';
 
 
 
@@ -26,6 +27,7 @@ const Routers = () => {
         <Route path="/educations" element={<EducationPage />} />
         <Route path="/partners" element={<PartnersPage />} />
         <Route path="/KVKK" element={<KvkkPage />} />
+          <Route path="/chat" element={<ChatPage />} />
     </Routes>
   );
 };
