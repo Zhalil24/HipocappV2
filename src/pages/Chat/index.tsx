@@ -135,6 +135,7 @@ const ChatPage: React.FC = () => {
                                 {filtered.map((c) => (
                                     <ChatListItem
                                         key={c.id}
+                                        isOnline={false}
                                         item={c}
                                         active={activeId === c.id}
                                         onClick={() => setActiveId(c.id)}

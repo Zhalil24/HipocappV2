@@ -158,7 +158,6 @@ const ProfilePage: React.FC = () => {
           <div className="w-[280px] bg-gray-900/70 p-6 flex flex-col items-start justify-start border-r border-gray-700">
             <img
               src={
-                `https://hipocapp.com/${profile.imageURL}`||
                 `https://hipocapp.com/${profile.photoURL}`||                
                 `https://ui-avatars.com/api/?name=${profile.name}+${profile.surname}&background=0D8ABC&color=fff&size=128`
               }
