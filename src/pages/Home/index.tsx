@@ -170,9 +170,11 @@ const HomePage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen flex justify-center items-start bg-gray-50 font-sans">
-      <div className="flex flex-col w-full max-w-6xl px-6 mt-32">
-        <div className="flex w-full gap-2">
+    <div className="min-h-screen w-full flex justify-center items-start 
+                bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
+                font-sans pt-2 px-4">
+      <div className="flex flex-col w-full max-w-6xl px-6 mt-24">
+        <div className="flex w-full gap-5">
           {/* Sidebar */}
           <div className="w-84 min-w-84 ml-8">
             <Sidebar
@@ -193,12 +195,12 @@ const HomePage: React.FC = () => {
                 <div className="flex items-center justify-between mb-6 w-full max-w-3xl mx-auto gap-4">
 
                   {/* Sol: Daily / Stream */}
-                  <div className="flex space-x-3">
+                  <div className="flex space-x-3 mt-4">
                     <button
                       onClick={() => handleModeChange('daily')}
                       className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'daily' && !selectedTitle
-                          ? 'bg-[#2B4560] text-white'
-                          : 'bg-white text-[#2B4560] border-[#2B4560]'
+                        ? 'bg-[#0071E3] text-white'
+                        : 'bg-white text-[#2B4560] border-[#2B4560]'
                         }`}
                     >
                       Daily
@@ -206,28 +208,16 @@ const HomePage: React.FC = () => {
                     <button
                       onClick={() => handleModeChange('stream')}
                       className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'stream' && !selectedTitle
-                          ? 'bg-[#2B4560] text-white'
-                          : 'bg-white text-[#2B4560] border-[#2B4560]'
+                        ? 'bg-[#0071E3] text-white'
+                        : 'bg-white text-[#2B4560] border-[#2B4560]'
                         }`}
                     >
                       Stream
                     </button>
 
                   </div>
-
-                  {/* Sağ: Otomatik Kayan Sayfa Butonları */}
-                  <div className="flex-1 overflow-hidden">
-                    <PageButtons pages={pages} navigate={navigate} />
-                  </div>
-                </div>
-
-
-                {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
-                {error && <p className="text-red-500">Hata: {error}</p>}
-
-                <div className="grid gap-5">
                   {selectedTitle === true && (
-                    <div className="mb-4">
+                    <div className="mt-3">
                       <button
                         onClick={() => {
                           if (isLogin) {
@@ -236,12 +226,18 @@ const HomePage: React.FC = () => {
                             setShowLoginAlert(true);
                           }
                         }}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                        className={`px-4 py-2 rounded-md border font-medium text-sm transition-colors bg-white text-[#2B4560] border-[#2B4560] hover:bg-[#d0d7dd]`}
                       >
                         Entry Aç
                       </button>
                     </div>
                   )}
+                </div>
+                {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
+                {error && <p className="text-red-500">Hata: {error}</p>}
+
+                <div className="grid gap-5">
+
 
                   {showLoginAlert && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -317,6 +313,10 @@ const HomePage: React.FC = () => {
                       date={entry.date}
                     />
                   ))}
+
+                  {/* <div className="flex-1 overflow-hidden">
+                    <PageButtons pages={pages} navigate={navigate} />
+                  </div> */}
                 </div>
               </div>
             </main>

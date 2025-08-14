@@ -1,44 +1,53 @@
-import React from 'react';
+import { Info } from "lucide-react";
 
 const KvkkPage: React.FC = () => {
   return (
-    <div className="bg-gray-100 min-h-screen pt-28 px-4">
-      <div className="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-md">
-        <h1 className="text-4xl font-bold text-gray-800 mb-6 border-b pb-4">KVKK Aydınlatma Metni</h1>
+    <div className="min-h-[80vh] bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] py-16 px-4 mt-10">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-200">
+        {/* Başlık (AboutPage ile aynı şerit) */}
+        <div className="flex items-center mb-6 gap-3">
+          <div className="bg-blue-100 p-3 rounded-full">
+            <Info className="w-6 h-6 text-blue-600" />
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">
+            KVKK Aydınlatma Metni
+          </h1>
+        </div>
 
-        <section className="space-y-6 text-gray-700 leading-relaxed">
+        {/* İçerik – yazı boyutu About'tan biraz küçük */}
+        <section className="space-y-6 text-gray-700 text-[15px] leading-relaxed">
           <p>
             Bu aydınlatma metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında,
             kişisel verilerinizin hangi amaçlarla, ne şekilde işlendiği ve haklarınız hakkında sizleri
             bilgilendirmek amacıyla hazırlanmıştır.
           </p>
 
-          <h2 className="text-2xl font-semibold text-gray-800 mt-8">1. Veri Sorumlusu</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 pt-2">1. Veri Sorumlusu</h2>
           <p>
             Kişisel verileriniz, veri sorumlusu sıfatıyla tarafımızca işlenmektedir. İletişim bilgileri,
             açık adresimiz ve diğer detaylar için lütfen iletişim sayfamızı ziyaret ediniz.
           </p>
 
-          <h2 className="text-2xl font-semibold text-gray-800 mt-8">2. Kişisel Verilerin İşlenme Amaçları</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 pt-2">2. Kişisel Verilerin İşlenme Amaçları</h2>
           <p>
             Toplanan kişisel verileriniz; hizmetlerimizin sunulabilmesi, üyelik işlemlerinin
             yürütülmesi, sizinle iletişime geçilmesi ve yasal yükümlülüklerin yerine getirilmesi
             amacıyla işlenmektedir.
           </p>
 
-          <h2 className="text-2xl font-semibold text-gray-800 mt-8">3. Kişisel Verilerin Aktarılması</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 pt-2">3. Kişisel Verilerin Aktarılması</h2>
           <p>
             Verileriniz, açık rızanız olmaksızın yalnızca kanunen yetkili kamu kurum ve kuruluşlarıyla
             paylaşılabilir. Bunun dışında üçüncü kişilere aktarımı yapılmaz.
           </p>
 
-          <h2 className="text-2xl font-semibold text-gray-800 mt-8">4. Veri Saklama Süresi</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 pt-2">4. Veri Saklama Süresi</h2>
           <p>
             Kişisel verileriniz, işlendikleri amaç doğrultusunda gerekli süre boyunca saklanmakta, bu
             sürenin sonunda ise mevzuata uygun olarak silinmekte veya anonim hale getirilmektedir.
           </p>
 
-          <h2 className="text-2xl font-semibold text-gray-800 mt-8">5. KVKK Kapsamındaki Haklarınız</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 pt-2">5. KVKK Kapsamındaki Haklarınız</h2>
           <ul className="list-disc pl-6 space-y-2">
             <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme,</li>
             <li>İşlenmişse buna ilişkin bilgi talep etme,</li>
@@ -51,10 +60,13 @@ const KvkkPage: React.FC = () => {
             <li>Yasalara aykırı işleme nedeniyle zarara uğramışsanız, tazminat talep etme.</li>
           </ul>
 
-          <h2 className="text-2xl font-semibold text-gray-800 mt-8">6. İletişim</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 pt-2">6. İletişim</h2>
           <p>
-            KVKK kapsamındaki haklarınızı kullanmak için lütfen bizimle info@ornekmail.com adresi üzerinden
-            iletişime geçiniz.
+            KVKK kapsamındaki haklarınızı kullanmak için lütfen bizimle{" "}
+            <a href="mailto:info@ornekmail.com" className="text-blue-600 hover:underline">
+              info@ornekmail.com
+            </a>{" "}
+            adresi üzerinden iletişime geçiniz.
           </p>
         </section>
       </div>

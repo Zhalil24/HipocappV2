@@ -1,0 +1,1 @@
+export const AboutConstants = "Amacımız, kaliteli bilgiye kolay erişim sağlamak ve kullanıcılarımıza en güncel içerikleri ulaştırmaktır. \n Ekibimiz alanında uzman kişilerden oluşmakta ve sürekli olarak platformumuzu geliştirmek için çalışmaktadır.";

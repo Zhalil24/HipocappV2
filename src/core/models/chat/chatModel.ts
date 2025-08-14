@@ -1,3 +1,4 @@
+import { MessageModel } from "../chatMessage/messageModel";
 import { UserDataModel } from "../user/userDataModel";
 
 export interface InitialChatModel {
@@ -7,6 +8,10 @@ export interface InitialChatModel {
   loading: boolean;
   error: string | null;
   message: string | null;
+  connected: boolean;
+  connecting: boolean;
+  onlineUsers: number[];
+  messagesByUser: Record<number, MessageModel[]>;
 }
 
 export const chatModelInitialState: InitialChatModel = {
@@ -16,4 +21,8 @@ export const chatModelInitialState: InitialChatModel = {
   loading: false,
   error: null,
   message: null,
+  connecting: false,
+  connected: false,
+  onlineUsers: [],
+  messagesByUser: {},
 };

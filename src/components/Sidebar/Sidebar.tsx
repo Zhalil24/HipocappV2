@@ -75,28 +75,29 @@ const Sidebar: React.FC<SidebarProps> = ({
       className="sticky top-[100px] bg-white p-4 rounded-xl shadow-lg border border-gray-300 z-20"
       style={{
         maxWidth: '320px',
-        width: '90%',
+        width: '100%',
         maxHeight: 'calc(100vh - 110px)',
         overflowY: 'auto',
       }}
     >
 
       {/* Kategoriler */}
-      <div className="flex flex-wrap gap-2 mb-5 justify-center">
+      <div className="flex flex-wrap gap-1 mb-5 justify-center">
         {SIDEBAR_CATEGORIES.map((item) => (
           <button
             key={item.category}
             onClick={() => handleCategoryClick(item.category)}
-            className={`px-3 py-1.5 rounded-full font-medium text-[11px] transition-transform duration-200 ease-in-out
-            ${selectedCategory === item.category
-                ? 'bg-[#2B4560] text-white shadow-lg transform scale-105'
-                : 'bg-gray-100 text-[#2B4560] hover:bg-[#d0d7dd] hover:shadow-md hover:scale-105'
+            className={`px-2 py-2 rounded-md border font-medium text-sm transition-colors
+        ${selectedCategory === item.category
+                ? 'bg-[#0071E3] text-white border-[#0071E3]'
+                : 'bg-white text-[#2B4560] border-[#2B4560] hover:bg-[#d0d7dd] hover:shadow-md'
               }`}
           >
             {item.category}
           </button>
         ))}
       </div>
+
 
       {/* Alt Başlıklar */}
       {selectedCategory && subItems && (
