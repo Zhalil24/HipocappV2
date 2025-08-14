@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import InfoPopup from '@/components/InfoPopup/InfoPopup';
 import LoadingWidget from '@/components/Loading/loadingWidget';
 import { UserProfileModel } from '@/core/models/user/userProfileModel';
-import { fileToBase64 } from '@/Utilities/fileToBase64Helper';
+import { fileToBase64 } from '@/Utilities/helpers/fileToBase64Helper';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();

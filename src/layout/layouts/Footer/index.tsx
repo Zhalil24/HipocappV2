@@ -1,4 +1,4 @@
-import { AboutConstants } from "@/Utilities/aboutConstants";
+import { AboutConstants } from "@/Utilities/constants/aboutConstants";
 import React from "react";
 
 const Footer = () => {

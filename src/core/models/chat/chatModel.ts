@@ -5,6 +5,8 @@ export interface InitialChatModel {
   users: UserDataModel[] | null;   // Kişiler listesi
   groups: UserDataModel[] | null;  // Gruplar listesi
   chats: UserDataModel[] | null;   // Sohbet listesi
+  lastMessages: MessageModel[] | null;
+  unreadCounts: Record<number, number>;
   loading: boolean;
   error: string | null;
   message: string | null;
@@ -25,4 +27,6 @@ export const chatModelInitialState: InitialChatModel = {
   connected: false,
   onlineUsers: [],
   messagesByUser: {},
+  lastMessages: [],
+  unreadCounts: {},
 };

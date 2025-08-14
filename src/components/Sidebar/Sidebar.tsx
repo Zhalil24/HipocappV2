@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SIDEBAR_CATEGORIES } from '../../Utilities/constants';
+import { SIDEBAR_CATEGORIES } from '../../Utilities/constants/constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEntriesByTitleName } from '../../store/slices/titleEntrySlice';
 import { AppDispatch, RootState } from '../../store/store';

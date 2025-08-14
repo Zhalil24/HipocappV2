@@ -1,6 +1,6 @@
 import React from 'react';
 import { Info } from 'lucide-react';
-import { AboutConstants } from '@/Utilities/aboutConstants';
+import { AboutConstants } from '@/Utilities/constants/aboutConstants';
 
 const AboutPage: React.FC = () => {
   return (

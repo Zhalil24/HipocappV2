@@ -2,7 +2,7 @@ import { ChatListItem } from "@/components/ChatListItem";
 import ChatWindow from "@/components/ChatWindow";
 import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserDataModel } from "@/core/models/user/userDataModel";
-import { fetchConversationMessages, fetchUsers, getOnlineUsers, saveMessage, sendPrivateMessage, startConnection } from "@/store/slices/chatSlice";
+import { fetchConversationMessages, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, saveMessage, sendPrivateMessage, startConnection } from "@/store/slices/chatSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +19,6 @@ const EmptyState: React.FC = () => (
     </div>
 );
 
-
 const ChatPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const [search, setSearch] = useState("");
@@ -28,14 +27,23 @@ const ChatPage: React.FC = () => {
     const [section, setSection] = useState<"chats" | "people" | "groups">("chats");
     const [userId, setUserId] = useState<number | null>(null);
 
+    const [activePeerId, setActivePeerId] = useState<number | null>(null);
+
     useEffect(() => {
         if (!userId || !activeId) return;
         dispatch(fetchConversationMessages({ fromUserId: userId, toUserId: activeId }));
     }, [userId, activeId, dispatch]);
-    
+
     const messages = useSelector((s: RootState) =>
         s.chat.messagesByUser[activeId ?? -1] ?? []
     );
+    const openChatWith = (partnerId: number) => {
+        setActivePeerId(partnerId);
+        setActiveId(partnerId);
+        if (meId && partnerId) {
+            dispatch(fetchConversationMessages({ fromUserId: meId, toUserId: partnerId }));
+        }
+    };
 
     useEffect(() => {
         const userString = localStorage.getItem("user");
@@ -54,6 +62,9 @@ const ChatPage: React.FC = () => {
             .unwrap()
             .then(() => {
                 dispatch(getOnlineUsers());
+                dispatch(fetchUsers());
+                dispatch(fetchLastMessages({ userId }));
+                dispatch(fetchUnreadCounts({ userId }));
             })
             .catch((e) => {
                 console.error("startConnection hata:", e);
@@ -121,6 +132,73 @@ const ChatPage: React.FC = () => {
         dispatch(sendPrivateMessage({ toUserId: activeConv.id, message: newMsg }));
     };
 
+    const meId = Number(userId);
+    const { lastMessages = [], users = [] } = useSelector((s: RootState) => ({
+        lastMessages: s.chat.lastMessages ?? [],
+        users: s.chat.users ?? [],
+    }));
+
+    const conversations = useMemo(() => {
+        const byPartner = new Map<number, {
+            partnerId: number;
+            userName: string;
+            photoUrl?: string | null;
+            lastMessageText: string;
+            sentAt: string;
+            isRead: boolean;
+        }>();
+
+        for (const m of lastMessages) {
+            const partnerId =
+                Number(m.fromUserId) === meId
+                    ? Number(m.toUserId)
+                    : Number(m.fromUserId ?? m.toUserId);
+
+            if (!partnerId) continue;
+
+            const u: any = users.find((x: any) => Number(x.id) === partnerId);
+            const name =
+                u?.userName ?? u?.username ?? `Kullanıcı #${partnerId}`;
+            const photo =
+                u?.photoUrl ?? u?.avatarUrl ?? null;
+
+            const item = {
+                partnerId,
+                userName: name,
+                photoUrl: photo,
+                lastMessageText: m.messageText ?? "",
+                sentAt: typeof m.sentAt === "string" ? m.sentAt : m.sentAt.toISOString(),
+                isRead: !!m.isRead,
+            };
+
+            const prev = byPartner.get(partnerId);
+            if (!prev || new Date(item.sentAt).getTime() > new Date(prev.sentAt).getTime()) {
+                byPartner.set(partnerId, item);
+            }
+        }
+
+        return Array.from(byPartner.values()).sort(
+            (a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+        );
+    }, [lastMessages, users, meId]);
+
+    const { unreadCounts = {} } = useSelector((s: RootState) => ({
+        unreadCounts: s.chat.unreadCounts ?? {},
+    }));
+
+    const convWithUnread = useMemo(() => {
+        return conversations.map(c => ({
+            ...c,
+            unread: unreadCounts[c.partnerId] ?? 0,
+        }));
+    }, [conversations, unreadCounts]);
+
+    const convFiltered = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return convWithUnread;
+        return convWithUnread.filter(c => c.userName.toLowerCase().includes(q));
+    }, [convWithUnread, search]);
+
 
     return (
         <div className="pt-[80.5px]">
@@ -160,7 +238,17 @@ const ChatPage: React.FC = () => {
                                         title={it.title}
                                         onClick={() => {
                                             setSection(it.key as any);
-                                            if (it.key === "people") dispatch(fetchUsers());
+                                            if (it.key === "people") {
+                                                dispatch(fetchUsers());
+                                            }
+                                            if (it.key === "chats") {
+                                                const me = Number(userId);
+                                                if (me) {
+                                                    dispatch(fetchUsers());
+                                                    dispatch(fetchLastMessages({ userId: me }));
+                                                    dispatch(fetchUnreadCounts({ userId: me }));
+                                                }
+                                            }
                                         }}
                                         className={[
                                             "w-10 h-10 rounded-xl flex items-center justify-center",
@@ -201,23 +289,69 @@ const ChatPage: React.FC = () => {
                             <div className="flex-1 pr-1 overflow-y-auto thin-scroll space-y-2">
                                 {chatState.loading ? (
                                     <LoadingWidget />
-                                ) : (
-                                    <>
-                                        {filtered.map((c: any) => (
-                                            <ChatListItem
-                                                key={c.id}
-                                                isOnline={isOnlineUser(c)}
-                                                item={c}
-                                                active={activeId === c.id}
-                                                onClick={() => setActiveId(c.id)}
-                                            />
-                                        ))}
-                                        {filtered.length === 0 && !chatState.loading && (
-                                            <div className="text-xs text-gray-400/90 px-1 py-6 text-center">Sonuç bulunamadı.</div>
-                                        )}
-                                    </>
+                                ) : section === "chats" ? (
+                                    convFiltered.length === 0 ? (
+                                        <div className="text-white/60 text-sm px-3 py-6 text-center">Henüz sohbet yok.</div>
+                                    ) : (
+                                        <ul className="divide-y divide-white/10">
+                                            {convFiltered.map((c) => {
+                                                const unread = unreadCounts[c.partnerId] ?? 0;
+                                                return (
+                                                    <li key={c.partnerId}>
+                                                        <button
+                                                            onClick={() => openChatWith(c.partnerId)}
+                                                            className={[
+                                                                "w-full flex items-center gap-3 px-3 py-2 rounded-md",
+                                                                "hover:bg-white/5 transition",
+                                                                activePeerId === c.partnerId ? "bg-white/10" : ""
+                                                            ].join(" ")}
+                                                        >
+                                                            <img
+                                                                src={c.photoUrl || "/placeholder-avatar.png"}
+                                                                alt={c.userName}
+                                                                className="w-8 h-8 rounded-full object-cover"
+                                                            />
+                                                            <div className="flex-1 text-left">
+                                                                <div className="text-white/90 text-sm font-semibold">{c.userName}</div>
+                                                                <div className="text-white/60 text-xs truncate">{c.lastMessageText || "—"}</div>
+                                                            </div>
+
+                                                            <time className="text-white/40 text-[10px] whitespace-nowrap">
+                                                                {new Date(c.sentAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                                                            </time>
+
+                                                            {unread > 0 && (
+                                                                <span
+                                                                    className="ml-2 inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5
+                               rounded-full bg-[#0071E3] text-white text-[10px] font-semibold"
+                                                                    title={`${unread} okunmamış`}
+                                                                >
+                                                                    {unread}
+                                                                </span>
+                                                            )}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    )
+                                ) : (<>
+                                    {filtered.map((c: any) => (
+                                        <ChatListItem
+                                            key={c.id}
+                                            isOnline={isOnlineUser(c)}
+                                            item={c}
+                                            active={activeId === c.id}
+                                            onClick={() => setActiveId(c.id)}
+                                        />
+                                    ))}
+                                    {filtered.length === 0 && (
+                                        <div className="text-xs text-gray-400/90 px-1 py-6 text-center">Sonuç bulunamadı.</div>
+                                    )}
+                                </>
                                 )}
                             </div>
+
                         </aside>
 
                         {/* RIGHT: içerik */}
