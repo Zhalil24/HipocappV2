@@ -4,8 +4,9 @@ export const ChatListItem: React.FC<{
     item: UserDataModel;
     active?: boolean;
     isOnline?: boolean;
+    unread?: number;
     onClick: () => void;
-}> = ({ item, active, onClick, isOnline = false }) => (
+}> = ({ item, active, onClick, isOnline = false, unread }) => (
     <button
         onClick={onClick}
         className={[
@@ -28,8 +29,17 @@ export const ChatListItem: React.FC<{
             />
         </span>
 
-        <div className="flex flex-col text-left min-w-0">
-            <span className="text-sm font-medium text-white truncate">{item.username}</span>
+        <div className="flex flex-col text-left min-w-0 flex-1">
+            <span className="text-sm font-medium text-white truncate">
+                {item.username}
+            </span>
         </div>
+
+        {unread! > 0 && (
+            <span className="ml-auto shrink-0 min-w-[22px] h-5 px-1.5 text-[11px] rounded-full bg-red-500 text-white text-center leading-5">
+                {unread! > 99 ? "99+" : unread}
+            </span>
+        )}
     </button>
+
 );

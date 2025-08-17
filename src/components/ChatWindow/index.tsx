@@ -1,4 +1,5 @@
 import { MessageModel } from "@/core/models/chatMessage/messageModel";
+import { formatTime } from "@/Utilities/helpers/formatDateHelper";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 
@@ -10,16 +11,6 @@ type Props = {
     peer?: { id: number; username: string; };
 };
 
-const formatTime = (d: string | number | Date) => {
-    const date = new Date(d);
-    const dd = String(date.getDate()).padStart(2, "0");
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const yyyy = date.getFullYear();
-    const hh = String(date.getHours()).padStart(2, "0");
-    const min = String(date.getMinutes()).padStart(2, "0");
-    const ss = String(date.getSeconds()).padStart(2, "0");
-    return `${dd}.${mm}.${yyyy} ${hh}:${min}:${ss}`;
-};
 
 const ChatWindow: React.FC<Props> = ({
     currentUserId,
@@ -31,10 +22,6 @@ const ChatWindow: React.FC<Props> = ({
     const [text, setText] = useState("");
     const [sending, setSending] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
-
-    useEffect(()=>{
-        console.log("mesajlar:",messages)
-    },[])
 
     const toMs = (d: string | number | Date) => {
         const t = new Date(d).getTime();

@@ -3,7 +3,7 @@ import { BaseService } from '../../core/services/baseService';
 import { UserDataModel } from '@/core/models/user/userDataModel';
 import { chatModelInitialState, InitialChatModel } from '@/core/models/chat/chatModel';
 import { SignalRService } from '@/core/hubService/hubService';
-import { MessageModel } from '@/core/models/chatMessage/messageModel';
+import { GroupMessageModel, GroupModel, MarkMessageModel, MessageModel, UnreadCountItem } from '@/core/models/chatMessage/messageModel';
 import { decryptMessage, encryptMessage } from '@/Utilities/helpers/cryptoHelper';
 
 const baseService = new BaseService();
@@ -46,10 +46,42 @@ export const startConnection = createAsyncThunk<void, number, ThunkConfig>(
                 messageText: decryptedText
             }));
         });
+        hubService.off("ReceiveMessageForGroupClients");
+        hubService.on("ReceiveMessageForGroupClients", (payload: any) => {
+            const raw = typeof payload === "string" ? JSON.parse(payload) : payload;
+            const candidate = raw?.sentAt ?? raw?.sentOn ?? null;
+            const parsed = (typeof candidate === "string" || typeof candidate === "number")
+                ? Date.parse(candidate as any) : NaN;
+            const safeSentAt = Number.isNaN(parsed) ? new Date().toISOString() : new Date(parsed).toISOString();
+            const decryptedText = decryptMessage(raw?.messageText ?? "");
+            const normalized = {
+                ...raw,
+                messageText: decryptedText,
+                sentAt: safeSentAt,
+            };
+            dispatch(addIncomingMessageGroup(normalized));
+        });
         hubService.on?.("reconnected", async () => {
             const res = await hubService.invoke("GetOnlineUsers");
             if (Array.isArray(res)) dispatch(setOnlineUsers(res.map(Number)));
         });
+    }
+);
+
+export const joinGroupMobil = createAsyncThunk<
+    void,
+    { groupName: string },
+    ThunkConfig
+>(
+    "chat/joinGroupMobil",
+    async ({ groupName }, { dispatch, rejectWithValue }) => {
+        try {
+            await hubService.startConnection();
+            await hubService.invoke("JoinGroupMobil", groupName);
+        } catch (err) {
+            console.error("[SR] JoinGroupMobil failed:", err);
+            return rejectWithValue("JoinGroupMobil failed");
+        }
     }
 );
 
@@ -71,8 +103,7 @@ export const getOnlineUsers = createAsyncThunk<number[], void, ThunkConfig>(
 
 export const sendPrivateMessage = createAsyncThunk<
     void,
-    { toUserId: number; message: MessageModel },
-    { rejectValue: string }
+    { toUserId: number; message: MessageModel }
 >(
     "chat/sendPrivateMessage",
     async ({ toUserId, message }, { dispatch, rejectWithValue }) => {
@@ -96,6 +127,81 @@ export const sendPrivateMessage = createAsyncThunk<
         await hubService.invoke("SendPrivateMessage", Number(toUserId), serverMessage);
     }
 );
+
+export const sendGroupMessageSave = createAsyncThunk<
+    GroupMessageModel,
+    GroupMessageModel,
+    { rejectValue: string }
+>(
+    "chat/sendGroupMessage",
+    async (payload, { rejectWithValue }) => {
+        // Gönderirken şifrele
+        const body: GroupMessageModel = {
+            ...payload,
+            messageText: encryptMessage(String(payload.messageText ?? "")),
+        };
+        const res = await baseService.post<GroupMessageModel, GroupMessageModel>(
+            "/api/chat/GroupMessageSave",
+            body
+        );
+        if (!res?.success || !res.data) {
+            return rejectWithValue(res?.message || "Grup mesajı kaydedilemedi.");
+        }
+        const saved = res.data;
+        return {
+            ...saved,
+            messageText: decryptMessage(String(saved.messageText ?? "")),
+        } as GroupMessageModel;
+    }
+);
+
+export const sendGroupMessage = createAsyncThunk<
+    void,
+    { groupName: string; model: GroupMessageModel },
+    { rejectValue: string }
+>(
+    "chat/sendGroupMessage",
+    async ({ groupName, model }, { dispatch, rejectWithValue }) => {
+        if (!groupName) {
+            return rejectWithValue("Geçersiz grup ismi!");
+        }
+        const jsonString = JSON.stringify({
+            fromUserId: model.fromUserId,
+            groupId: model.groupId,
+            messageText: model.messageText,
+            fromUserName: model.fromUserName,
+            sentAt: model.sentAt,
+        });
+        dispatch(addOutgoingMessageGroup(model));
+        await hubService.invoke("SendGroupMessage", groupName, jsonString);
+        await dispatch(sendGroupMessageSave(model)).unwrap();
+    }
+);
+export const fetchGroupMessages = createAsyncThunk<
+    { groupId: number; items: GroupMessageModel[] },
+    number,
+    { rejectValue: string }
+>(
+    "chat/fetchGroupMessages",
+    async (groupId, { rejectWithValue }) => {
+        const res = await baseService.get<any[]>(
+            `api/chat/GroupMessagesList?groupId=${groupId}`
+        );
+        if (!res?.success || !res?.data) {
+            return rejectWithValue(res?.message || "Grup mesajları alınamadı.");
+        }
+        const items: GroupMessageModel[] = res.data.map(m => ({
+            ...m,
+            messageText: decryptMessage(String(m.messageText ?? "")),
+            sentAt: typeof m.sentOn === "string"
+                ? m.sentOn
+                : new Date(m.sentOn ?? "").toISOString(),
+        }));
+        return { groupId, items };
+    }
+);
+
+
 
 export const saveMessage = createAsyncThunk<
     MessageModel,
@@ -139,6 +245,9 @@ export const saveMessage = createAsyncThunk<
         return normalized;
     }
 );
+
+
+
 
 
 export const fetchConversationMessages = createAsyncThunk<
@@ -207,7 +316,7 @@ export const fetchLastMessages = createAsyncThunk<
     }
 );
 
-type UnreadCountItem = { fromUserId: number; count: number };
+
 export const fetchUnreadCounts = createAsyncThunk<
     Record<number, number>,
     { userId: number },
@@ -234,6 +343,55 @@ export const fetchUnreadCounts = createAsyncThunk<
     }
 );
 
+export const markMessagesAsRead = createAsyncThunk<
+    MarkMessageModel,
+    MarkMessageModel,
+    { rejectValue: string }
+>(
+    "chat/markMessagesAsRead",
+    async ({ fromUserId, toUserId }, { rejectWithValue }) => {
+        const res = await baseService.put<MarkMessageModel, void>(
+            "/api/chat/MarkMessagesAsRead",
+            { fromUserId, toUserId }
+        );
+        if (!res?.success) {
+            return rejectWithValue(res?.message ?? "Mesajlar okundu olarak işaretlenemedi");
+        }
+        return { fromUserId, toUserId };
+    }
+);
+
+export const fetchGroups = createAsyncThunk<
+    GroupModel[],
+    { userId: number },
+    { rejectValue: string }
+>(
+    "chat/fetchGroups",
+    async ({ userId }, { rejectWithValue }) => {
+        const res = await baseService.get<any>("/api/chat/GetGroups", { userId });
+
+        const data = Array.isArray(res) ? res : (res?.data ?? null);
+        if (!data) {
+            return rejectWithValue(res?.message ?? "Gruplar alınamadı");
+        }
+
+        const arr = Array.isArray(data) ? data : [data];
+        return arr.map((g: any) => ({
+            id: Number(g.id ?? g.Id),
+            groupName: g.groupName ?? g.GroupName ?? "",
+            createdOn: String(g.createdOn ?? g.CreatedOn ?? ""),
+            members: ((g.members ?? g.Members) ?? []).map((m: any) => ({
+                groupId: Number(m.groupId ?? m.GroupId),
+                userId: Number(m.userId ?? m.UserId),
+                userName: m.userName ?? m.UserName ?? undefined,
+                joinedOn: String(m.joinedOn ?? m.JoinedOn ?? ""),
+            })),
+        })) as GroupModel[];
+    }
+);
+
+
+
 const chatSlice = createSlice({
     name: "chat",
     initialState: chatModelInitialState as InitialChatModel,
@@ -245,7 +403,7 @@ const chatSlice = createSlice({
         setUsers: (state, action: PayloadAction<UserDataModel[]>) => {
             state.users = action.payload;
         },
-        setGroups: (state, action: PayloadAction<UserDataModel[]>) => {
+        setGroups: (state, action: PayloadAction<GroupModel[]>) => {
             state.groups = action.payload;
         },
         setChats: (state, action: PayloadAction<UserDataModel[]>) => {
@@ -275,6 +433,31 @@ const chatSlice = createSlice({
             const peerId = Number(m.toUserId);
             if (!state.messagesByUser[peerId]) state.messagesByUser[peerId] = [];
             state.messagesByUser[peerId].push(m);
+        },
+
+        addIncomingMessageGroup: (state, action: PayloadAction<GroupMessageModel>) => {
+            const m = action.payload;
+            if (!state.messageByGroup[m.groupId]) state.messageByGroup[m.groupId] = [];
+            state.messageByGroup[m.groupId].push(m);
+        },
+        addOutgoingMessageGroup: (state, action: PayloadAction<GroupMessageModel>) => {
+            const m = action.payload;
+            if (!state.messageByGroup[m.groupId]) state.messageByGroup[m.groupId] = [];
+            state.messageByGroup[m.groupId].push(m);
+        },
+
+
+        clearUnreadForUser(state, action: PayloadAction<number>) {
+            const id = action.payload;
+            const curr = state.unreadCounts ?? {};
+            state.unreadCounts = { ...curr, [id]: 0 };
+        },
+        markPartnerMsgsReadLocal(state, action: PayloadAction<number>) {
+            const fromId = action.payload;
+            const list = state.messagesByUser?.[fromId] ?? [];
+            for (const m of list) {
+                if (Number(m.fromUserId) === fromId) m.isRead = true;
+            }
         },
 
     },
@@ -334,17 +517,55 @@ const chatSlice = createSlice({
                 state.error = (action.payload as string) ?? action.error.message ?? "Son mesajlar alınamadı";
             })
 
-        builder
+
             .addCase(fetchUnreadCounts.fulfilled, (state, action) => {
                 state.unreadCounts = action.payload;
             })
             .addCase(fetchUnreadCounts.rejected, (state, action) => {
                 state.error = (action.payload as string) ?? action.error.message ?? "Okunmamış sayıları alınamadı";
+            })
+
+            .addCase(markMessagesAsRead.fulfilled, (state, action) => {
+                const { fromUserId } = action.payload;
+                if (state.unreadCounts) {
+                    state.unreadCounts[fromUserId] = 0;
+                }
+            })
+            .addCase(markMessagesAsRead.rejected, (state, action) => {
+                state.error = action.payload ?? action.error.message ?? "Mesajlar okundu olarak işaretlenemedi";
+            })
+
+            .addCase(fetchGroups.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchGroups.fulfilled, (state, action) => {
+                state.loading = false;
+                state.groups = action.payload;
+            })
+            .addCase(fetchGroups.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? "Gruplar alınamadı";
+            })
+
+            .addCase(fetchGroupMessages.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchGroupMessages.fulfilled, (state, action) => {
+                state.loading = false;
+                const { groupId, items } = action.payload;
+                if (!state.messageByGroup) state.messageByGroup = {};
+                state.messageByGroup[groupId] = items;
+            })
+            .addCase(fetchGroupMessages.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? "Grup mesajları alınamadı";
             });
 
 
     },
 });
 
-export const { clearMessage, userConnected, userDisconnected, setOnlineUsers, addIncomingMessage, addOutgoingMessage } = chatSlice.actions;
+export const { clearMessage, userConnected, userDisconnected, addOutgoingMessageGroup, addIncomingMessageGroup, clearUnreadForUser, markPartnerMsgsReadLocal, setOnlineUsers, addIncomingMessage, addOutgoingMessage } = chatSlice.actions;
 export default chatSlice.reducer;

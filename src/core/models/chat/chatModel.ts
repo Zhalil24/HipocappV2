@@ -1,10 +1,10 @@
-import { MessageModel } from "../chatMessage/messageModel";
+import { GroupMessageModel, GroupModel, MessageModel } from "../chatMessage/messageModel";
 import { UserDataModel } from "../user/userDataModel";
 
 export interface InitialChatModel {
-  users: UserDataModel[] | null;   // Kişiler listesi
-  groups: UserDataModel[] | null;  // Gruplar listesi
-  chats: UserDataModel[] | null;   // Sohbet listesi
+  users: UserDataModel[] | null;
+  groups: GroupModel[] | [];
+  chats: UserDataModel[] | null;
   lastMessages: MessageModel[] | null;
   unreadCounts: Record<number, number>;
   loading: boolean;
@@ -14,6 +14,7 @@ export interface InitialChatModel {
   connecting: boolean;
   onlineUsers: number[];
   messagesByUser: Record<number, MessageModel[]>;
+  messageByGroup: Record<number, GroupMessageModel[]>;
 }
 
 export const chatModelInitialState: InitialChatModel = {
@@ -29,4 +30,5 @@ export const chatModelInitialState: InitialChatModel = {
   messagesByUser: {},
   lastMessages: [],
   unreadCounts: {},
+  messageByGroup: []
 };

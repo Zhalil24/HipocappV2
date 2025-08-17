@@ -2,12 +2,16 @@ import { ChatListItem } from "@/components/ChatListItem";
 import ChatWindow from "@/components/ChatWindow";
 import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserDataModel } from "@/core/models/user/userDataModel";
-import { fetchConversationMessages, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, saveMessage, sendPrivateMessage, startConnection } from "@/store/slices/chatSlice";
+import { clearUnreadForUser, fetchConversationMessages, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroupMobil, markMessagesAsRead, markPartnerMsgsReadLocal, saveMessage, sendGroupMessage, sendPrivateMessage, startConnection } from "@/store/slices/chatSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import logo from '../../layout/layouts/Header/logo.png'
-import { MessageModel } from "@/core/models/chatMessage/messageModel";
+import { GroupMessageModel, GroupModel, MessageModel } from "@/core/models/chatMessage/messageModel";
+import { GroupChatListItem } from "@/components/GroupChatListItem";
+import { formatDateTR } from "@/Utilities/helpers/formatDateHelper";
+import GroupChatWindow from "@/components/GroupChatWindow";
+import type { Peer as GroupPeer } from "@/components/GroupChatWindow";
 
 const EmptyState: React.FC = () => (
     <div className="h-full w-full flex flex-col items-center justify-center text-center">
@@ -23,11 +27,12 @@ const ChatPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const [search, setSearch] = useState("");
     const [activeId, setActiveId] = useState<number | null>(null);
+    const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
     const chatState = useSelector((state: RootState) => state.chat);
     const [section, setSection] = useState<"chats" | "people" | "groups">("chats");
     const [userId, setUserId] = useState<number | null>(null);
-
-    const [activePeerId, setActivePeerId] = useState<number | null>(null);
+    const [userName, setUserName] = useState<string | null>(null);
+    const [groupName, setGroupName] = useState<string | null>(null);
 
     useEffect(() => {
         if (!userId || !activeId) return;
@@ -37,23 +42,53 @@ const ChatPage: React.FC = () => {
     const messages = useSelector((s: RootState) =>
         s.chat.messagesByUser[activeId ?? -1] ?? []
     );
-    const openChatWith = (partnerId: number) => {
-        setActivePeerId(partnerId);
-        setActiveId(partnerId);
-        if (meId && partnerId) {
-            dispatch(fetchConversationMessages({ fromUserId: meId, toUserId: partnerId }));
-        }
-    };
+
+    useEffect(() => {
+        if (activeGroupId) dispatch(fetchGroupMessages(activeGroupId));
+    }, [activeGroupId])
+
+    useEffect(() => {
+        if (groupName) dispatch(joinGroupMobil({ groupName }));
+    }, [groupName])
+
+
+    const groupMessagesById = useSelector(
+        (s: RootState) => s.chat.messageByGroup ?? {}
+    );
+
+    const allGroupMessages = useMemo<GroupMessageModel[]>(() => {
+        const gid = Number(activeGroupId);
+        if (!gid) return [];
+        return groupMessagesById[gid] ?? [];
+    }, [groupMessagesById, activeGroupId]);
+
+    const uniqueGroupMessages = useMemo<GroupMessageModel[]>(() => {
+        const seen = new Set<string>();
+        return allGroupMessages.filter((m) => {
+            const key = `${m.fromUserId}|${m.sentAt}|${m.messageText ?? ""}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [allGroupMessages]);
+
 
     useEffect(() => {
         const userString = localStorage.getItem("user");
         if (!userString) return;
+
         const parsed = JSON.parse(userString) || {};
         const uid = Number(parsed.id);
+        const uname = parsed.username || "";
+
         if (Number.isInteger(uid) && uid > 0) {
             setUserId(uid);
         }
+        if (uname) {
+            setUserName(uname);
+        }
     }, []);
+
 
     useEffect(() => {
         if (userId == null) return;
@@ -78,65 +113,73 @@ const ChatPage: React.FC = () => {
     const isOnlineUser = (u: UserDataModel) => onlineSet.has(Number(u.id));
 
 
-    useEffect(() => {
-        console.log("online user listesi", chatState.onlineUsers);
-    }, [chatState.onlineUsers]);
-
-    const filtered = useMemo(() => {
+    const peopleFiltered = useMemo(() => {
         const s = search.trim().toLowerCase();
+        const list = chatState.users ?? [];
+        if (!s) return list;
+        return list.filter(u => (u.username ?? u.name ?? "").toLowerCase().includes(s));
+    }, [search, chatState.users]);
 
-        const base: UserDataModel[] =
-            section === "people" ? (chatState.users ?? [])
-                : section === "groups" ? (chatState.groups ?? [])
-                    : (chatState.chats ?? []);
+    const groupsFiltered = useMemo(() => {
+        const s = search.trim().toLowerCase();
+        const list = chatState.groups ?? [];
+        if (!s) return list;
+        return list.filter(g => (g.groupName ?? "").toLowerCase().includes(s));
+    }, [search, chatState.groups]);
 
-        const textOf = (u: UserDataModel) =>
-            (u.username ?? u.name ?? "").toLowerCase();
 
-        if (!s) return base;
-        return base.filter(x => textOf(x).includes(s));
-    }, [
-        search,
-        section,
-        chatState.users,
-        chatState.groups,
-        chatState.chats,
-    ]);
 
-    const activeConv = filtered.find((x) => x.id === activeId);
-    const headerUser = activeConv ?? null;
-    const peer = activeConv
-        ? {
-            id: activeConv.id,
-            username: activeConv.username ?? activeConv.name ?? "—",
+    useEffect(() => {
+        if (section === "groups") {
+            console.log("groups in state:", chatState.groups);
         }
-        : undefined;
-
-
-    const filterUser =
-        filtered.find((x) => isOnlineUser(x)) ?? null;
+    }, [section, chatState.groups]);
 
 
     const handleSend = (text: string) => {
-        if (!activeConv || !userId) return;
-
+        if (!userId || !activeId) return;
         const newMsg: MessageModel = {
             id: 0,
             fromUserId: userId,
-            toUserId: activeConv.id,
+            toUserId: activeId,
             messageText: text,
             sentAt: new Date().toISOString(),
             isRead: false
         };
         dispatch(saveMessage({ message: newMsg }));
-        dispatch(sendPrivateMessage({ toUserId: activeConv.id, message: newMsg }));
+        dispatch(sendPrivateMessage({ toUserId: activeId, message: newMsg }));
     };
+
+
+    const handleGroupMessageSend = (text: string) => {
+        if (!userId) return;
+
+        const newMesagge: GroupMessageModel = {
+            fromUserId: userId,
+            groupId: activeGroupId ?? 0,
+            sentAt: new Date().toISOString(),
+            fromUserName: userName!,
+            messageText: text,
+        }
+        dispatch(sendGroupMessage({ groupName: groupName!, model: newMesagge }))
+    }
+
+    const uniqueMessages = useMemo(() => {
+        const seen = new Set<string>();
+        return messages.filter((m) => {
+            const key = `${m.id}|${m.fromUserId}|${m.toUserId}|${m.sentAt}|${m.messageText}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [messages])
 
     const meId = Number(userId);
     const { lastMessages = [], users = [] } = useSelector((s: RootState) => ({
         lastMessages: s.chat.lastMessages ?? [],
         users: s.chat.users ?? [],
     }));
+
 
     const conversations = useMemo(() => {
         const byPartner = new Map<number, {
@@ -182,6 +225,39 @@ const ChatPage: React.FC = () => {
         );
     }, [lastMessages, users, meId]);
 
+    const headerUser = React.useMemo(() => {
+        if (!activeId) return null;
+
+        const findIn = (arr?: UserDataModel[]) =>
+            arr?.find(u => Number(u.id) === activeId) ?? null;
+
+        const u = findIn(chatState.users ?? []) || findIn(chatState.chats ?? []);
+        if (u) return u;
+
+        const c = conversations.find(x => x.partnerId === activeId);
+        if (c) {
+            return {
+                id: c.partnerId,
+                username: c.userName,
+                photoURL: c.photoUrl ?? null,
+            } as unknown as UserDataModel;
+        }
+        return null;
+    }, [activeId, chatState.users, chatState.chats, conversations]);
+
+    const peer = headerUser
+        ? {
+            id: Number(headerUser.id),
+            username: (headerUser as any).username ?? (headerUser as any).name ?? "—",
+        }
+        : undefined;
+
+    const headerGroup = React.useMemo(() => {
+        if (section !== "groups" || !activeGroupId) return null;
+        return (chatState.groups ?? []).find(g => Number(g.id) === Number(activeGroupId)) ?? null;
+    }, [section, activeId, chatState.groups]);
+
+
     const { unreadCounts = {} } = useSelector((s: RootState) => ({
         unreadCounts: s.chat.unreadCounts ?? {},
     }));
@@ -198,6 +274,35 @@ const ChatPage: React.FC = () => {
         if (!q) return convWithUnread;
         return convWithUnread.filter(c => c.userName.toLowerCase().includes(q));
     }, [convWithUnread, search]);
+
+    useEffect(() => {
+        if (!activeId || !userId) return;
+
+        dispatch(clearUnreadForUser(activeId));
+        dispatch(markPartnerMsgsReadLocal(activeId));
+
+        dispatch(markMessagesAsRead({ fromUserId: activeId, toUserId: userId }))
+            .unwrap()
+            .catch(() => {
+                dispatch(fetchUnreadCounts({ userId }));
+            });
+    }, [activeId, userId, dispatch]);
+
+    type Peer = { id: number; username: string; photoURL?: string | null };
+
+    const activeGroup: GroupModel | null = useMemo(() => {
+        if (!activeGroupId) return null;
+        return (chatState.groups ?? []).find(g => Number(g.id) === Number(activeGroupId)) ?? null;
+    }, [chatState.groups, activeGroupId]);
+
+    const peers: GroupPeer[] = useMemo(() => {
+        const ms = activeGroup?.members ?? [];
+        return ms.map((m: any) => ({
+            userId: Number(m.id),                                                 
+            userName: m.username ?? m.userName ?? m.name ?? `Kullanıcı #${m.id}`, 
+        }));
+    }, [activeGroup]);
+
 
 
     return (
@@ -241,13 +346,9 @@ const ChatPage: React.FC = () => {
                                             if (it.key === "people") {
                                                 dispatch(fetchUsers());
                                             }
-                                            if (it.key === "chats") {
-                                                const me = Number(userId);
-                                                if (me) {
-                                                    dispatch(fetchUsers());
-                                                    dispatch(fetchLastMessages({ userId: me }));
-                                                    dispatch(fetchUnreadCounts({ userId: me }));
-                                                }
+                                            if (it.key === "groups" && userId) {
+                                                setActiveId(null);
+                                                dispatch(fetchGroups({ userId }));
                                             }
                                         }}
                                         className={[
@@ -268,7 +369,13 @@ const ChatPage: React.FC = () => {
                                 <h2 className="font-semibold text-white/90 tracking-wide">
                                     {section === "chats" ? "Sohbetler" : section === "people" ? "Kişiler" : "Gruplar"}
                                 </h2>
-                                <span className="text-xs text-white/60">{filtered.length}</span>
+                                <span className="text-xs text-white/60">
+                                    {section === "chats"
+                                        ? convFiltered.length
+                                        : section === "people"
+                                            ? peopleFiltered.length
+                                            : groupsFiltered.length}
+                                </span>
                             </div>
 
                             <div className="mb-4">
@@ -285,73 +392,77 @@ const ChatPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Liste: yalnızca burası scroll */}
                             <div className="flex-1 pr-1 overflow-y-auto thin-scroll space-y-2">
                                 {chatState.loading ? (
                                     <LoadingWidget />
-                                ) : section === "chats" ? (
-                                    convFiltered.length === 0 ? (
-                                        <div className="text-white/60 text-sm px-3 py-6 text-center">Henüz sohbet yok.</div>
-                                    ) : (
-                                        <ul className="divide-y divide-white/10">
-                                            {convFiltered.map((c) => {
-                                                const unread = unreadCounts[c.partnerId] ?? 0;
-                                                return (
-                                                    <li key={c.partnerId}>
-                                                        <button
-                                                            onClick={() => openChatWith(c.partnerId)}
-                                                            className={[
-                                                                "w-full flex items-center gap-3 px-3 py-2 rounded-md",
-                                                                "hover:bg-white/5 transition",
-                                                                activePeerId === c.partnerId ? "bg-white/10" : ""
-                                                            ].join(" ")}
-                                                        >
-                                                            <img
-                                                                src={c.photoUrl || "/placeholder-avatar.png"}
-                                                                alt={c.userName}
-                                                                className="w-8 h-8 rounded-full object-cover"
-                                                            />
-                                                            <div className="flex-1 text-left">
-                                                                <div className="text-white/90 text-sm font-semibold">{c.userName}</div>
-                                                                <div className="text-white/60 text-xs truncate">{c.lastMessageText || "—"}</div>
-                                                            </div>
-
-                                                            <time className="text-white/40 text-[10px] whitespace-nowrap">
-                                                                {new Date(c.sentAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
-                                                            </time>
-
-                                                            {unread > 0 && (
-                                                                <span
-                                                                    className="ml-2 inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5
-                               rounded-full bg-[#0071E3] text-white text-[10px] font-semibold"
-                                                                    title={`${unread} okunmamış`}
-                                                                >
-                                                                    {unread}
-                                                                </span>
-                                                            )}
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    )
-                                ) : (<>
-                                    {filtered.map((c: any) => (
-                                        <ChatListItem
-                                            key={c.id}
-                                            isOnline={isOnlineUser(c)}
-                                            item={c}
-                                            active={activeId === c.id}
-                                            onClick={() => setActiveId(c.id)}
-                                        />
-                                    ))}
-                                    {filtered.length === 0 && (
-                                        <div className="text-xs text-gray-400/90 px-1 py-6 text-center">Sonuç bulunamadı.</div>
-                                    )}
-                                </>
+                                ) : (
+                                    <>
+                                        {section === "chats" ? (
+                                            convFiltered.length === 0 ? (
+                                                <div className="text-white/60 text-sm px-3 py-6 text-center">Henüz sohbet yok.</div>
+                                            ) : (
+                                                <>
+                                                    {convFiltered.map((c) => (
+                                                        <ChatListItem
+                                                            key={c.partnerId}
+                                                            active={activeId === c.partnerId}
+                                                            isOnline={onlineSet.has(Number(c.partnerId))}
+                                                            unread={c.unread}
+                                                            onClick={() => {
+                                                                setActiveId(c.partnerId);
+                                                                if (userId) {
+                                                                    dispatch(clearUnreadForUser(c.partnerId));
+                                                                    dispatch(markPartnerMsgsReadLocal(c.partnerId));
+                                                                    dispatch(markMessagesAsRead({ fromUserId: c.partnerId, toUserId: userId }))
+                                                                        .unwrap()
+                                                                        .catch(() => dispatch(fetchUnreadCounts({ userId })));
+                                                                }
+                                                            }}
+                                                            item={{
+                                                                id: c.partnerId,
+                                                                username: c.userName,
+                                                                photoURL: c.photoUrl ?? null,
+                                                            } as unknown as UserDataModel}
+                                                        />
+                                                    ))}
+                                                </>
+                                            )
+                                        ) : section === "people" ? (
+                                            <>
+                                                {peopleFiltered.map((u) => (
+                                                    <ChatListItem
+                                                        key={u.id}
+                                                        isOnline={isOnlineUser(u)}
+                                                        item={u}
+                                                        active={activeId === u.id}
+                                                        onClick={() => setActiveId(u.id)}
+                                                    />
+                                                ))}
+                                                {peopleFiltered.length === 0 && (
+                                                    <div className="text-xs text-gray-400/90 px-1 py-6 text-center">Sonuç bulunamadı.</div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                {groupsFiltered.map((g) => (
+                                                    <GroupChatListItem
+                                                        key={g.id}
+                                                        item={{ id: g.id, groupName: g.groupName } as unknown as GroupModel}
+                                                        active={activeGroupId === g.id}
+                                                        onClick={() => {
+                                                            setActiveGroupId(g.id)
+                                                            setGroupName(g.groupName)
+                                                        }}
+                                                    />
+                                                ))}
+                                                {groupsFiltered.length === 0 && (
+                                                    <div className="text-xs text-gray-400/90 px-1 py-6 text-center">Sonuç bulunamadı.</div>
+                                                )}
+                                            </>
+                                        )}
+                                    </>
                                 )}
                             </div>
-
                         </aside>
 
                         {/* RIGHT: içerik */}
@@ -359,16 +470,31 @@ const ChatPage: React.FC = () => {
                             {/* Header sabit */}
                             <div className="h-14 px-5 border-b border-white/10 flex items-center justify-between bg-[#0C1226]/70 backdrop-blur">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    {headerUser ? (
+                                    {section === "groups" && headerGroup ? (
+                                        <>
+                                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 ring-2 ring-white/10 grid place-items-center">
+                                                <img
+                                                    src={logo}
+                                                    className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10"
+                                                />
+                                            </div>
+
+                                            <div className="min-w-0">
+                                                <div className="text-white/90 text-sm font-medium truncate">
+                                                    {headerGroup.groupName}
+                                                </div>
+                                                <div className="text-[11px] text-gray-400">
+                                                    Oluşturulma Tarihi: {formatDateTR(headerGroup.createdOn)}
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : headerUser ? (
                                         <>
                                             <img
-                                                src={headerUser.photoURL
-                                                    ? `https://hipocapp.com/${headerUser.photoURL}`
-                                                    : logo}
+                                                src={headerUser.photoURL ? `https://hipocapp.com/${headerUser.photoURL}` : logo}
                                                 alt={headerUser.username ?? headerUser.name}
                                                 className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10"
                                             />
-
                                             <div className="min-w-0">
                                                 <div className="text-white/90 text-sm font-medium truncate">
                                                     {headerUser.username ?? headerUser.name}
@@ -381,17 +507,37 @@ const ChatPage: React.FC = () => {
                                     ) : (
                                         <div className="text-white/80 text-sm font-medium">Sohbet</div>
                                     )}
+
                                 </div>
                             </div>
-
-                            {/* Chat gövdesi: yalnızca burası scroll */}
                             <div className="flex-1 overflow-y-auto">
-                                {activeId ? (
-                                    <ChatWindow currentUserId={userId!} messages={messages} onSend={handleSend} peer={peer} />
+                                {section === "groups" ? (
+                                    activeGroupId ? (
+                                        <GroupChatWindow
+                                            currentUserId={userId!}
+                                            groupId={activeGroupId}
+                                            messages={uniqueGroupMessages}
+                                            onSend={handleGroupMessageSend}
+                                            peers={peers}
+                                        />
+                                    ) : (
+                                        <EmptyState />
+                                    )
                                 ) : (
-                                    <EmptyState />
+                                    activeId ? (
+                                        <ChatWindow
+                                            key={activeId ?? 'none'}
+                                            currentUserId={userId!}
+                                            messages={uniqueMessages}
+                                            onSend={handleSend}
+                                            peer={peer}
+                                        />
+                                    ) : (
+                                        <EmptyState />
+                                    )
                                 )}
                             </div>
+
                         </section>
                     </div>
                 </div>
