@@ -32,3 +32,15 @@ export type GroupMessageModel = {
     fromUserName?: string;
     sentAt: string;
 }
+
+export type GroupMemberDto = {
+  groupId: number;
+  userId: number;
+  userName?: string | null;
+  joinedOn: string; 
+}
+
+export type AddGroupMemberDto = {
+  groupId: number;
+  userId: number[]; 
+};

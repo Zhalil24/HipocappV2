@@ -2,7 +2,7 @@ import { ChatListItem } from "@/components/ChatListItem";
 import ChatWindow from "@/components/ChatWindow";
 import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserDataModel } from "@/core/models/user/userDataModel";
-import { clearUnreadForUser, fetchConversationMessages, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroupMobil, markMessagesAsRead, markPartnerMsgsReadLocal, saveMessage, sendGroupMessage, sendPrivateMessage, startConnection } from "@/store/slices/chatSlice";
+import { addMembersToGroup, clearUnreadForUser, deleteGroup, deleteMemberFromGroup, fetchConversationMessages, fetchGroupMembers, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroupMobil, markMessagesAsRead, markPartnerMsgsReadLocal, removeGroupLocal, saveMessage, sendGroupMessage, sendPrivateMessage, startConnection, updateGroup } from "@/store/slices/chatSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,6 +12,8 @@ import { GroupChatListItem } from "@/components/GroupChatListItem";
 import { formatDateTR } from "@/Utilities/helpers/formatDateHelper";
 import GroupChatWindow from "@/components/GroupChatWindow";
 import type { Peer as GroupPeer } from "@/components/GroupChatWindow";
+import { toast, ToastContainer } from "react-toastify";
+import { GroupManageModal } from "@/components/GroupManageModal";
 
 const EmptyState: React.FC = () => (
     <div className="h-full w-full flex flex-col items-center justify-center text-center">
@@ -33,6 +35,73 @@ const ChatPage: React.FC = () => {
     const [userId, setUserId] = useState<number | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
     const [groupName, setGroupName] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [manageOpen, setManageOpen] = useState(false);
+    const [manageGroupId, setManageGroupId] = useState<number | null>(null);
+    const [manageName, setManageName] = useState<string>("");
+
+    const members = useSelector((s: RootState) =>
+        s.chat.groupMembersByGroup[manageGroupId ?? -1] ?? []
+    );
+    const membersLoading = useSelector((s: RootState) =>
+        s.chat.groupMembersLoadingByGroup[manageGroupId ?? -1] ?? false
+    );
+
+    const openManage = (groupId: number, groupName: string) => {
+        setManageGroupId(groupId);
+        setManageName(groupName);
+        setManageOpen(true);
+        dispatch(fetchGroupMembers({ groupId }));
+        dispatch(fetchUsers());
+    };
+
+    const closeManage = () => setManageOpen(false);
+
+    const handleSaveName = () => {
+        if (!manageGroupId || !manageName?.trim()) {
+            toast.error("Geçersiz grup adı.");
+            return;
+        }
+
+        dispatch(updateGroup({ groupId: manageGroupId, groupName: manageName }))
+            .unwrap()
+            .then(() => {
+                toast.success("Grup adı başarıyla güncellendi.");
+            })
+            .catch((err) => {
+                toast.error(err || "Grup güncellenemedi.");
+            });
+    };
+    const handleRemoveMember = (userId: number) => {
+        if (!manageGroupId) return;
+
+        dispatch(deleteMemberFromGroup({ groupId: manageGroupId, userId }))
+            .unwrap()
+            .then((res) => {
+                toast.success("Üye başarıyla gruptan çıkarıldı.");
+            })
+            .catch((err) => {
+                toast.error(err || "Üye çıkarılamadı.");
+            });
+    };
+    const handleAddUser = (userId: number) => {
+        if (!manageGroupId) return;
+        const currentMembers = chatState.groupMembersByGroup[manageGroupId] ?? [];
+        const alreadyExists = currentMembers.some(m => Number(m.userId) === Number(userId));
+        if (alreadyExists) {
+            toast.warning("Bu kullanıcı zaten grupta.");
+            return;
+        }
+        dispatch(addMembersToGroup({ groupId: manageGroupId, userIds: [userId] }))
+            .unwrap()
+            .then((res) => {
+                toast.success(res.message || "Üye başarıyla eklendi.");
+            })
+            .catch((err) => {
+                toast.error(err || "Üye eklenemedi.");
+            });
+    };
+
 
     useEffect(() => {
         if (!userId || !activeId) return;
@@ -76,16 +145,20 @@ const ChatPage: React.FC = () => {
     useEffect(() => {
         const userString = localStorage.getItem("user");
         if (!userString) return;
-
         const parsed = JSON.parse(userString) || {};
         const uid = Number(parsed.id);
         const uname = parsed.username || "";
-
+        const roleId = Number(parsed.rolId ?? parsed.roleId);
         if (Number.isInteger(uid) && uid > 0) {
             setUserId(uid);
         }
         if (uname) {
             setUserName(uname);
+        }
+        if (roleId === 1) {
+            setIsAdmin(true);
+        } else {
+            setIsAdmin(false);
         }
     }, []);
 
@@ -298,15 +371,16 @@ const ChatPage: React.FC = () => {
     const peers: GroupPeer[] = useMemo(() => {
         const ms = activeGroup?.members ?? [];
         return ms.map((m: any) => ({
-            userId: Number(m.id),                                                 
-            userName: m.username ?? m.userName ?? m.name ?? `Kullanıcı #${m.id}`, 
+            userId: Number(m.id),
+            userName: m.username ?? m.userName ?? m.name ?? `Kullanıcı #${m.id}`,
         }));
     }, [activeGroup]);
 
 
 
     return (
-        <div className="pt-[80.5px]">
+        <div className="pt-[60.5px]">
+            <ToastContainer position="top-right" autoClose={3000} theme="dark" newestOnTop />;
             <div className="max-w-[1600px] mx-auto p-6">
                 <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#0E183B]
                         h-[calc(100vh-120.5px)]">
@@ -450,11 +524,26 @@ const ChatPage: React.FC = () => {
                                                         item={{ id: g.id, groupName: g.groupName } as unknown as GroupModel}
                                                         active={activeGroupId === g.id}
                                                         onClick={() => {
-                                                            setActiveGroupId(g.id)
-                                                            setGroupName(g.groupName)
+                                                            setActiveGroupId(g.id);
+                                                            setGroupName(g.groupName);
                                                         }}
+                                                        {...(isAdmin && {
+                                                            onEdit: () => openManage(g.id, g.groupName),
+                                                            onDelete: () => {
+                                                                dispatch(deleteGroup({ groupId: g.id }))
+                                                                    .unwrap()
+                                                                    .then((res) => {
+                                                                        toast.success(res?.message || "Grup başarıyla silindi.");
+                                                                    })
+                                                                    .catch((err) => {
+                                                                        toast.error(err || "Silme başarısız");
+                                                                    });
+                                                                dispatch(removeGroupLocal(g.id));
+                                                            }
+                                                        })}
                                                     />
                                                 ))}
+
                                                 {groupsFiltered.length === 0 && (
                                                     <div className="text-xs text-gray-400/90 px-1 py-6 text-center">Sonuç bulunamadı.</div>
                                                 )}
@@ -542,8 +631,21 @@ const ChatPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {/* İnce scroll bar */}
+            <GroupManageModal
+                open={manageOpen}
+                onClose={closeManage}
+                groupName={manageName}
+                onChangeGroupName={setManageName}
+                onSaveGroupName={handleSaveName}
+                savingName={false}
+                members={members}
+                onRemoveMember={handleRemoveMember}
+                membersLoading={membersLoading}
+                users={users}
+                onChangeUserSearch={setSearch}
+                onAddUser={handleAddUser}
+                usersLoading={chatState.loading}
+            />
             <style>{`
         .thin-scroll::-webkit-scrollbar { width: 8px; }
         .thin-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 9999px; }

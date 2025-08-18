@@ -3,7 +3,7 @@ import { BaseService } from '../../core/services/baseService';
 import { UserDataModel } from '@/core/models/user/userDataModel';
 import { chatModelInitialState, InitialChatModel } from '@/core/models/chat/chatModel';
 import { SignalRService } from '@/core/hubService/hubService';
-import { GroupMessageModel, GroupModel, MarkMessageModel, MessageModel, UnreadCountItem } from '@/core/models/chatMessage/messageModel';
+import { AddGroupMemberDto, GroupMemberDto, GroupMessageModel, GroupModel, MarkMessageModel, MessageModel, UnreadCountItem } from '@/core/models/chatMessage/messageModel';
 import { decryptMessage, encryptMessage } from '@/Utilities/helpers/cryptoHelper';
 
 const baseService = new BaseService();
@@ -390,6 +390,121 @@ export const fetchGroups = createAsyncThunk<
     }
 );
 
+export const deleteGroup = createAsyncThunk<
+    { groupId: number; message: string },
+    { groupId: number },
+    { rejectValue: string }
+>(
+    "chat/deleteGroup",
+    async ({ groupId }, { rejectWithValue }) => {
+        if (!groupId || groupId <= 0) {
+            return rejectWithValue("Geçersiz grup ID.");
+        }
+        const res = await baseService.delete<any>(`/api/chat/DeleteGroup?groupId=${groupId}`);
+        const ok = res?.success ?? res?.success ?? false;
+        if (!ok) {
+            return rejectWithValue(res?.message || "Grup silinemedi.");
+        }
+        return { groupId, message: res.message! };
+    }
+);
+
+export const fetchGroupMembers = createAsyncThunk<
+    { groupId: number; members: GroupMemberDto[] },
+    { groupId: number },
+    { rejectValue: string }
+>(
+    "chat/fetchGroupMembers",
+    async ({ groupId }, { rejectWithValue }) => {
+        if (!groupId || groupId <= 0) {
+            return rejectWithValue("Geçersiz grup ID.");
+        }
+        const res = await baseService.get<GroupMemberDto[]>(
+            "/api/chat/GetGroupMembers",
+            { groupId }
+        );
+
+        const ok = (res as any)?.success ?? false;
+        if (!ok || !res.data) {
+            return rejectWithValue(res?.message || "Grup üyeleri alınamadı.");
+        }
+
+        return { groupId, members: res.data };
+    }
+);
+
+export const addMembersToGroup = createAsyncThunk<
+    { groupId: number; userIds: number[]; message: string },
+    { groupId: number; userIds: number[] },
+    { rejectValue: string }
+>(
+    "chat/addMembersToGroup",
+    async ({ groupId, userIds }, { rejectWithValue }) => {
+        if (!groupId || groupId <= 0 || !userIds?.length) {
+            return rejectWithValue("Geçersiz grup veya kullanıcı bilgileri.");
+        }
+        const payload = { groupId, userId: userIds };
+        const res = await baseService.post<AddGroupMemberDto, AddGroupMemberDto>("/api/chat/AddMembersToGroup", payload);
+        const ok = (res as any)?.isSuccess ?? (res as any)?.success ?? false;
+        if (!ok) {
+            return rejectWithValue(res?.message || "Üyeler eklenemedi.");
+        }
+        return { groupId, userIds, message: res?.message || "Üyeler başarıyla eklendi." };
+    }
+);
+
+export const deleteMemberFromGroup = createAsyncThunk<
+    { groupId: number; userId: number },
+    { groupId: number; userId: number },
+    { rejectValue: string }
+>(
+    "chat/deleteMemberFromGroup",
+    async ({ groupId, userId }, { rejectWithValue }) => {
+        if (!groupId || !userId) {
+            return rejectWithValue("Geçersiz grup veya kullanıcı ID.");
+        }
+        const res = await baseService.delete<{ isSuccess: boolean; message?: string }>(
+            "/api/chat/DeleteMemberFromGroup",
+            { params: { groupId, userId } }
+        );
+        if (!res || !(res as any).isSuccess) {
+            return rejectWithValue(res?.message || "Kullanıcı gruptan çıkarılamadı.");
+        }
+
+        return { groupId, userId };
+    }
+);
+
+export const updateGroup = createAsyncThunk<
+    { groupId: number; groupName: string },
+    { groupId: number; groupName: string },
+    { rejectValue: string }
+>(
+    "chat/updateGroup",
+    async ({ groupId, groupName }, { rejectWithValue }) => {
+        if (!groupId || !groupName?.trim()) {
+            return rejectWithValue("Geçersiz grup ID veya isim.");
+        }
+
+        const res = await baseService.post<
+            { groupId: number; groupName: string; userIds: number[] },
+            { isSuccess: boolean; message?: string }
+        >(
+            "/api/chat/UpdateGroup",
+            {
+                groupId,
+                groupName,
+                userIds: []
+            }
+        );
+
+        if (!res || !(res as any).isSuccess) {
+            return rejectWithValue(res?.message || "Grup güncellenemedi.");
+        }
+
+        return { groupId, groupName };
+    }
+);
 
 
 const chatSlice = createSlice({
@@ -459,10 +574,90 @@ const chatSlice = createSlice({
                 if (Number(m.fromUserId) === fromId) m.isRead = true;
             }
         },
-
+        removeGroupLocal: (state, action) => {
+            const gid = action.payload as number;
+            state.groups = (state.groups ?? []).filter(g => Number(g.id) !== gid);
+            if (state.messageByGroup && gid in state.messageByGroup) {
+                delete state.messageByGroup[gid];
+            }
+        },
+        clearGroupMembers(state, action) {
+            const gid = Number(action.payload);
+            delete state.groupMembersByGroup[gid];
+            delete state.groupMembersLoadingByGroup[gid];
+            delete state.groupMembersErrorByGroup[gid];
+        },
     },
     extraReducers: (builder) => {
         builder
+            .addCase(deleteGroup.fulfilled, (state, action) => {
+                const { groupId } = action.payload;
+                state.groups = (state.groups ?? []).filter(g => Number(g.id) !== Number(groupId));
+                if (state.messageByGroup && groupId in state.messageByGroup) {
+                    delete state.messageByGroup[groupId];
+                }
+            })
+
+            .addCase(deleteMemberFromGroup.fulfilled, (state, action) => {
+                const { groupId, userId } = action.payload;
+                const members = state.groupMembersByGroup[groupId] ?? [];
+                state.groupMembersByGroup[groupId] = members.filter(m => Number(m.userId) !== Number(userId));
+            })
+            .addCase(fetchGroupMembers.pending, (state, action) => {
+                const gid = action.meta.arg.groupId;
+                state.groupMembersLoadingByGroup[gid] = true;
+                state.groupMembersErrorByGroup[gid] = null;
+            })
+            .addCase(fetchGroupMembers.fulfilled, (state, action) => {
+                const { groupId, members } = action.payload;
+                state.groupMembersLoadingByGroup[groupId] = false;
+                state.groupMembersByGroup[groupId] = members;
+                state.groupMembersErrorByGroup[groupId] = null;
+            })
+            .addCase(fetchGroupMembers.rejected, (state, action) => {
+                const gid = action.meta.arg.groupId;
+                state.groupMembersLoadingByGroup[gid] = false;
+                state.groupMembersErrorByGroup[gid] = action.payload || "Grup üyeleri alınamadı.";
+            })
+
+            .addCase(addMembersToGroup.pending, (state, action) => {
+                const gid = action.meta.arg.groupId;
+                state.addMembersLoadingByGroup![gid] = true;
+                state.addMembersErrorByGroup![gid] = null;
+            })
+            .addCase(addMembersToGroup.fulfilled, (state, action) => {
+                const { groupId, userIds } = action.payload;
+                state.addMembersLoadingByGroup![groupId] = false;
+                state.addMembersErrorByGroup![groupId] = null;
+
+                const now = new Date().toISOString();
+                const current = state.groupMembersByGroup[groupId] ?? [];
+
+                const users = state.users ?? [];
+                const getName = (id: number) => {
+                    const u: any = users.find((x: any) => Number(x.id) === Number(id));
+                    return u?.username ?? u?.userName ?? u?.name ?? null;
+                };
+
+                const existingIds = new Set(current.map((m) => Number(m.userId)));
+                const toAdd: GroupMemberDto[] = userIds
+                    .filter((uid) => !existingIds.has(Number(uid)))
+                    .map((uid) => ({
+                        groupId,
+                        userId: Number(uid),
+                        userName: getName(Number(uid)),
+                        joinedOn: now,
+                    }));
+
+                state.groupMembersByGroup[groupId] = [...current, ...toAdd];
+            })
+            .addCase(addMembersToGroup.rejected, (state, action) => {
+                const gid = action.meta.arg.groupId;
+                state.addMembersLoadingByGroup![gid] = false;
+                state.addMembersErrorByGroup![gid] =
+                    action.payload || "Üyeler eklenemedi.";
+            })
+
             .addCase(fetchUsers.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -567,5 +762,5 @@ const chatSlice = createSlice({
     },
 });
 
-export const { clearMessage, userConnected, userDisconnected, addOutgoingMessageGroup, addIncomingMessageGroup, clearUnreadForUser, markPartnerMsgsReadLocal, setOnlineUsers, addIncomingMessage, addOutgoingMessage } = chatSlice.actions;
+export const { clearMessage, userConnected, clearGroupMembers, userDisconnected, removeGroupLocal, addOutgoingMessageGroup, addIncomingMessageGroup, clearUnreadForUser, markPartnerMsgsReadLocal, setOnlineUsers, addIncomingMessage, addOutgoingMessage } = chatSlice.actions;
 export default chatSlice.reducer;

@@ -1,4 +1,4 @@
-import { GroupMessageModel, GroupModel, MessageModel } from "../chatMessage/messageModel";
+import { GroupMemberDto, GroupMessageModel, GroupModel, MessageModel } from "../chatMessage/messageModel";
 import { UserDataModel } from "../user/userDataModel";
 
 export interface InitialChatModel {
@@ -15,6 +15,11 @@ export interface InitialChatModel {
   onlineUsers: number[];
   messagesByUser: Record<number, MessageModel[]>;
   messageByGroup: Record<number, GroupMessageModel[]>;
+  groupMembersByGroup: Record<number, GroupMemberDto[]>;
+  groupMembersLoadingByGroup: Record<number, boolean>;
+  groupMembersErrorByGroup: Record<number, string | null>;
+  addMembersLoadingByGroup?: Record<number, boolean>;
+  addMembersErrorByGroup?: Record<number, string | null>;
 }
 
 export const chatModelInitialState: InitialChatModel = {
@@ -30,5 +35,10 @@ export const chatModelInitialState: InitialChatModel = {
   messagesByUser: {},
   lastMessages: [],
   unreadCounts: {},
-  messageByGroup: []
+  messageByGroup: [],
+  groupMembersByGroup: {},
+  groupMembersLoadingByGroup: {},
+  groupMembersErrorByGroup: {},
+  addMembersLoadingByGroup: {},
+  addMembersErrorByGroup: {},
 };
