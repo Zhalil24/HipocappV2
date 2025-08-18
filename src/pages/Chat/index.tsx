@@ -2,7 +2,7 @@ import { ChatListItem } from "@/components/ChatListItem";
 import ChatWindow from "@/components/ChatWindow";
 import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserDataModel } from "@/core/models/user/userDataModel";
-import { addMembersToGroup, clearUnreadForUser, deleteGroup, deleteMemberFromGroup, fetchConversationMessages, fetchGroupMembers, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroupMobil, markMessagesAsRead, markPartnerMsgsReadLocal, removeGroupLocal, saveMessage, sendGroupMessage, sendPrivateMessage, startConnection, updateGroup } from "@/store/slices/chatSlice";
+import { addMembersToGroup, clearUnreadForUser, deleteGroup, deleteMemberFromGroup, disconnectUser, fetchConversationMessages, fetchGroupMembers, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroupMobil, markMessagesAsRead, markPartnerMsgsReadLocal, removeGroupLocal, saveMessage, sendGroupMessage, sendPrivateMessage, startConnection, updateGroup } from "@/store/slices/chatSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,6 +39,22 @@ const ChatPage: React.FC = () => {
     const [manageOpen, setManageOpen] = useState(false);
     const [manageGroupId, setManageGroupId] = useState<number | null>(null);
     const [manageName, setManageName] = useState<string>("");
+
+    useEffect(() => {
+        if (!userId) return;
+        const handleBeforeUnload = async () => {
+            try {
+                await disconnectUser(userId)();
+            } catch (err) {
+                console.error("DisconnectUser çağrısı hata:", err);
+            }
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            handleBeforeUnload();
+        };
+    }, [userId]);
 
     const members = useSelector((s: RootState) =>
         s.chat.groupMembersByGroup[manageGroupId ?? -1] ?? []
@@ -478,6 +494,7 @@ const ChatPage: React.FC = () => {
                                                 <>
                                                     {convFiltered.map((c) => (
                                                         <ChatListItem
+
                                                             key={c.partnerId}
                                                             active={activeId === c.partnerId}
                                                             isOnline={onlineSet.has(Number(c.partnerId))}
@@ -503,15 +520,24 @@ const ChatPage: React.FC = () => {
                                             )
                                         ) : section === "people" ? (
                                             <>
-                                                {peopleFiltered.map((u) => (
-                                                    <ChatListItem
-                                                        key={u.id}
-                                                        isOnline={isOnlineUser(u)}
-                                                        item={u}
-                                                        active={activeId === u.id}
-                                                        onClick={() => setActiveId(u.id)}
-                                                    />
-                                                ))}
+                                                {peopleFiltered.map((u) => {
+                                                    const isSelf = Number(u.id) === Number(userId);
+                                                    return (
+                                                        <ChatListItem
+                                                            key={u.id}
+                                                            isOnline={isOnlineUser(u)}
+                                                            item={u}
+                                                            active={activeId === u.id}
+                                                            onClick={() => {
+                                                                if (isSelf) {
+                                                                    toast.warning("Kendinize mesaj gönderemezsiniz.");
+                                                                    return;
+                                                                }
+                                                                setActiveId(u.id);
+                                                            }}
+                                                        />
+                                                    );
+                                                })}
                                                 {peopleFiltered.length === 0 && (
                                                     <div className="text-xs text-gray-400/90 px-1 py-6 text-center">Sonuç bulunamadı.</div>
                                                 )}

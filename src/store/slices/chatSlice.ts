@@ -68,6 +68,16 @@ export const startConnection = createAsyncThunk<void, number, ThunkConfig>(
     }
 );
 
+export const disconnectUser =
+    (userId: number) => async () => {
+        try {
+            await hubService.invoke("DisconnectUserMobil", userId);
+        } catch (err) {
+            console.error("disconnectUser hata:", err);
+        }
+    };
+
+
 export const joinGroupMobil = createAsyncThunk<
     void,
     { groupName: string },
