@@ -49,8 +49,8 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (!didInitFromUrl.current && usernameFromUrl) {
-            setSearch(usernameFromUrl);   // inputu doldur
-            setSection("people");         // ilk sekme: Kişiler
+            setSearch(usernameFromUrl);   
+            setSection("people");         
             didInitFromUrl.current = true;
         }
     }, [usernameFromUrl]);
