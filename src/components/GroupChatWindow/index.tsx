@@ -1,6 +1,7 @@
 import { GroupMessageModel } from "@/core/models/chatMessage/messageModel";
 import { formatTime } from "@/Utilities/helpers/formatDateHelper";
 import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
+import { useNavigate } from "react-router";
 
 export type Peer = { userId: number; userName?: string };
 
@@ -48,7 +49,7 @@ const GroupChatWindow: React.FC<Props> = ({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
+  const navigate = useNavigate();
   // İsim aramasını hızlandır (O(1))
   const peerNameById = useMemo(() => {
     const map = new Map<number, string>();
@@ -106,6 +107,12 @@ const GroupChatWindow: React.FC<Props> = ({
     }
   };
 
+  const goToProfile = (uid?: number | null) => {
+    if (!uid) return;
+    const encodedId = btoa(uid.toString());
+    navigate(`/profile/${encodedId}`);
+  };
+
   return (
     <div className="relative h-full w-full">
       <div
@@ -153,7 +160,15 @@ const GroupChatWindow: React.FC<Props> = ({
                 className="max-w-[70%] rounded-2xl rounded-tl-none p-3 shadow-md"
                 style={{ backgroundColor: bubbleColor, color: "#111827" }}
               >
-                <div className="text-xs font-semibold mb-1">{name}</div>
+                <div
+                  className="text-xs font-semibold mb-1 cursor-pointer hover:underline"
+                  onClick={() => goToProfile(m.fromUserId)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => (e.key === "Enter" ? goToProfile(m.fromUserId) : null)}
+                >
+                  {name}
+                </div>
                 <div className="text-sm mb-1 whitespace-pre-wrap">{m.messageText}</div>
                 <div className="text-[11px] opacity-80">{formatTime(m.sentAt)}</div>
               </div>

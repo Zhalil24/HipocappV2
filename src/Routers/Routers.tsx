@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 
-import { Home, Login, SignUp, Error, About} from '@/pages';
+import { Home, Login, SignUp, Error, About } from '@/pages';
 import Profile from '../pages/ProfilePage/';
 import MarketPage from '@/pages/Market/MarketPage';
 import AdsPage from '@/pages/Ads/AdsPage';
@@ -21,13 +21,13 @@ const Routers = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/sign-up" element={<SignUp />} />
       <Route path="*" element={<Error />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/profile/:id?" element={<Profile />} />
       <Route path="/market" element={<MarketPage />} />
-        <Route path="/ads" element={<AdsPage />} />
-        <Route path="/educations" element={<EducationPage />} />
-        <Route path="/partners" element={<PartnersPage />} />
-        <Route path="/KVKK" element={<KvkkPage />} />
-          <Route path="/chat" element={<ChatPage />} />
+      <Route path="/ads" element={<AdsPage />} />
+      <Route path="/educations" element={<EducationPage />} />
+      <Route path="/partners" element={<PartnersPage />} />
+      <Route path="/KVKK" element={<KvkkPage />} />
+      <Route path="/chat" element={<ChatPage />} />
     </Routes>
   );
 };

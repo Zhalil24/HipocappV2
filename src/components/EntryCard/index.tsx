@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 type EntryCardProps = {
   titleName?: string;
@@ -9,11 +10,12 @@ type EntryCardProps = {
   createDate?: string;
   date?: string;
   showDelete?: boolean;
+  userId?: number;
   onDelete?: () => void;
 };
-const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName, date, description, createDate, showDelete, onDelete }: EntryCardProps) => {
+const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, userName, date, description, createDate, showDelete, onDelete }: EntryCardProps) => {
   const [expanded, setExpanded] = useState(false);
-
+  const navigate = useNavigate();
   const rawDate = date || createDate;
 
   const formattedDate = rawDate
@@ -25,6 +27,12 @@ const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName
       minute: "2-digit",
     })
     : '';
+
+  const goToProfile = (uid?: number | null) => {
+    if (!uid) return;
+    const encodedId = btoa(uid.toString());
+    navigate(`/profile/${encodedId}`);
+  };
 
 
   const fallbackDescription = entryDescription || description || '';
@@ -74,8 +82,28 @@ const EntryCard = ({ titleName, entryDescription = '', userNameSurname, userName
       )}
 
       {(userNameSurname || userName) && (
-        <p className="text-[10px] text-gray-500 mt-4">
-          Yazar: {userNameSurname || userName}
+        <p className="text-[10px] text-gray-500 mt-4 flex items-center gap-1">
+          Yazar:{" "}
+          <span
+            onClick={() => goToProfile(userId)}
+            className="cursor-pointer text-cyan-500 hover:underline hover:text-cyan-400 transition-colors duration-200 flex items-center gap-1"
+          >
+            {userNameSurname || userName}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
+            </svg>
+          </span>
         </p>
       )}
 

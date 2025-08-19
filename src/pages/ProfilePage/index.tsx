@@ -19,8 +19,13 @@ import InfoPopup from '@/components/InfoPopup/InfoPopup';
 import LoadingWidget from '@/components/Loading/loadingWidget';
 import { UserProfileModel } from '@/core/models/user/userProfileModel';
 import { fileToBase64 } from '@/Utilities/helpers/fileToBase64Helper';
+import { useParams } from 'react-router';
+
+
 
 const ProfilePage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const targetId = id ? Number(id) : null;
   const dispatch = useAppDispatch();
   const [userId, setUserId] = useState<number>(0);
   const { data: profile, status, error, activeComponent } = useAppSelector((state) => state.profile);
@@ -88,10 +93,12 @@ const ProfilePage: React.FC = () => {
 
 
   useEffect(() => {
-    if (userId !== 0 && status === 'idle') {
-      dispatch(fetchUserProfile(userId.toString()));
+    const decodedId = id ? Number(atob(id)) : userId;
+
+    if (decodedId && decodedId !== 0 && status === "idle") {
+      dispatch(fetchUserProfile(decodedId.toString()));
     }
-  }, [userId, status, dispatch]);
+  }, [id, userId, status, dispatch]);
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
@@ -113,6 +120,7 @@ const ProfilePage: React.FC = () => {
           <UserEntries
             entries={profile?.entries || []}
             onDelete={handleDelete}
+            canDelete={!!userId}
           />
         );
       default:
@@ -158,7 +166,7 @@ const ProfilePage: React.FC = () => {
           <div className="w-[280px] bg-gray-900/70 p-6 flex flex-col items-start justify-start border-r border-gray-700">
             <img
               src={
-                `https://hipocapp.com/${profile.photoURL}`||                
+                `https://hipocapp.com/${profile.photoURL}` ||
                 `https://ui-avatars.com/api/?name=${profile.name}+${profile.surname}&background=0D8ABC&color=fff&size=128`
               }
               alt="Profil"
@@ -168,16 +176,20 @@ const ProfilePage: React.FC = () => {
               {profile.name} {profile.surname}
             </h2>
             <p className="text-sm text-cyan-400">@{profile.username}</p>
-            <blockquote className="mt-2 text-xs italic text-gray-400">
-              "Her gün yeni bir versiyonun olmalı."
-            </blockquote>
 
             <div className="mt-6 flex flex-col gap-2 w-full">
               <NavButton tab="profile" label="Profil" />
-              <NavButton tab="edit" label="Düzenle" />
-              <NavButton tab="password" label="Parola" />
-              <NavButton tab="entries" label="Entry'lerim" />
+
+              {id == null && (
+                <>
+                  <NavButton tab="edit" label="Düzenle" />
+                  <NavButton tab="password" label="Parola" />
+                </>
+              )}
+
+              <NavButton tab="entries" label="Entrys" />
             </div>
+
           </div>
 
           {showPopup && (

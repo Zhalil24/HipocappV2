@@ -14,6 +14,7 @@ import GroupChatWindow from "@/components/GroupChatWindow";
 import type { Peer as GroupPeer } from "@/components/GroupChatWindow";
 import { toast, ToastContainer } from "react-toastify";
 import { GroupManageModal } from "@/components/GroupManageModal";
+import { useNavigate } from "react-router";
 
 const EmptyState: React.FC = () => (
     <div className="h-full w-full flex flex-col items-center justify-center text-center">
@@ -39,15 +40,18 @@ const ChatPage: React.FC = () => {
     const [manageOpen, setManageOpen] = useState(false);
     const [manageGroupId, setManageGroupId] = useState<number | null>(null);
     const [manageName, setManageName] = useState<string>("");
+    const navigate = useNavigate();
+    const goToProfile = () => {
+        if (headerUser?.id) {
+            const encodedId = btoa(headerUser.id.toString());
+            navigate(`/profile/${encodedId}`);
+        }
+    };
 
     useEffect(() => {
         if (!userId) return;
         const handleBeforeUnload = async () => {
-            try {
                 await disconnectUser(userId)();
-            } catch (err) {
-                console.error("DisconnectUser çağrısı hata:", err);
-            }
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
         return () => {
@@ -611,7 +615,10 @@ const ChatPage: React.FC = () => {
                                                 className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10"
                                             />
                                             <div className="min-w-0">
-                                                <div className="text-white/90 text-sm font-medium truncate">
+                                                <div
+                                                    className="text-white/90 text-sm font-medium truncate cursor-pointer hover:underline"
+                                                    onClick={goToProfile}
+                                                >
                                                     {headerUser.username ?? headerUser.name}
                                                 </div>
                                                 <div className="text-[11px] text-gray-400">

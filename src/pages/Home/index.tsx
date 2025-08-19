@@ -311,6 +311,7 @@ const HomePage: React.FC = () => {
                       userNameSurname={entry.userNameSurname}
                       userName={entry.userName}
                       date={entry.date}
+                      userId={entry.userId}
                     />
                   ))}
 

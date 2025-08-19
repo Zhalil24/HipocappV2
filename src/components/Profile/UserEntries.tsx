@@ -9,9 +9,10 @@ import EntryCard from '../EntryCard';
 interface UserEntriesProps {
   entries: RandomEntryModel[];
   onDelete?: (entryId: number) => void;
+  canDelete: boolean;
 }
 
-const UserEntries: React.FC<UserEntriesProps> = ({ entries, onDelete }) => {
+const UserEntries: React.FC<UserEntriesProps> = ({ entries, onDelete, canDelete }) => {
   return (
     <div className="w-full h-screen bg-gradient-to-br from-slate-900 to-gray-800 flex items-center justify-center overflow-hidden">
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl w-[90vw] max-w-2xl p-6 shadow-2xl text-white flex flex-col max-h-[90vh]">
@@ -25,9 +26,9 @@ const UserEntries: React.FC<UserEntriesProps> = ({ entries, onDelete }) => {
         <div className="overflow-y-auto space-y-4 pr-2">
           {entries.map((entry) => (
             <EntryCard
-              onDelete={() => onDelete?.(entry.id)}
-              showDelete={true}
               key={entry.id}
+              onDelete={canDelete ? () => onDelete?.(entry.id) : undefined} // ✅ sadece canDelete varsa çalışır
+              showDelete={canDelete} // ✅ butonu göstermek için
               createDate={entry.createDate}
               description={entry.description}
               titleName={entry.titleName}
