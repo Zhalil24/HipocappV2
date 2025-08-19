@@ -34,6 +34,11 @@ const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, 
     navigate(`/profile/${encodedId}`);
   };
 
+  const goToChat = () => {
+    if (userName) {
+      navigate(`/chat/${userName}`);
+    }
+  };
 
   const fallbackDescription = entryDescription || description || '';
   const isLong = fallbackDescription.length > 250;
@@ -82,34 +87,48 @@ const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, 
       )}
 
       {(userNameSurname || userName) && (
-        <p className="text-[10px] text-gray-500 mt-4 flex items-center gap-1">
-          Yazar:{" "}
-          <span
-            onClick={() => goToProfile(userId)}
-            className="cursor-pointer text-cyan-500 hover:underline hover:text-cyan-400 transition-colors duration-200 flex items-center gap-1"
-          >
-            {userNameSurname || userName}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-3 w-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        <div className="mt-4 text-[10px] text-gray-500 flex flex-col gap-1">
+          <p className="flex items-center gap-1">
+            Yazar:{" "}
+            <span
+              onClick={() => goToProfile(userId)}
+              className="cursor-pointer text-cyan-500 hover:underline hover:text-cyan-400 transition-colors duration-200 flex items-center gap-1"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </span>
-        </p>
+              {userNameSurname || userName}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-3 w-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </span>
+          </p>
+
+          {/* Mesaj Gönder butonu */}
+          {userName && (
+            <button
+              onClick={goToChat}
+              className="self-start text-[11px] px-2 py-1 rounded-md bg-cyan-500 text-white hover:bg-cyan-600 transition"
+            >
+              Mesaj Gönder
+            </button>
+          )}
+        </div>
       )}
 
       {formattedDate && (
         <p className="text-[10px] text-gray-400 mt-1">{formattedDate}</p>
       )}
+
+
     </div>
   );
 

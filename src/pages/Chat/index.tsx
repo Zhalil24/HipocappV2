@@ -4,7 +4,7 @@ import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserDataModel } from "@/core/models/user/userDataModel";
 import { addMembersToGroup, clearUnreadForUser, deleteGroup, deleteMemberFromGroup, disconnectUser, fetchConversationMessages, fetchGroupMembers, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroupMobil, markMessagesAsRead, markPartnerMsgsReadLocal, removeGroupLocal, saveMessage, sendGroupMessage, sendPrivateMessage, startConnection, updateGroup } from "@/store/slices/chatSlice";
 import { AppDispatch, RootState } from "@/store/store";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import logo from '../../layout/layouts/Header/logo.png'
 import { GroupMessageModel, GroupModel, MessageModel } from "@/core/models/chatMessage/messageModel";
@@ -14,7 +14,8 @@ import GroupChatWindow from "@/components/GroupChatWindow";
 import type { Peer as GroupPeer } from "@/components/GroupChatWindow";
 import { toast, ToastContainer } from "react-toastify";
 import { GroupManageModal } from "@/components/GroupManageModal";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 const EmptyState: React.FC = () => (
     <div className="h-full w-full flex flex-col items-center justify-center text-center">
@@ -41,6 +42,19 @@ const ChatPage: React.FC = () => {
     const [manageGroupId, setManageGroupId] = useState<number | null>(null);
     const [manageName, setManageName] = useState<string>("");
     const navigate = useNavigate();
+
+    const { username } = useParams<{ username?: string }>();
+    const usernameFromUrl = username ?? "";
+    const didInitFromUrl = useRef(false);
+
+    useEffect(() => {
+        if (!didInitFromUrl.current && usernameFromUrl) {
+            setSearch(usernameFromUrl);   // inputu doldur
+            setSection("people");         // ilk sekme: Kişiler
+            didInitFromUrl.current = true;
+        }
+    }, [usernameFromUrl]);
+
     const goToProfile = () => {
         if (headerUser?.id) {
             const encodedId = btoa(headerUser.id.toString());
@@ -51,7 +65,7 @@ const ChatPage: React.FC = () => {
     useEffect(() => {
         if (!userId) return;
         const handleBeforeUnload = async () => {
-                await disconnectUser(userId)();
+            await disconnectUser(userId)();
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
         return () => {
@@ -221,14 +235,6 @@ const ChatPage: React.FC = () => {
     }, [search, chatState.groups]);
 
 
-
-    useEffect(() => {
-        if (section === "groups") {
-            console.log("groups in state:", chatState.groups);
-        }
-    }, [section, chatState.groups]);
-
-
     const handleSend = (text: string) => {
         if (!userId || !activeId) return;
         const newMsg: MessageModel = {
@@ -381,8 +387,6 @@ const ChatPage: React.FC = () => {
             });
     }, [activeId, userId, dispatch]);
 
-    type Peer = { id: number; username: string; photoURL?: string | null };
-
     const activeGroup: GroupModel | null = useMemo(() => {
         if (!activeGroupId) return null;
         return (chatState.groups ?? []).find(g => Number(g.id) === Number(activeGroupId)) ?? null;
@@ -472,19 +476,30 @@ const ChatPage: React.FC = () => {
                                 </span>
                             </div>
 
+
                             <div className="mb-4">
                                 <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 ring-1 ring-white/10 focus-within:ring-indigo-500/50">
                                     <svg width="18" height="18" viewBox="0 0 24 24" className="text-gray-300">
-                                        <path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.71.71l.27.28v.79l5 4.99L20.49 19l-4.99-5m-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z" />
+                                        <path
+                                            fill="currentColor"
+                                            d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.71.71l.27.28v.79l5 4.99L20.49 19l-4.99-5m-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z"
+                                        />
                                     </svg>
                                     <input
                                         className="w-full bg-transparent outline-none text-sm text-white placeholder:text-gray-400"
-                                        placeholder={section === "chats" ? "Sohbet ara…" : section === "people" ? "Kişi ara…" : "Grup ara…"}
+                                        placeholder={
+                                            section === "chats"
+                                                ? "Sohbet ara…"
+                                                : section === "people"
+                                                    ? "Kişi ara…"
+                                                    : "Grup ara…"
+                                        }
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </div>
                             </div>
+
 
                             <div className="flex-1 pr-1 overflow-y-auto thin-scroll space-y-2">
                                 {chatState.loading ? (

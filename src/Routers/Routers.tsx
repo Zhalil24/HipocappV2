@@ -27,7 +27,7 @@ const Routers = () => {
       <Route path="/educations" element={<EducationPage />} />
       <Route path="/partners" element={<PartnersPage />} />
       <Route path="/KVKK" element={<KvkkPage />} />
-      <Route path="/chat" element={<ChatPage />} />
+      <Route path="/chat/:username?" element={<ChatPage />} />
     </Routes>
   );
 };
