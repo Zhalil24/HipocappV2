@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearMessage, createEntry, fetchLastEntries } from '../../store/slices/entrySlice';
 import { fetchRandomEntries } from '../../store/slices/randomEntrySlice';
@@ -6,7 +6,7 @@ import {
   fetchTitlesByHeaderName,
   clearTitles,
 } from '../../store/slices/titleListSlice';
-import { fetchEntriesByTitleName } from '../../store/slices/titleEntrySlice';
+import { fetchEntriesByTitleName, fetchGetJobAdvertisements } from '../../store/slices/titleEntrySlice';
 import EntryCard from '../../components/EntryCard';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { AppDispatch, RootState } from '../../store/store';
@@ -14,6 +14,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import PageButtons from '@/components/PageButtons';
 import { EntryModel } from '@/core/models/entries/entryModel';
+import AdRotator from '@/components/AdRotatorJobs';
+import { ContentModel } from '@/core/models/content/contentModel';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,6 +38,20 @@ const HomePage: React.FC = () => {
   const titleListState = useSelector((state: RootState) => state.titleList);
   const titleEntryState = useSelector((state: RootState) => state.titleEntry);
 
+  const jobs = useSelector((state: RootState) => state.titleEntry.jobs);
+
+  const adItems: ContentModel[] = useMemo(() => {
+    const list = Array.isArray(jobs) ? jobs : [];
+    return list.map((j: any, idx: number): ContentModel => ({
+      id: j.id ?? j.jobId ?? idx,
+      imageURL: j.imageURL ?? j.imageUrl ?? j.bannerUrl ?? "/ads/placeholder.jpg",
+      title: j.title ?? j.name ?? "İlan",
+      description: j.description ?? j.summary ?? "",
+      link: j.link ?? j.url ?? "#",
+    }))
+      .filter(it => it.link && it.link !== "#" && it.imageURL);
+  }, [jobs]);
+
   const pages = [
     { name: 'Market', path: '/market' },
     { name: 'İlanlar', path: '/ads' },
@@ -56,8 +72,6 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const params = queryString.parse(location.search);
-
-
     const newSearch =
       typeof params.search === 'string' && params.search.trim() !== ''
         ? params.search.trim()
@@ -79,6 +93,9 @@ const HomePage: React.FC = () => {
     }
   }, [location.search]);
 
+  useEffect(() => {
+    dispatch(fetchGetJobAdvertisements());
+  }, [])
 
   useEffect(() => {
     if (searchTerm) {
@@ -89,6 +106,7 @@ const HomePage: React.FC = () => {
     } else {
       if (entryMode === 'daily') {
         dispatch(fetchLastEntries());
+
       } else {
         dispatch(fetchRandomEntries());
       }
@@ -170,13 +188,14 @@ const HomePage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen w-full flex justify-center items-start 
+    <div
+      className="min-h-screen w-full flex justify-center items-start 
                 bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
-                font-sans pt-2 px-4">
-      <div className="flex flex-col w-full max-w-6xl px-6 mt-24">
-        <div className="flex w-full gap-5">
-          {/* Sidebar */}
-          <div className="w-84 min-w-84 ml-8">
+                font-sans pt-2 px-4"
+    >
+      <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
+        <div className="flex w-full gap-6">
+          <div className="w-64 shrink-0">
             <Sidebar
               onSelect={handleSidebarSelect}
               titles={titleListState.titles}
@@ -187,20 +206,16 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-w-0">
             <main className="flex-1 w-full pb-12 overflow-y-auto">
-              <div className="max-w-3xl mx-auto">
-
-                {/* ✅ Daily / Stream + Sayfa Butonları Aynı Satırda */}
-                <div className="flex items-center justify-between mb-6 w-full max-w-3xl mx-auto gap-4">
-
-                  {/* Sol: Daily / Stream */}
+              <div className="px-2 lg:px-4">
+                <div className="flex items-center justify-between mb-6 w-full gap-4">
                   <div className="flex space-x-3 mt-4">
                     <button
                       onClick={() => handleModeChange('daily')}
                       className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'daily' && !selectedTitle
-                        ? 'bg-[#0071E3] text-white'
-                        : 'bg-white text-[#2B4560] border-[#2B4560]'
+                          ? 'bg-[#0071E3] text-white'
+                          : 'bg-white text-[#2B4560] border-[#2B4560]'
                         }`}
                     >
                       Daily
@@ -208,15 +223,15 @@ const HomePage: React.FC = () => {
                     <button
                       onClick={() => handleModeChange('stream')}
                       className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'stream' && !selectedTitle
-                        ? 'bg-[#0071E3] text-white'
-                        : 'bg-white text-[#2B4560] border-[#2B4560]'
+                          ? 'bg-[#0071E3] text-white'
+                          : 'bg-white text-[#2B4560] border-[#2B4560]'
                         }`}
                     >
                       Stream
                     </button>
-
                   </div>
-                  {selectedTitle === true && (
+
+                  {selectedTitle && (
                     <div className="mt-3">
                       <button
                         onClick={() => {
@@ -226,79 +241,70 @@ const HomePage: React.FC = () => {
                             setShowLoginAlert(true);
                           }
                         }}
-                        className={`px-4 py-2 rounded-md border font-medium text-sm transition-colors bg-white text-[#2B4560] border-[#2B4560] hover:bg-[#d0d7dd]`}
+                        className="px-4 py-2 rounded-md border font-medium text-sm transition-colors bg-white text-[#2B4560] border-[#2B4560] hover:bg-[#d0d7dd]"
                       >
                         Entry Aç
                       </button>
                     </div>
                   )}
                 </div>
+
                 {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
                 {error && <p className="text-red-500">Hata: {error}</p>}
+                {showLoginAlert && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full text-center">
+                      <p className="mb-4 font-semibold text-red-600">Lütfen Giriş Yapınız!</p>
+                      <button
+                        onClick={() => setShowLoginAlert(false)}
+                        className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                      >
+                        Kapat
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-                <div className="grid gap-5">
-
-
-                  {showLoginAlert && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                      <div className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full text-center">
-                        <p className="mb-4 font-semibold text-red-600">Lütfen Giriş Yapınız!</p>
+                {isModalOpen && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+                      <h2 className="text-xl font-semibold mb-4">
+                        Yeni Entry - {selectedCategory}
+                      </h2>
+                      {dailyEntriesState.message && (
+                        <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+                          {dailyEntriesState.message}
+                        </div>
+                      )}
+                      <textarea
+                        value={newEntry}
+                        onChange={(e) => setNewEntry(e.target.value)}
+                        placeholder="Entry'nizi buraya yazın..."
+                        className="w-full h-48 border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div className="flex justify-end gap-3 mt-4">
                         <button
-                          onClick={() => setShowLoginAlert(false)}
-                          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                          onClick={() => setIsModalOpen(false)}
+                          className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
                         >
-                          Kapat
+                          İptal
+                        </button>
+                        <button
+                          onClick={() => handleCreateEntry()}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                          Kaydet
                         </button>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {isModalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
-                        <h2 className="text-xl font-semibold mb-4">
-                          Yeni Entry - {selectedCategory}
-                        </h2>
+                {currentEntries?.length === 0 && !loading && (
+                  <p className="text-gray-600">Gösterilecek entry yok.</p>
+                )}
 
-                        {/* Başarı mesajı varsa göster */}
-                        {dailyEntriesState.message && (
-                          <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
-                            {dailyEntriesState.message}
-                          </div>
-                        )}
-
-                        <textarea
-                          value={newEntry}
-                          onChange={(e) => setNewEntry(e.target.value)}
-                          placeholder="Entry'nizi buraya yazın..."
-                          className="w-full h-48 border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-
-                        <div className="flex justify-end gap-3 mt-4">
-                          <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
-                          >
-                            İptal
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleCreateEntry();
-                            }}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                          >
-                            Kaydet
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-
-                  {currentEntries?.length === 0 && !loading && (
-                    <p className="text-gray-600">Gösterilecek entry yok.</p>
-                  )}
-
+                <div className="space-y-5">
                   {currentEntries?.map((entry) => (
                     <EntryCard
                       key={entry.id}
@@ -314,19 +320,17 @@ const HomePage: React.FC = () => {
                       userId={entry.userId}
                     />
                   ))}
-
-                  {/* <div className="flex-1 overflow-hidden">
-                    <PageButtons pages={pages} navigate={navigate} />
-                  </div> */}
                 </div>
               </div>
             </main>
+          </div>
+          <div className="w-64 shrink-0">
+            <AdRotator items={adItems} />
           </div>
         </div>
       </div>
     </div>
   );
-
 };
 
 export default HomePage;
