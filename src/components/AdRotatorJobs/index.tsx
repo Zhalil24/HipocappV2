@@ -54,7 +54,7 @@ const AdRotator: React.FC<AdRotatorProps> = ({
   return (
     <div
       className={[
-        "relative w-60 select-none overflow-hidden rounded-xl border border-white/10",
+        "relative w-75 select-none overflow-hidden rounded-xl border border-white/10",
         "bg-neutral-900/60 shadow-lg backdrop-blur",
         className
       ].join(" ")}

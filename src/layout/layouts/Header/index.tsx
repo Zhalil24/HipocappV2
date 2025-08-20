@@ -33,8 +33,9 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-[#000000FF] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 px-6 h-[72px] flex items-center justify-between">
-      <div className="flex items-center gap-6">
+    <header className="bg-[#000000FF] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 
+  px-4 md:px-6 h-[64px] md:h-[72px] flex items-center justify-between">
+      <div className="flex items-center gap-3 md:gap-6">
         <div
           className="flex items-center gap-4 cursor-pointer select-none"
           onClick={() => navigate('/')}
@@ -53,7 +54,7 @@ const Header = () => {
         <form
           onSubmit={handleSearchSubmit}
           role="search"
-          className="w-64  mr-9"
+          className="hidden md:block md:w-64 md:mr-9"
         >
           <input
             type="text"
@@ -102,25 +103,32 @@ const Header = () => {
           })}
         </nav>
       </div>
-      <div className="flex items-center gap-4 ml-6">
+      <div className="flex items-center gap-3 md:gap-4 ml-2 md:ml-6">
+
         {user === null ? (
           <>
-            <button
-              onClick={() => navigate('/login')}
-              className="px-5 py-2 rounded-md bg-[#000000FF] text-white shadow-md font-semibold
-               border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
-            >
-              Giriş Yap
-            </button>
+            <div className="flex gap-1 sm:gap-3">
+              <button
+                onClick={() => navigate('/login')}
+                className="px-4 py-2 rounded-md bg-[#000000FF] text-white shadow-md 
+                 font-semibold text-xs sm:text-sm md:text-base 
+                 border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
+              >
+                Giriş Yap
+              </button>
 
-            <button
-              onClick={() => navigate('/sign-up')}
-              className="px-5 py-2 rounded-md bg-[#000000FF] text-white shadow-md font-semibold
-               border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
-            >
-              Kaydol
-            </button>
+              <button
+                onClick={() => navigate('/sign-up')}
+                className="px-4 py-2 rounded-md bg-[#000000FF] text-white shadow-md 
+                 font-semibold text-xs sm:text-sm md:text-base 
+                 border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
+              >
+                Kaydol
+              </button>
+            </div>
           </>
+
+
 
         ) : (
           <>

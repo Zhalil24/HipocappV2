@@ -150,70 +150,83 @@ const ProfilePage: React.FC = () => {
 
   if (!profile) return null;
 
-  return (
-    <div className="w-full h-screen overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
-      <header className="h-16 flex items-center justify-between px-8 bg-gray-900 border-b border-gray-800 shadow-sm">
-        <h1 className="text-xl font-bold tracking-wide text-cyan-400">
-          Profil Sayfası
-        </h1>
-        <span className="text-sm text-gray-400">
-          Hoş geldin, {profile.name}
-        </span>
-      </header>
+return (
+  <div className="w-full min-h-screen overflow-x-hidden bg-gray-950 text-white flex flex-col font-sans">
+    {/* Üst bar */}
+    <header className="h-14 md:h-16 flex items-center justify-between px-4 sm:px-8 bg-gray-900 border-b border-gray-800 shadow-sm">
+      <h1 className="text-lg md:text-xl font-bold tracking-wide text-cyan-400">Profil Sayfası</h1>
+      <span className="text-xs md:text-sm text-gray-400">Hoş geldin, {profile.name}</span>
+    </header>
 
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-6xl h-[60%] bg-gray-800/80 border border-cyan-500/20 rounded-3xl shadow-xl flex overflow-hidden">
-          <div className="w-[280px] bg-gray-900/70 p-6 flex flex-col items-start justify-start border-r border-gray-700">
+    {/* İçerik */}
+    <main className="flex-1 px-3 sm:px-4 py-4 sm:py-6 flex items-stretch justify-center">
+      <div
+        className="
+          w-full max-w-6xl mx-auto
+          bg-gray-800/80 border border-cyan-500/20 rounded-3xl shadow-xl
+          flex flex-col md:flex-row overflow-hidden
+        "
+      >
+        {/* Sol panel */}
+        <aside
+          className="
+            w-full md:w-[280px]
+            bg-gray-900/70 p-5 sm:p-6
+            border-b md:border-b-0 md:border-r border-gray-700
+          "
+        >
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <img
               src={
-                `https://hipocapp.com/${profile.photoURL}` ||
-                `https://ui-avatars.com/api/?name=${profile.name}+${profile.surname}&background=0D8ABC&color=fff&size=128`
+                profile.photoURL
+                  ? `https://hipocapp.com/${profile.photoURL}`
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      `${profile.name} ${profile.surname}`
+                    )}&background=0D8ABC&color=fff&size=128`
               }
-              alt="Profil"
-              className="h-28 w-28 rounded-full object-cover ring-4 ring-cyan-500 shadow-md"
+              alt={`${profile.name} ${profile.surname}`}
+              className="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover ring-4 ring-cyan-500 shadow-md"
             />
-            <h2 className="mt-4 text-lg font-semibold">
+
+            <h2 className="mt-3 sm:mt-4 text-base sm:text-lg font-semibold">
               {profile.name} {profile.surname}
             </h2>
             <p className="text-sm text-cyan-400">@{profile.username}</p>
 
-            <div className="mt-6 flex flex-col gap-2 w-full">
+            {/* Navigasyon butonları */}
+            <div className="mt-5 sm:mt-6 grid grid-cols-2 md:grid-cols-1 gap-2 w-full">
               <NavButton tab="profile" label="Profil" />
-
               {id == null && (
                 <>
                   <NavButton tab="edit" label="Düzenle" />
                   <NavButton tab="password" label="Parola" />
                 </>
               )}
-
               <NavButton tab="entries" label="Entrys" />
             </div>
-
           </div>
+        </aside>
 
-          {showPopup && (
-            <InfoPopup
-              message={serviceMessage.message!}
-              type="info"
-              onClose={() => setShowPopup(false)}
-              onTime={true}
-            />
-          )}
+        {/* Sağ içerik */}
+        {showPopup && (
+          <InfoPopup
+            message={serviceMessage.message!}
+            type="info"
+            onClose={() => setShowPopup(false)}
+            onTime={true}
+          />
+        )}
 
-          <div className="flex-1 p-6 overflow-hidden">
-            <div className="bg-gray-900/60 border border-gray-700 rounded-xl h-full p-4 overflow-y-auto">
-              {renderActiveComponent()}
-            </div>
+        <section className="flex-1 p-4 sm:p-6 overflow-visible md:overflow-hidden">
+          <div className="bg-gray-900/60 border border-gray-700 rounded-xl h-full p-4 sm:p-5 md:overflow-y-auto">
+            {renderActiveComponent()}
           </div>
-        </div>
-      </main>
+        </section>
+      </div>
+    </main>
+  </div>
+);
 
-      <footer className="h-12 flex items-center justify-center bg-gray-900 border-t border-gray-800 text-sm text-gray-500">
-        &copy; 2025 Profil Uygulaması | Geliştirici: Sen ✨
-      </footer>
-    </div>
-  );
 };
 
 export default ProfilePage;

@@ -185,17 +185,61 @@ const HomePage: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [dailyEntriesState.message, dispatch]);
-
+  const isActive = (p: string) =>
+    location.pathname === p || location.pathname.startsWith(p + "/");
 
   return (
     <div
       className="min-h-screen w-full flex justify-center items-start 
-                bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
-                font-sans pt-2 px-4"
+               bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
+               font-sans pt-2 px-4 overflow-x-hidden" 
     >
       <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
-        <div className="flex w-full gap-6">
-          <div className="w-64 shrink-0">
+        <div className="flex w-full gap-4 md:gap-6 flex-col md:flex-row items-stretch">
+          <div className="md:hidden -mx-4 px-4">
+            <div className="flex gap-2 overflow-x-auto pb-2 pt-1">
+              {pages.map(({ name, path }) => {
+                const active = isActive(path);
+                return (
+                  <button
+                    key={path}
+                    onClick={() => navigate(path)}
+                    className={[
+                      "group relative px-3 py-2 rounded-full text-xs leading-5 font-semibold select-none overflow-hidden",
+                      "transition-all duration-300 ease-out focus:outline-none",
+                      "border border-white/10 bg-[#000000] ring-1 ring-[#0071E3]/55",
+                      "whitespace-nowrap",
+                      active
+                        ? "text-white shadow-[0_10px_24px_rgba(0,113,227,0.35)]"
+                        : "text-white/85 hover:text-white hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,113,227,0.35)]",
+                      "focus-visible:ring-2 focus-visible:ring-[#0071E3]",
+                    ].join(" ")}
+                  >
+                    <span className="relative z-10">{name}</span>
+
+                    <span
+                      className={[
+                        "pointer-events-none absolute inset-0 rounded-full",
+                        "bg-[linear-gradient(135deg,#0071E3_0%,#004a98_100%)]",
+                        "transform transition-transform duration-300",
+                        active ? "translate-y-0" : "translate-y-full group-hover:translate-y-0",
+                      ].join(" ")}
+                    />
+
+                    <span
+                      className="pointer-events-none absolute inset-x-0 -top-6 h-12 rounded-full
+                       bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+
+
+          {/* Sidebar */}
+          <div className="w-full md:w-64 md:shrink-0">
             <Sidebar
               onSelect={handleSidebarSelect}
               titles={titleListState.titles}
@@ -208,14 +252,14 @@ const HomePage: React.FC = () => {
           {/* Content */}
           <div className="flex-1 flex flex-col min-w-0">
             <main className="flex-1 w-full pb-12 overflow-y-auto">
-              <div className="px-2 lg:px-4">
-                <div className="flex items-center justify-between mb-6 w-full gap-4">
-                  <div className="flex space-x-3 mt-4">
+              <div className="px-1 sm:px-2 lg:px-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 w-full gap-3 sm:gap-4">
+                  <div className="flex space-x-3 mt-2 sm:mt-4">
                     <button
                       onClick={() => handleModeChange('daily')}
                       className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'daily' && !selectedTitle
-                          ? 'bg-[#0071E3] text-white'
-                          : 'bg-white text-[#2B4560] border-[#2B4560]'
+                        ? 'bg-[#0071E3] text-white'
+                        : 'bg-white text-[#2B4560] border-[#2B4560]'
                         }`}
                     >
                       Daily
@@ -223,8 +267,8 @@ const HomePage: React.FC = () => {
                     <button
                       onClick={() => handleModeChange('stream')}
                       className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'stream' && !selectedTitle
-                          ? 'bg-[#0071E3] text-white'
-                          : 'bg-white text-[#2B4560] border-[#2B4560]'
+                        ? 'bg-[#0071E3] text-white'
+                        : 'bg-white text-[#2B4560] border-[#2B4560]'
                         }`}
                     >
                       Stream
@@ -232,14 +276,11 @@ const HomePage: React.FC = () => {
                   </div>
 
                   {selectedTitle && (
-                    <div className="mt-3">
+                    <div className="mt-1 sm:mt-3">
                       <button
                         onClick={() => {
-                          if (isLogin) {
-                            setIsModalOpen(true);
-                          } else {
-                            setShowLoginAlert(true);
-                          }
+                          if (isLogin) setIsModalOpen(true);
+                          else setShowLoginAlert(true);
                         }}
                         className="px-4 py-2 rounded-md border font-medium text-sm transition-colors bg-white text-[#2B4560] border-[#2B4560] hover:bg-[#d0d7dd]"
                       >
@@ -251,8 +292,9 @@ const HomePage: React.FC = () => {
 
                 {loading && <p className="text-[#2B4560]">Yükleniyor...</p>}
                 {error && <p className="text-red-500">Hata: {error}</p>}
+
                 {showLoginAlert && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full text-center">
                       <p className="mb-4 font-semibold text-red-600">Lütfen Giriş Yapınız!</p>
                       <button
@@ -266,7 +308,7 @@ const HomePage: React.FC = () => {
                 )}
 
                 {isModalOpen && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
                       <h2 className="text-xl font-semibold mb-4">
                         Yeni Entry - {selectedCategory}
@@ -304,7 +346,7 @@ const HomePage: React.FC = () => {
                   <p className="text-gray-600">Gösterilecek entry yok.</p>
                 )}
 
-                <div className="space-y-5">
+                <div className="space-y-5 break-words"> {/* uzun kelimeler taşmasın */}
                   {currentEntries?.map((entry) => (
                     <EntryCard
                       key={entry.id}
@@ -324,13 +366,16 @@ const HomePage: React.FC = () => {
               </div>
             </main>
           </div>
-          <div className="w-64 shrink-0">
+
+          {/* Reklam sütunu */}
+          <div className="w-full md:w-64 md:shrink-0">
             <AdRotator items={adItems} />
           </div>
         </div>
       </div>
     </div>
   );
+
 };
 
 export default HomePage;
