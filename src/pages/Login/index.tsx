@@ -8,6 +8,7 @@ import { fetchLogin } from "@/store/slices/loginSlice";
 import logo from '../../layout/layouts/Header/logo.png';
 import { useNavigate } from "react-router";
 import InfoPopup from "@/components/InfoPopup/InfoPopup";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -76,13 +77,22 @@ const Login = () => {
                 Şifre
               </label>
               <AuthInput
-                type="text"
+                type="password"
                 placeholder="********"
                 icon="lock"
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 name="password"
               />
+
+              <div className="mt-2 text-right">
+                <Link
+                  to="/forgotpassword"
+                  className="text-sm text-[#2B4560] hover:underline"
+                >
+                  Şifremi unuttum
+                </Link>
+              </div>
             </div>
             <button
               type="submit"

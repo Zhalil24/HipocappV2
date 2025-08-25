@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import logo from './logo.png';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PageButtons from '@/components/PageButtons';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import { searchTitlesByName } from '@/store/slices/titleEntrySlice';
 
 const Header = () => {
   const navigate = useNavigate();
   const userString = localStorage.getItem('user');
   const user = userString ? JSON.parse(userString) : null;
   const [menuOpen, setMenuOpen] = useState(false);
+  const titleEntryState = useSelector((state: RootState) => state.titleEntry);
+  const dispatch = useDispatch<AppDispatch>();
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
+  const [highlight, setHighlight] = useState<number>(-1);
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement | null>(null);
   const isActive = (p: string) =>
     location.pathname === p || location.pathname.startsWith(p + "/");
 
@@ -26,16 +34,88 @@ const Header = () => {
     { name: 'Partnerlerimiz', path: '/partners' },
   ];
 
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!searchTerm.trim()) return;
-    navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setHighlight(-1);
+      }
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  useEffect(() => {
+    const q = searchTerm.trim();
+    if (q.length < 2) {
+      setOpen(false);
+      return;
+    }
+    const t = setTimeout(() => {
+      dispatch(searchTitlesByName({ name: q }));
+      setOpen(true);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchTerm, dispatch]);
+
+
+  const handleSelect = (name: string, headerId?: number) => {
+    setOpen(false);
+    setHighlight(-1);
+    setSearchTerm(name);
+    const qs = headerId != null
+      ? `/?search=${encodeURIComponent(name)}&headerId=${headerId}`
+      : `/?search=${encodeURIComponent(name)}`;
+    navigate(qs);
   };
+
+  const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    const list = titleEntryState.titles ?? [];
+    if (!open || list.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlight((h) => (h + 1) % list.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlight((h) => (h - 1 + list.length) % list.length);
+    } else if (e.key === "Enter") {
+      if (highlight >= 0 && highlight < list.length) {
+        e.preventDefault();
+        const item = list[highlight];
+        handleSelect(item.name, item.headerId);
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+      setHighlight(-1);
+    }
+  };
+
+
+  const handleSearchSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const q = searchTerm.trim();
+    if (!q) return;
+
+    const list = titleEntryState.titles ?? [];
+    const exact = list.find(x => x.name === q);
+    const ci = exact ?? list.find(x => x.name.toLowerCase() === q.toLowerCase());
+
+    if (ci) {
+      handleSelect(ci.name, ci.headerId);
+    } else {
+      handleSelect(q);
+    }
+  };
+
+
 
   return (
     <header className="bg-[#000000FF] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 
-  px-4 md:px-6 h-[64px] md:h-[72px] flex items-center justify-between">
-      <div className="flex items-center gap-3 md:gap-6">
+  px-4 md:px-6 h-auto md:h-[72px] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 py-3 md:py-0">
+     <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 w-full">
+
         <div
           className="flex items-center gap-4 cursor-pointer select-none"
           onClick={() => navigate('/')}
@@ -51,23 +131,61 @@ const Header = () => {
           </h1>
         </div>
 
-        <form
-          onSubmit={handleSearchSubmit}
-          role="search"
-          className="hidden md:block md:w-64 md:mr-9"
-        >
-          <input
-            type="text"
-            name="search"
-            placeholder="Başlık ara..."
-            className="w-full rounded-md py-0.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2B4560]"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            aria-label="Başlık ara"
-            autoComplete="off"
-          />
-        </form>
+       <div className="relative w-full md:w-64 md:mr-9 mt-2 md:mt-0" ref={boxRef}>
+          <form onSubmit={handleSearchSubmit} role="search">
+            <input
+              type="text"
+              name="search"
+              placeholder="Başlık ara..."
+              className="w-full rounded-md py-0.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2B4560]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => searchTerm.trim().length >= 2 && setOpen(true)}
+              onKeyDown={handleKeyDown}
+              aria-label="Başlık ara"
+              autoComplete="off"
+              role="combobox"
+              aria-expanded={open}
+              aria-controls="search-suggest-list"
+              aria-autocomplete="list"
+            />
+          </form>
 
+          {open && (
+            <div
+              id="search-suggest-list"
+              role="listbox"
+              className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg max-h-80 overflow-auto"
+            >
+              {titleEntryState.loading && (
+                <div className="px-4 py-2 text-sm text-gray-500">Yükleniyor…</div>
+              )}
+
+              {!titleEntryState.loading && titleEntryState.titles?.length === 0 && (
+                <div className="px-4 py-2 text-sm text-gray-500">Sonuç yok</div>
+              )}
+
+              {!titleEntryState.loading &&
+                titleEntryState.titles?.map((item, idx) => (
+                  <button
+                    key={item.id ?? item.name ?? idx}
+                    type="button"
+                    role="option"
+                    aria-selected={highlight === idx}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleSelect(item.name, item.headerId)}
+                    onMouseEnter={() => setHighlight(idx)}
+                    className={[
+                      "w-full text-left px-4 py-2 text-sm",
+                      highlight === idx ? "bg-[#2B4560] text-white" : "text-gray-800 hover:bg-gray-100",
+                    ].join(" ")}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+            </div>
+          )}
+        </div>
         <nav className="hidden md:flex items-center gap-5">
           {pages.map(({ name, path }) => {
             const active = isActive(path);

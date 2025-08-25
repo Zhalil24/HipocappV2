@@ -9,6 +9,7 @@ import PartnersPage from '@/pages/Partners/PartnersPage';
 import ContactPage from '@/pages/Contact';
 import KvkkPage from '@/pages/KVKK/KVKK';
 import ChatPage from '@/pages/Chat';
+import ForgotPassword from '@/pages/ForgotPassword';
 
 
 
@@ -23,6 +24,7 @@ const Routers = () => {
       <Route path="*" element={<Error />} />
       <Route path="/profile/:id?" element={<Profile />} />
       <Route path="/market" element={<MarketPage />} />
+      <Route path="/forgotpassword" element={<ForgotPassword />} />
       <Route path="/ads" element={<AdsPage />} />
       <Route path="/educations" element={<EducationPage />} />
       <Route path="/partners" element={<PartnersPage />} />

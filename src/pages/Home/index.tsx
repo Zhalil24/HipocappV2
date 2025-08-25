@@ -37,7 +37,7 @@ const HomePage: React.FC = () => {
   );
   const titleListState = useSelector((state: RootState) => state.titleList);
   const titleEntryState = useSelector((state: RootState) => state.titleEntry);
-
+  const [headerId, setHeaderId] = useState<number | null>(null);
   const jobs = useSelector((state: RootState) => state.titleEntry.jobs);
 
   const adItems: ContentModel[] = useMemo(() => {
@@ -165,8 +165,9 @@ const HomePage: React.FC = () => {
   const handleCreateEntry = async () => {
     const model: EntryModel = {
       description: newEntry,
-      headerId: titleListState.headerId!,
-      titleName: titleName!,
+      headerId: headerId !== null && headerId !== undefined
+        ? headerId
+        : titleListState.headerId!, titleName: titleName!,
       isEntry: true,
       userId: userId,
     };
@@ -175,6 +176,30 @@ const HomePage: React.FC = () => {
       dispatch(fetchEntriesByTitleName(titleName!));
     }
   };
+
+  useEffect(() => {
+    const params = queryString.parse(location.search);
+
+    const newSearch =
+      typeof params.search === "string" && params.search.trim() !== ""
+        ? params.search.trim()
+        : "";
+
+    const newHeaderId =
+      typeof params.headerId === "string"
+        ? parseInt(params.headerId, 10)
+        : null;
+
+    if (newSearch) {
+      setSearchTerm(newSearch);
+      setSelecetedTitle(true);
+      setTitleName(newSearch);
+      if (newHeaderId) {
+        setHeaderId(newHeaderId);
+      }
+    }
+  }, [location.search]);
+
   useEffect(() => {
     if (dailyEntriesState.message) {
       const timer = setTimeout(() => {
@@ -185,15 +210,18 @@ const HomePage: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [dailyEntriesState.message, dispatch]);
+
+  
   const isActive = (p: string) =>
     location.pathname === p || location.pathname.startsWith(p + "/");
 
   return (
     <div
-      className="min-h-screen w-full flex justify-center items-start 
-               bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
-               font-sans pt-2 px-4 overflow-x-hidden" 
-    >
+  className="min-h-screen w-full flex justify-center items-start 
+             bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
+             font-sans px-4 overflow-x-hidden
+             pt-[100px] md:pt-2"  
+>
       <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
         <div className="flex w-full gap-4 md:gap-6 flex-col md:flex-row items-stretch">
           <div className="md:hidden -mx-4 px-4">
@@ -311,7 +339,7 @@ const HomePage: React.FC = () => {
                   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
                       <h2 className="text-xl font-semibold mb-4">
-                        Yeni Entry - {selectedCategory}
+                        Yeni Entry
                       </h2>
                       {dailyEntriesState.message && (
                         <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">

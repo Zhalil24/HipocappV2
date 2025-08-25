@@ -1,5 +1,6 @@
 import { BaseResponseModel } from '@/core/models';
 import { ContentModel } from '@/core/models/content/contentModel';
+import { TitleModel } from '@/core/models/entries/titleModel';
 import { BaseService } from '@/core/services/baseService';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
@@ -19,6 +20,28 @@ export const fetchEntriesByTitleName = createAsyncThunk(
   }
 );
 
+export const searchTitlesByName = createAsyncThunk<
+  BaseResponseModel<TitleModel[]>,
+  { name: string },
+  { rejectValue: string }
+>(
+  "titles/searchByName",
+  async ({ name }, { rejectWithValue, signal }) => {
+    const query = (name ?? "").trim();
+    if (!query) {
+      return { success: true, data: [], message: "", error: "" };
+    }
+
+    const res = await baseService.get<TitleModel[]>(
+      "/Title/SearchEntriesByTitleName",
+      { name: query },
+      { signal }
+    );
+
+    return res;
+  }
+);
+
 export const fetchGetJobAdvertisements = createAsyncThunk<
   BaseResponseModel<ContentModel[]>
 >('draw/GetJobAdvertisements', async () => {
@@ -32,6 +55,7 @@ const initialState = {
   loading: false,
   error: null as string | null,
   jobs: [] as any[],
+  titles: [] as any[],
 };
 
 const titleEntrySlice = createSlice({
@@ -65,7 +89,21 @@ const titleEntrySlice = createSlice({
       .addCase(fetchGetJobAdvertisements.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message ?? 'Bir hata oluştu.';
+      })
+
+      .addCase(searchTitlesByName.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchTitlesByName.fulfilled, (state, action) => {
+        state.loading = false;
+        state.titles = action.payload.data!;
+      })
+      .addCase(searchTitlesByName.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Bir hata oluştu";
       });
+
   },
 });
 

@@ -154,189 +154,168 @@ const Register = () => {
         />
       )}
 
-      <form onSubmit={formik.handleSubmit} className="space-y-5">
-        <div className="min-h-screen flex items-center justify-center px-4">
-          <div className="bg-white border-2 border-[#FFB700] rounded-3xl shadow-2xl p-8 w-full max-w-md space-y-5">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="w-40 h-40 rounded-full bg-[#2b4560] flex items-center justify-center">
+      <form onSubmit={formik.handleSubmit}>
+        {/* Tam ekran ortalama + kenarlardan boşluk */}
+        <div className="min-h-screen flex items-center justify-center px-4 md:px-6 py-8 md:py-12 bg-gradient-to-br from-[#f8fafc] via-white to-[#eef2f7]">
+          {/* Kompakt, dikdörtgen kart */}
+          <div className="w-full max-w-[750px] bg-white/95 backdrop-blur border border-[#FFB700]/70 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] p-6 md:p-8">
+
+            {/* Logo */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-28 h-28 rounded-full bg-[#2B4560] flex items-center justify-center ring-4 ring-[#FFB700]/20">
                 <img
                   src={logo}
                   alt="Logo"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-[#2B4560] font-semibold mb-1">
-                Ad
-              </label>
-              <AuthInput
-                type="text"
-                placeholder="Adınız"
-                icon="user"
-                name="firstName"
-                value={formik.values.firstName}
-                onChange={formik.handleChange}
+            {/* Form grid: md ve üstünde 2 sütun, mobilde 1 sütun */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[#2B4560] font-semibold mb-1">Ad</label>
+                <AuthInput
+                  type="text"
+                  placeholder="Adınız"
+                  icon="user"
+                  name="firstName"
+                  value={formik.values.firstName}
+                  onChange={formik.handleChange}
+                />
+              </div>
 
-              />
-            </div>
+              <div>
+                <label className="block text-[#2B4560] font-semibold mb-1">Soyad</label>
+                <AuthInput
+                  type="text"
+                  placeholder="Soyadınız"
+                  icon="user"
+                  name="lastName"
+                  value={formik.values.lastName}
+                  onChange={formik.handleChange}
+                />
+              </div>
 
-            <div>
-              <label className="block text-[#2B4560] font-semibold mb-1">
-                Soyad
-              </label>
-              <AuthInput
-                type="text"
-                placeholder="Soyadınız"
-                icon="user"
-                name="lastName"
-                value={formik.values.lastName}
-                onChange={formik.handleChange}
+              <div>
+                <label className="block text-[#2B4560] font-semibold mb-1">Kullanıcı adı</label>
+                <AuthInput
+                  type="text"
+                  placeholder="Kullanıcı adı"
+                  icon="user"
+                  name="userName"
+                  value={formik.values.userName}
+                  onChange={formik.handleChange}
+                />
+              </div>
 
-              />
-            </div>
+              <div>
+                <label className="block text-[#2B4560] font-semibold mb-1">Telefon Numarası</label>
+                <AuthInput
+                  type="tel"
+                  placeholder="Telefon numaranız"
+                  name="phoneNumber"
+                  value={formik.values.phoneNumber}
+                  onChange={formik.handleChange}
+                />
+              </div>
 
-            <div>
-              <label className="block text-[#2B4560] font-semibold mb-1">
-                Kullanıcı adı
-              </label>
-              <AuthInput
-                type="text"
-                placeholder="Kullanıcı adı"
-                icon="user"
-                name="userName"
-                value={formik.values.userName}
-                onChange={formik.handleChange}
+              {/* E-posta tek satırda geniş alan kullansın */}
+              <div className="md:col-span-2">
+                <label className="block text-[#2B4560] font-semibold mb-1">E-posta</label>
+                <AuthInput
+                  type="email"
+                  placeholder="E-posta adresiniz"
+                  name="email"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                />
+              </div>
 
-              />
-            </div>
+              <div>
+                <label className="block text-[#2B4560] font-semibold mb-1">Şifre</label>
+                <AuthInput
+                  type="password"
+                  placeholder="********"
+                  icon="lock"
+                  name="password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                />
+              </div>
 
-            <div>
-              <label className="block text-[#2B4560] font-semibold mb-1">
-                Telefon Numarası
-              </label>
-              <AuthInput
-                type="tel"
-                placeholder="Telefon numaranız"
-                //icon="phone"
-                name="phoneNumber"
-                value={formik.values.phoneNumber}
-                onChange={formik.handleChange}
+              <div>
+                <label className="block text-[#2B4560] font-semibold mb-1">Şifre Tekrarı</label>
+                <AuthInput
+                  type="password"
+                  placeholder="********"
+                  icon="lock"
+                  name="passwordRepeat"
+                  value={formik.values.passwordRepeat}
+                  onChange={formik.handleChange}
+                />
+                {formik.errors.passwordRepeat && (
+                  <p className="text-red-500 text-sm mt-1">{formik.errors.passwordRepeat}</p>
+                )}
+              </div>
 
-              />
-            </div>
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectInput
+                  label="Ünvan Seçimi"
+                  name="title"
+                  value={formik.values.title}
+                  onChange={formik.handleChange}
+                  options={titleOptions}
+                />
 
-            <div>
-              <label className="block text-[#2B4560] font-semibold mb-1">
-                E-posta
-              </label>
-              <AuthInput
-                type="email"
-                placeholder="E-posta adresiniz"
-                //icon="envelope"
-                name="email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-
-              />
-            </div>
-
-            <div>
-              <label className="block text-[#2B4560] font-semibold mb-1">
-                Şifre
-              </label>
-              <AuthInput
-                type="password"
-                placeholder="********"
-                icon="lock"
-                name="password"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-
-              />
-            </div>
-
-            <div>
-              <label className="block text-[#2B4560] font-semibold mb-1">
-                Şifre Tekrarı
-              </label>
-              <AuthInput
-                type="password"
-                placeholder="********"
-                icon="lock"
-                name="passwordRepeat"
-                value={formik.values.passwordRepeat}
-                onChange={formik.handleChange}
-
-              />
-              {formik.errors.passwordRepeat && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formik.errors.passwordRepeat}
-                </p>
-              )}
-            </div>
-
-            <SelectInput
-              label="Ünvan Seçimi"
-              name="title"
-              value={formik.values.title}
-              onChange={formik.handleChange}
-              options={titleOptions}
-            />
-
-            <FileInput
-              label="Kurum Kimliği Seçin"
-              name="institutionIdFile"
-              onChange={handleFileChange}
-            />
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isTermsAccepted"
-                name="isTermsAccepted"
-                checked={formik.values.isTermsAccepted}
-                onChange={formik.handleChange}
-                className="form-checkbox h-5 w-5 text-[#2B4560] rounded"
-              />
-              <label htmlFor="isTermsAccepted" className="text-sm text-[#2B4560]">
-                Kullanım şartlarını kabul ediyorum
-              </label>
-            </div>
-            {formik.errors.isTermsAccepted && (
-              <p className="text-red-500 text-sm mt-1">
-                {formik.errors.isTermsAccepted}
-              </p>
-            )}
+                <FileInput
+                  label="Kurum Kimliği Seçin"
+                  name="institutionIdFile"
+                  onChange={handleFileChange}
+                />
+              </div>
 
 
-            <button
-              type="submit"
-              disabled={registerState.loading}
-              className="w-full bg-[#2B4560] text-[#ffffff] font-bold py-2.5 rounded-lg hover:brightness-105 shadow-md transition-all disabled:opacity-70"
-            >
-              {registerState.loading ? "Kayıt Olunuyor..." : "Kayıt Ol"}
-            </button>
+              <div className="md:col-span-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isTermsAccepted"
+                    name="isTermsAccepted"
+                    checked={formik.values.isTermsAccepted}
+                    onChange={formik.handleChange}
+                    className="h-5 w-5 text-[#2B4560] rounded border-gray-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => window.open("/kvkk", "_blank")}
+                    className="text-sm text-[#2B4560] underline hover:text-[#FFB700]"
+                  >
+                    Kullanım şartlarını kabul ediyorum
+                  </button>
+                </div>
+                {formik.errors.isTermsAccepted && (
+                  <p className="text-red-500 text-sm mt-1">{formik.errors.isTermsAccepted}</p>
+                )}
+              </div>
+              <div className="md:col-span-2 flex justify-center">
+                <button
+                  type="submit"
+                  disabled={registerState.loading}
+                  className="bg-[#2B4560] text-white font-bold py-2.5 px-10 rounded-lg hover:brightness-105 shadow-md transition-all disabled:opacity-70"
+                >
+                  {registerState.loading ? "Kayıt Olunuyor..." : "Kayıt Ol"}
+                </button>
+              </div>
 
-            <div className="text-center text-sm text-gray-600 mt-2">
-              Zaten hesabınız var mı?
-            </div>
 
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={() => navigate("/login")}
-                className="bg-[#2B4560] hover:bg-[#1f3550] text-white font-bold py-2.5 px-6 mt-2 rounded-full shadow-lg transform transition hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#2B4560]/50"
-              >
-                Giriş Yap
-              </button>
             </div>
           </div>
         </div>
       </form>
     </div>
   );
+
 };
 
 export default Register;

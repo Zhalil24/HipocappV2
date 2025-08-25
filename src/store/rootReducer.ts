@@ -8,6 +8,7 @@ import registerReducer from './slices/registerSlice';
 import profileReducer from './slices/profileSlice';
 import contentReducer from './slices/contentSlice';
 import chatReducer from './slices/chatSlice';
+import forgotPasswordSlice from './slices/forgotPasswordSlice'
 
 
 
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   profile: profileReducer,
   content: contentReducer,
   chat: chatReducer,
+  forgotPassword: forgotPasswordSlice,
 });
 
 export default rootReducer;
