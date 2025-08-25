@@ -27,8 +27,8 @@ const UserEntries: React.FC<UserEntriesProps> = ({ entries, onDelete, canDelete 
           {entries.map((entry) => (
             <EntryCard
               key={entry.id}
-              onDelete={canDelete ? () => onDelete?.(entry.id) : undefined} // ✅ sadece canDelete varsa çalışır
-              showDelete={canDelete} // ✅ butonu göstermek için
+              onDelete={canDelete ? () => onDelete?.(entry.id) : undefined} 
+              showDelete={canDelete} 
               createDate={entry.createDate}
               description={entry.description}
               titleName={entry.titleName}

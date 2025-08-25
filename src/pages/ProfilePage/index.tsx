@@ -91,14 +91,15 @@ const ProfilePage: React.FC = () => {
     dispatch(updateProfile(formData));
   };
 
+useEffect(() => {
+  const decodedId = id ? Number(atob(id)) : userId;
+  if (decodedId && decodedId !== 0) {
+    dispatch(fetchUserProfile(decodedId.toString()));
+  }
+}, [id, userId, dispatch]);
 
-  useEffect(() => {
-    const decodedId = id ? Number(atob(id)) : userId;
 
-    if (decodedId && decodedId !== 0 && status === "idle") {
-      dispatch(fetchUserProfile(decodedId.toString()));
-    }
-  }, [id, userId, status, dispatch]);
+  const isFromLocalStorage = !id;
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
@@ -120,7 +121,7 @@ const ProfilePage: React.FC = () => {
           <UserEntries
             entries={profile?.entries || []}
             onDelete={handleDelete}
-            canDelete={!!userId}
+            canDelete={isFromLocalStorage}
           />
         );
       default:
