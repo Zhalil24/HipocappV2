@@ -2,7 +2,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="min-h-[80vh] bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] py-16 px-4 mt-10">
+<div className="min-h-[80vh] bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] py-16 px-4 mt-[150px] md:mt-10">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-200">
         {/* Başlık */}
         <div className="flex items-center mb-6 gap-3">

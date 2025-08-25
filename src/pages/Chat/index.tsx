@@ -436,7 +436,8 @@ const ChatPage: React.FC = () => {
 
 
     return (
-        <div className="pt-[60.5px] overflow-x-hidden">
+        <div className="pt-[180px] md:pt-[60.5px] overflow-x-hidden">
+
             <ToastContainer position="top-right" autoClose={3000} theme="dark" newestOnTop />
             <div className="max-w-[1600px] mx-auto p-3 sm:p-6">
                 <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#0E183B]
