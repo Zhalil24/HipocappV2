@@ -1,15 +1,15 @@
 import { Routes, Route } from 'react-router-dom';
 
 import { Home, Login, SignUp, Error, About } from '@/pages';
-import Profile from '../pages/ProfilePage/';
-import MarketPage from '@/pages/Market/MarketPage';
-import AdsPage from '@/pages/Ads/AdsPage';
-import EducationPage from '@/pages/Educations/EducationPage';
-import PartnersPage from '@/pages/Partners/PartnersPage';
-import ContactPage from '@/pages/Contact';
-import KvkkPage from '@/pages/KVKK/KVKK';
-import ChatPage from '@/pages/Chat';
-import ForgotPassword from '@/pages/ForgotPassword';
+import Profile from '../pages/UserHome/ProfilePage';
+import MarketPage from '@/pages/UserHome/Market/MarketPage';
+import AdsPage from '@/pages/UserHome/Ads/AdsPage';
+import EducationPage from '@/pages/UserHome/Educations/EducationPage';
+import PartnersPage from '@/pages/UserHome/Partners/PartnersPage';
+import ContactPage from '@/pages/UserHome/Contact';
+import KvkkPage from '@/pages/UserHome/KVKK/KVKK';
+import ChatPage from '@/pages/UserHome/Chat';
+import ForgotPassword from '@/pages/UserHome/ForgotPassword';
 
 
 

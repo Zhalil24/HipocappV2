@@ -1,5 +1,5 @@
 import { UserDataModel } from "@/core/models/user/userDataModel";
-import logo from '../../layout/layouts/Header/logo.png'
+import logo from '../../layout/layouts/UserHome/Header/logo.png';
 export const ChatListItem: React.FC<{
     item: UserDataModel;
     active?: boolean;

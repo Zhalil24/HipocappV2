@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearMessage, createEntry, fetchLastEntries } from '../../store/slices/entrySlice';
-import { fetchRandomEntries } from '../../store/slices/randomEntrySlice';
+import { clearMessage, createEntry, fetchLastEntries } from '../../../store/slices/entrySlice';
+import { fetchRandomEntries } from '../../../store/slices/randomEntrySlice';
 import {
   fetchTitlesByHeaderName,
   clearTitles,
-} from '../../store/slices/titleListSlice';
-import { fetchEntriesByTitleName, fetchGetJobAdvertisements } from '../../store/slices/titleEntrySlice';
-import EntryCard from '../../components/EntryCard';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import { AppDispatch, RootState } from '../../store/store';
+} from '../../../store/slices/titleListSlice';
+import { fetchEntriesByTitleName, fetchGetJobAdvertisements } from '../../../store/slices/titleEntrySlice';
+import EntryCard from '../../../components/EntryCard';
+import Sidebar from '../../../components/Sidebar/Sidebar';
+import { AppDispatch, RootState } from '../../../store/store';
 import { useNavigate, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import PageButtons from '@/components/PageButtons';

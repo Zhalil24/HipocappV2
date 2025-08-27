@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../../layout/layouts/Header/logo.png'     
+import logo from '../../layout/layouts/UserHome/Header/logo.png'     
 const LoadingWidget: React.FC = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900">

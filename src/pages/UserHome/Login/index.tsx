@@ -5,7 +5,7 @@ import { useFormik } from 'formik';
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchLogin } from "@/store/slices/loginSlice";
-import logo from '../../layout/layouts/Header/logo.png';
+import logo from '../../../layout/layouts/UserHome/Header/logo.png';
 import { useNavigate } from "react-router";
 import InfoPopup from "@/components/InfoPopup/InfoPopup";
 import { Link } from "react-router-dom";

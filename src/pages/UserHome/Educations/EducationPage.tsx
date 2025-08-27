@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import ItemList from '../../components/Common/ItemList';
-import ItemDetail from '../../components/Common/ItemDetail';
+import ItemList from '../../../components/Common/ItemList';
+import ItemDetail from '../../../components/Common/ItemDetail';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { ContentModel } from '@/core/models/content/contentModel';

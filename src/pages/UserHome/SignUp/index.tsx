@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { registerUser } from "@/store/slices/registerSlice";
-import logo from "../../layout/layouts/Header/logo.png";
+import logo from "../../../layout/layouts/UserHome/Header/logo.png";
 import { useNavigate } from "react-router";
 import InfoPopup from "@/components/InfoPopup/InfoPopup";
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import {
   changePassword,
   clearServiceMessage,
@@ -7,7 +7,7 @@ import {
   fetchUserProfile,
   setActiveComponent,
   updateProfile,
-} from '../../store/slices/profileSlice';
+} from '../../../store/slices/profileSlice';
 
 import ProfileView from '@/components/Profile/ProfileView';
 import EditProfile from '@/components/Profile/EditProfile';

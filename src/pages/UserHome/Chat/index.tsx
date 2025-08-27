@@ -6,7 +6,7 @@ import { addMembersToGroup, clearUnreadForUser, deleteGroup, deleteMemberFromGro
 import { AppDispatch, RootState } from "@/store/store";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import logo from '../../layout/layouts/Header/logo.png'
+import logo from '../../../layout/layouts/UserHome/Header/logo.png';
 import { GroupMessageModel, GroupModel, MessageModel } from "@/core/models/chatMessage/messageModel";
 import { GroupChatListItem } from "@/components/GroupChatListItem";
 import { formatDateTR } from "@/Utilities/helpers/formatDateHelper";
