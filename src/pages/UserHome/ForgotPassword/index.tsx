@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthInput from "@/components/AuthInput";
 import InfoPopup from "@/components/InfoPopup/InfoPopup";
-import logo from "@/layout/layouts/Header/logo.png";
+import logo from "@/layout/layouts/UserHome/Header/logo.png";
 import { AppDispatch, RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchForgotPassword } from "@/store/slices/forgotPasswordSlice";
