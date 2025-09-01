@@ -5,7 +5,7 @@ import PageButtons from '@/components/PageButtons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { searchTitlesByName } from '@/store/slices/titleEntrySlice';
-
+import { Link } from "react-router-dom";
 const Header = () => {
   const navigate = useNavigate();
   const userString = localStorage.getItem('user');
@@ -33,6 +33,10 @@ const Header = () => {
     { name: 'Eğitimler', path: '/educations' },
     { name: 'Partnerlerimiz', path: '/partners' },
   ];
+
+  useEffect(() => {
+    console.log("user", user)
+  }, [])
 
 
   useEffect(() => {
@@ -114,7 +118,7 @@ const Header = () => {
   return (
     <header className="bg-[#000000FF] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 
   px-4 md:px-6 h-auto md:h-[72px] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 py-3 md:py-0">
-     <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 w-full">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 w-full">
 
         <div
           className="flex items-center gap-4 cursor-pointer select-none"
@@ -131,7 +135,7 @@ const Header = () => {
           </h1>
         </div>
 
-       <div className="relative w-full md:w-64 md:mr-9 mt-2 md:mt-0" ref={boxRef}>
+        <div className="relative w-full md:w-64 md:mr-9 mt-2 md:mt-0" ref={boxRef}>
           <form onSubmit={handleSearchSubmit} role="search">
             <input
               type="text"
@@ -274,16 +278,14 @@ const Header = () => {
                     d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.518 0-2.94-.336-4.162-.93L3 20l1.07-3.276C3.388 15.982 3 14.538 3 13c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                   />
                 </svg>
-                {/* İstersen unread badge ekle
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">3</span>
-                */}
               </button>
             </div>
+
             <div className="relative">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="flex items-center gap-1 bg-[#000000FF] hover:bg-[#000000FF] px-4 py-2 rounded-md shadow-md font-semibold
-             transition-colors focus:outline-none border-b-2 border-transparent hover:border-[#0071E3]"
+       transition-colors focus:outline-none border-b-2 border-transparent hover:border-[#0071E3]"
                 aria-expanded={menuOpen}
               >
                 {user.username}
@@ -310,6 +312,17 @@ const Header = () => {
                   >
                     Profil
                   </button>
+
+                  {user.rolId === 1 && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition text-sm"
+                    >
+                      Admin Paneli
+                    </Link>
+                  )}
+
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition text-sm"
@@ -320,6 +333,7 @@ const Header = () => {
               )}
             </div>
           </>
+
         )}
       </div>
     </header>

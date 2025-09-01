@@ -4,6 +4,7 @@ export interface ContentModel {
     description: string;
     title: string;
     link: string;
+    image: File | null; 
 }
 
 export interface InitialContentModel {
@@ -11,6 +12,7 @@ export interface InitialContentModel {
     loading: boolean;
     message: string | null;
     error: string | null;
+    image: File | null;
 }
 
 export const contentModelInitialState: InitialContentModel = {
@@ -18,4 +20,5 @@ export const contentModelInitialState: InitialContentModel = {
     loading: false,
     error: null,
     message: null,
+    image: null
 };

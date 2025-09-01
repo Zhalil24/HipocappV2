@@ -8,8 +8,8 @@ import registerReducer from './slices/registerSlice';
 import profileReducer from './slices/profileSlice';
 import contentReducer from './slices/contentSlice';
 import chatReducer from './slices/chatSlice';
-import forgotPasswordSlice from './slices/forgotPasswordSlice'
-
+import forgotPasswordSlice from './slices/forgotPasswordSlice';
+import adminSlice from './slices/adminSlice';
 
 
 const rootReducer = combineReducers({
@@ -23,6 +23,7 @@ const rootReducer = combineReducers({
   content: contentReducer,
   chat: chatReducer,
   forgotPassword: forgotPasswordSlice,
+  admin: adminSlice
 });
 
 export default rootReducer;

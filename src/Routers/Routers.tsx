@@ -10,6 +10,7 @@ import ContactPage from '@/pages/UserHome/Contact';
 import KvkkPage from '@/pages/UserHome/KVKK/KVKK';
 import ChatPage from '@/pages/UserHome/Chat';
 import ForgotPassword from '@/pages/UserHome/ForgotPassword';
+import AdminPanel from '@/pages/AdminPanel/Panel';
 
 
 
@@ -30,6 +31,8 @@ const Routers = () => {
       <Route path="/partners" element={<PartnersPage />} />
       <Route path="/KVKK" element={<KvkkPage />} />
       <Route path="/chat/:username?" element={<ChatPage />} />
+      <Route path="/admin" element={<AdminPanel />} />
+      
     </Routes>
   );
 };
