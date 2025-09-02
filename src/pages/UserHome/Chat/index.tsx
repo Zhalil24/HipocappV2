@@ -436,7 +436,7 @@ const ChatPage: React.FC = () => {
 
 
     return (
-        <div className="pt-[180px] md:pt-[60.5px] overflow-x-hidden">
+        <div className="pt-[120px] md:pt-[60.5px] overflow-x-hidden">
 
             <ToastContainer position="top-right" autoClose={3000} theme="dark" newestOnTop />
             <div className="max-w-[1600px] mx-auto p-3 sm:p-6">
@@ -690,12 +690,12 @@ const ChatPage: React.FC = () => {
                                         <>
                                             <img
                                                 src={headerUser.photoURL ? `https://hipocapp.com/${headerUser.photoURL}` : logo}
-                                                alt={headerUser.username ?? headerUser.name}
+                                                alt={headerUser.userName ?? headerUser.name}
                                                 className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10"
                                             />
                                             <div className="min-w-0">
                                                 <div className="text-white/90 text-sm font-medium truncate cursor-pointer hover:underline" onClick={goToProfile}>
-                                                    {headerUser.username ?? headerUser.name}
+                                                    {headerUser.userName ?? headerUser.name}
                                                 </div>
                                                 <div className="text-[11px] text-gray-400">
                                                     {isOnlineUser(headerUser) ? "Çevrimiçi" : "Çevrimdışı"}

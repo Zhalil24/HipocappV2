@@ -152,7 +152,7 @@ useEffect(() => {
   if (!profile) return null;
 
 return (
-<div className="w-full min-h-screen overflow-x-hidden bg-gray-950 text-white flex flex-col font-sans pt-[190px] md:pt-0">
+<div className="w-full min-h-screen overflow-x-hidden bg-gray-950 text-white flex flex-col font-sans pt-[120px] md:pt-0">
     {/* Üst bar */}
     <header className="h-14 md:h-16 flex items-center justify-between px-4 sm:px-8 bg-gray-900 border-b border-gray-800 shadow-sm">
       <h1 className="text-lg md:text-xl font-bold tracking-wide text-cyan-400">Profil Sayfası</h1>

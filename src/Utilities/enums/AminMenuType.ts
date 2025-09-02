@@ -12,13 +12,13 @@ export enum AdminMenuType {
 }
 
 
-export const EndpointMappings: Record<AdminMenuType, Partial<Record<"list" | "create" | "update" | "delete", Endpoints>>> = {
+export const EndpointMappings: Record<AdminMenuType, Partial<Record<"list" | "create" | "update" | "delete" | "list2", Endpoints>>> = {
   [AdminMenuType.Users]: {
-    //  list: Endpoints.GetUsers,
+    list: Endpoints.GetUsers,
     //  create: Endpoints.CreateUser,
     //  update: Endpoints.UpdateUser,
     //  delete: Endpoints.DeleteUser,
-    //  detail: Endpoints.GetUserDetail,
+    list2: Endpoints.GetUnapprovedUsers,
   },
   [AdminMenuType.Modules]: {
     //  list: Endpoints.GetModules,
@@ -26,8 +26,8 @@ export const EndpointMappings: Record<AdminMenuType, Partial<Record<"list" | "cr
     //  update: Endpoints.UpdateModule,
     //  delete: Endpoints.DeleteModule,
   },
-    [AdminMenuType.Entries]: {
-      list: Endpoints.GetAllEntries,
+  [AdminMenuType.Entries]: {
+    list: Endpoints.GetAllEntries,
     //  create: Endpoints.CreateModule,
     //  update: Endpoints.UpdateModule,
     //  delete: Endpoints.DeleteModule,

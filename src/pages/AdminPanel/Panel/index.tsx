@@ -7,8 +7,8 @@ import { AppDispatch, RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { DegreeChart } from "@/components/DegreeChart";
 import { clearMessage, fetchLastEntries } from "@/store/slices/entrySlice";
-import { addContent, deleteAllEntry, deleteContent, deleteEntry, fetchContent, fetchEntries, fetchUserCount, fetchUsersCountByDegreeId, updateContent } from "@/store/slices/adminSlice";
-import { AdminMenuConstants, Item } from "@/Utilities/constants/panelItems";
+import { addContent, deleteAllEntry, deleteContent, deleteEntry, deleteUser, fetchContent, fetchEntries, fetchUserCount, fetchUserList, fetchUsersCountByDegreeId, updateContent, updateUser, updateUserStatus } from "@/store/slices/adminSlice";
+import { AdminMenuConstants, CrudOperation, Item } from "@/Utilities/constants/panelItems";
 import { ContentList } from "@/components/ContentList";
 import { ContentModel } from "@/core/models/content/contentModel";
 import { ContentModal } from "@/components/ContentModal";
@@ -17,6 +17,7 @@ import { AdminMenuType, EndpointMappings } from "@/Utilities/enums/AminMenuType"
 import { ToastContainer, toast } from "react-toastify";
 import { EntryList } from "@/components/EntryList";
 import LoadingWidget from "@/components/Loading/loadingWidget";
+import { UserList } from "@/components/UserList";
 
 export default function AdminPanel() {
     const dispatch = useDispatch<AppDispatch>();
@@ -29,7 +30,7 @@ export default function AdminPanel() {
     const [newContent, setNewContent] = useState<boolean>(false);
     const [activeItemType, setActiveItemType] = useState<AdminMenuType | null>(null);
     const [Endpoints, setEndpoints] = useState<Endpoints | null>(null);
-
+    const [operation, setOperation] = useState<CrudOperation | null>(null);
 
     useEffect(() => {
         dispatch(fetchLastEntries());
@@ -40,12 +41,20 @@ export default function AdminPanel() {
     const handleItemSelected = (item: Item | null) => {
         if (!item) return;
         setActiveItemType(item.type ?? null);
-        let listEndpoint: Endpoints | null = null;
-        if (item.type) {
-            listEndpoint = EndpointMappings[item.type]?.list ?? null;
+        let foundEndpoint: Endpoints | null = null;
+        let foundOperation: CrudOperation | null = null;
+        if (item.type && item.operation) {
+            const parent = AdminMenuConstants.items.find((x) => x.type === item.type);
+            const endpointConfig = parent?.children
+                ?.flatMap((c) => c.endpoints)
+                .find((e) => e.operation === item.operation);
+            foundEndpoint = endpointConfig?.endpoint ?? null;
+            foundOperation = endpointConfig?.operation ?? null;
         }
-        setEndpoints(listEndpoint);
+        setEndpoints(foundEndpoint);
+        setOperation(foundOperation);
     };
+
 
     const handleContentUpdate = async (updated: ContentModel) => {
         if (!activeItemType) return;
@@ -71,19 +80,41 @@ export default function AdminPanel() {
         ).unwrap();
     };
 
-    useEffect(() => {
-        if (activeItemType === AdminMenuType.Entries) {
-            dispatch(fetchEntries({ id: 0, page: 1 }));
-        }
-    }, [activeItemType]);
+    const handlePageChange = (newPage: number) => {
+        if (!activeItemType || !Endpoints || !operation) return;
 
-    const handleEntryDelete =(id:number) =>{
+        if (activeItemType === AdminMenuType.Entries) {
+            dispatch(fetchEntries({ id: 0, page: newPage }));
+            return;
+        }
+
+        if (activeItemType === AdminMenuType.Users) {
+            dispatch(fetchUserList({
+                apiUrl: Endpoints,
+                data: { id: 0, page: newPage },
+            }));
+            return;
+        }
+    };
+    const handleEntryDelete = (id: number) => {
         dispatch(deleteAllEntry(id))
     }
 
-    const handlePageChange = (newPage: number) => {
-        dispatch(fetchEntries({ id: 0, page: newPage }));
-    };
+    const handleUserDelete = (userId: number) => {
+        dispatch(deleteUser({ id: userId, page: 0 }));
+    }
+
+    const handleUserUpdate = (model: UserDataModel) => {
+        dispatch(updateUser(model))
+    }
+
+    const handleUserUpdateStatus = (userId: number) => {
+        dispatch(updateUserStatus(userId))
+    }
+
+    useEffect(() => {
+        handlePageChange(0)
+    }, [activeItemType, operation, Endpoints]);
 
     useEffect(() => {
         dispatch(fetchContent(Endpoints!))
@@ -112,12 +143,40 @@ export default function AdminPanel() {
                         onDelete={handleEntryDelete}
                     />
                 );
+            case AdminMenuType.Users:
+                if (adminState.loading) return <LoadingWidget isLight={true} />;
+                if (!adminState.allUsers || adminState.allUsers.items.length === 0) {
+                    return <p className="text-center text-gray-500">Gösterilecek kullanıcı yok</p>;
+                }
+                if (operation === "list") {
+                    return (
+                        <UserList
+                            pagination={adminState.allUsers}  
+                            onPageChange={handlePageChange}
+                            onDelete={handleUserDelete}
+                            onEdit={handleUserUpdate}
+                            variant="all"
+                        />
+                    );
+                }
+                if (operation === "list2") {
+                    return (
+                        <UserList
+                            pagination={adminState.allUsers}  
+                            onPageChange={handlePageChange}
+                            onReject={handleUserDelete}
+                            onApprove={handleUserUpdateStatus}
+                            variant="unapproved"
+                        />
+                    );
+                }
+                return null;
 
             case AdminMenuType.Jobs:
             case AdminMenuType.Market:
             case AdminMenuType.Partners:
             case AdminMenuType.Trainings:
-                if (!adminState.content) return <LoadingWidget isLight={true}/>;
+                if (!adminState.content) return <LoadingWidget isLight={true} />;
                 return (
                     <ContentList
                         data={adminState.content}
@@ -181,7 +240,7 @@ export default function AdminPanel() {
                                             {user && (
                                                 <div className="border-t border-white/20 pt-4">
                                                     <h3 className="text-md font-semibold text-white/80">Admin:</h3>
-                                                    <p className="text-sm font-light text-white/70"><span className="font-semibold">Kullanıcı Adı:</span> {user.username}</p>
+                                                    <p className="text-sm font-light text-white/70"><span className="font-semibold">Kullanıcı Adı:</span> {user.userName}</p>
                                                     <p className="text-sm font-light text-white/70"><span className="font-semibold">Ad Soyad:</span> {user.name} {user.surname}</p>
                                                     <p className="text-sm font-light text-white/70"><span className="font-semibold">E-posta:</span> {user.email}</p>
                                                 </div>

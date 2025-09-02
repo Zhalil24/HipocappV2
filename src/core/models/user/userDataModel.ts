@@ -7,13 +7,14 @@ export interface UserDataModel {
   rolId: number;
   iconId: number;
   degreeId: number;
-  username: string;
+  userName: string;
   name: string;
   surname: string;
   identityNumber: string;
   accessToken: AccessToken;
   imageURL: string;
   image: string | null;
+  status: boolean | null;
   photoURL: string | null;
   photo: string | null;
   email: string;

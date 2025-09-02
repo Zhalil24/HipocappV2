@@ -90,18 +90,24 @@ export default function AdminSidebar({
                                                     <div
                                                         key={endpoint.operation}
                                                         className={`block px-4 py-2 text-sm cursor-pointer
-            ${selectedItem?.label === endpoint.label
+${selectedItem?.label === endpoint.label
                                                                 ? "text-gray-900 dark:text-gray-100"
                                                                 : "text-gray-700 dark:text-gray-300"}
-            hover:bg-gray-50 dark:hover:bg-neutral-900`}
-                                                        onClick={() => handleSubItemClick({
-                                                            ...it,
-                                                            label: endpoint.label!,
-                                                        })}
+hover:bg-gray-50 dark:hover:bg-neutral-900`}
+                                                        onClick={() =>
+                                                            handleSubItemClick({
+                                                                ...it,
+                                                                label: endpoint.label!,
+                                                                operation: endpoint.operation,
+                                                                type: it.type,
+                                                            })
+                                                        }
                                                     >
                                                         {endpoint.label}
                                                     </div>
                                                 ))}
+
+
                                         </div>
                                     ))}
 

@@ -15,5 +15,8 @@ export enum Endpoints {
     CreateJobAdvertisement = 'api/jobadv/Create',
     CreateCampaign = 'api/campain/Create',
     CreateThesisConsultation = 'api/thesisconsultation/Create',
-    GetAllEntries = '/api/entry/GetList'
+    GetAllEntries = '/api/entry/GetList',
+    GetUsers = '/api/user/GetAllUser',
+    GetApprovedUsers = 'api/user/GetUsersByStatusTrue',
+    GetUnapprovedUsers = '/api/user/GetUsersByStatusFalse'
 }

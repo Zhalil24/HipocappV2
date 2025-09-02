@@ -14,19 +14,21 @@ import { AdminMenuType } from "../enums/AminMenuType";
 
 type IconType = ComponentType<{ className?: string }>;
 
-export type CrudOperation = "list" | "create" | "update" | "delete" | "detail";
+export type CrudOperation = "list" | "create" | "update" | "delete" | "detail" | "list2";
 
 export interface EndpointConfig {
   operation: CrudOperation;
   endpoint: Endpoints;
   hasPage: boolean;
   label?: string;
+  
 }
 
 export type Item = {
   label: string;
   icon?: IconType;
   type?: AdminMenuType;
+  operation?: string;
   children?: {
     label: string;
     endpoints: EndpointConfig[];
@@ -43,7 +45,7 @@ export class AdminMenuConstants {
         {
           label: "Kullanıcı İşlemleri",
           endpoints: [
-            //  { operation: "list", endpoint: Endpoints.GetUsers, hasPage: true, label: "Kullanıcı Listesi" },
+              { operation: "list", endpoint: Endpoints.GetUsers, hasPage: true, label: "Kullanıcı Listesi" },
             //  { operation: "create", endpoint: Endpoints.CreateUser, hasPage: true, label: "Kullanıcı Ekle" },
             //  { operation: "update", endpoint: Endpoints.UpdateUser, hasPage: false },
             //  { operation: "delete", endpoint: Endpoints.DeleteUser, hasPage: false },
@@ -53,8 +55,7 @@ export class AdminMenuConstants {
         {
           label: "Onay İşlemleri",
           endpoints: [
-            //  { operation: "list", endpoint: Endpoints.GetApprovedUsers, hasPage: true, label: "Onaylanmış Kullanıcılar" },
-            //  { operation: "list", endpoint: Endpoints.GetUnapprovedUsers, hasPage: true, label: "Onaylanmamış Kullanıcılar" },
+             { operation: "list2", endpoint: Endpoints.GetUnapprovedUsers, hasPage: true, label: "Onaylanmamış Kullanıcılar" },
           ],
         },
       ],

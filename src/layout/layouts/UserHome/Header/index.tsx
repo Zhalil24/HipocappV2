@@ -117,18 +117,19 @@ const Header = () => {
 
   return (
     <header className="bg-[#000000FF] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 
-  px-4 md:px-6 h-auto md:h-[72px] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 py-3 md:py-0">
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 w-full">
-
+      px-4 md:px-6 h-auto md:h-[72px] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 py-3 md:py-0">
+      
+      <div className="flex items-center md:flex-row md:items-center gap-3 md:gap-6 w-full">
         <div
           className="flex items-center gap-4 cursor-pointer select-none"
           onClick={() => navigate('/')}
         >
-          <div className="w-16 h-16 rounded-full bg-[#2b4560] flex items-center justify-center overflow-hidden shadow-inner">
+          {/* Logo boyutunu mobil için küçülttük */}
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#2b4560] flex items-center justify-center overflow-hidden shadow-inner">
             <img src={logo} alt="Logo" className="w-full h-full object-cover" />
           </div>
           <h1
-            className="text-2xl font-bold tracking-wide select-none leading-none"
+            className="hidden md:block text-2xl font-bold tracking-wide select-none leading-none"
             style={{ fontFamily: 'system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif' }}
           >
             HİPOCAPP
@@ -198,7 +199,7 @@ const Header = () => {
                 key={path}
                 onClick={() => navigate(path)}
                 className={[
-                  "group relative w-32 px-4 py-1   rounded-md text-sm font-semibold select-none overflow-hidden",
+                  "group relative w-32 px-4 py-1 rounded-md text-sm font-semibold select-none overflow-hidden",
                   "transition-all duration-300 ease-out focus:outline-none",
                   "bg-[#000000] ring-1 ring-[#0071E3]/55",
                   active
@@ -218,7 +219,7 @@ const Header = () => {
                 />
                 <span
                   className="pointer-events-none absolute inset-x-0 -top-6 h-12 rounded-md
-               bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 />
               </button>
             );
@@ -233,8 +234,8 @@ const Header = () => {
               <button
                 onClick={() => navigate('/login')}
                 className="px-4 py-2 rounded-md bg-[#000000FF] text-white shadow-md 
-                 font-semibold text-xs sm:text-sm md:text-base 
-                 border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
+                  font-semibold text-xs sm:text-sm md:text-base 
+                  border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
               >
                 Giriş Yap
               </button>
@@ -242,15 +243,13 @@ const Header = () => {
               <button
                 onClick={() => navigate('/sign-up')}
                 className="px-4 py-2 rounded-md bg-[#000000FF] text-white shadow-md 
-                 font-semibold text-xs sm:text-sm md:text-base 
-                 border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
+                  font-semibold text-xs sm:text-sm md:text-base 
+                  border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
               >
                 Kaydol
               </button>
             </div>
           </>
-
-
 
         ) : (
           <>
@@ -285,7 +284,7 @@ const Header = () => {
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="flex items-center gap-1 bg-[#000000FF] hover:bg-[#000000FF] px-4 py-2 rounded-md shadow-md font-semibold
-       transition-colors focus:outline-none border-b-2 border-transparent hover:border-[#0071E3]"
+        transition-colors focus:outline-none border-b-2 border-transparent hover:border-[#0071E3]"
                 aria-expanded={menuOpen}
               >
                 {user.username}
@@ -333,7 +332,6 @@ const Header = () => {
               )}
             </div>
           </>
-
         )}
       </div>
     </header>

@@ -220,7 +220,7 @@ const HomePage: React.FC = () => {
   className="min-h-screen w-full flex justify-center items-start 
              bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
              font-sans px-4 overflow-x-hidden
-             pt-[100px] md:pt-2"  
+             pt-[30px] md:pt-2"  
 >
       <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
         <div className="flex w-full gap-4 md:gap-6 flex-col md:flex-row items-stretch">

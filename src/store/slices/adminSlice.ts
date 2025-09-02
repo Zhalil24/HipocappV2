@@ -4,6 +4,7 @@ import { AllEntryModel } from "@/core/models/entries/allEntriesModel";
 import { PaginationModel } from "@/core/models/pagination/paginationModel";
 import { adminPanelModelState } from "@/core/models/panel/initialPanelModel";
 import { RequestModel } from "@/core/models/request/requestModel";
+import { UserDataModel } from "@/core/models/user/userDataModel";
 import { BaseService } from "@/core/services/baseService";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -140,7 +141,64 @@ export const deleteAllEntry = createAsyncThunk(
     }
 );
 
+export const fetchUserList = createAsyncThunk<
+    BaseResponseModel<PaginationModel<UserDataModel>>,
+    { apiUrl: string, data: RequestModel }
+>(
+    "users/fetchList",
+    async ({ apiUrl, data }) => {
+        const url = `${apiUrl}?id=${data.id}&page=${data.page}`;
+        const response = await baseService.get<PaginationModel<UserDataModel>>(url);
+        return response;
+    }
+);
 
+export const deleteUser = createAsyncThunk(
+    'api/user/Delete',
+    async (model: RequestModel) => {
+        const response = await baseService.delete<BaseResponseModel<null>>(
+            'api/user/Delete',
+            { params: { id: model.id } }
+        );
+        return response;
+    }
+);
+
+export const updateUser = createAsyncThunk<
+    BaseResponseModel<UserDataModel>,
+    UserDataModel
+>(
+    'user/update',
+    async (userModel) => {
+        const formData = new FormData();
+        for (const key in userModel) {
+            const value = userModel[key as keyof UserDataModel];
+            if (value !== undefined && value !== null) {
+                formData.append(key, value as any);
+            }
+        }
+        const response = await baseService.put<FormData, UserDataModel>(
+            '/api/user/Edit',
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        return response;
+    }
+);
+
+export const updateUserStatus = createAsyncThunk<
+    BaseResponseModel<UserDataModel>,
+    number
+>(
+    'user/updateStatus',
+    async (userId) => {
+        const response = await baseService.post<null, UserDataModel>(
+            `/api/user/UserUpdateStatus?userId=${userId}`,
+            null
+        );
+        return response;
+    }
+);
 
 const adminSlice = createSlice({
     name: 'admin',
@@ -290,7 +348,6 @@ const adminSlice = createSlice({
                 state.error = action.error.message ?? "Veri alınamadı";
             })
 
-
             .addCase(deleteAllEntry.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -307,8 +364,74 @@ const adminSlice = createSlice({
             .addCase(deleteAllEntry.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Silme işlemi başarısız';
-            });
+            })
 
+            .addCase(fetchUserList.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchUserList.fulfilled, (state, action) => {
+                state.loading = false;
+                state.allUsers = action.payload.data;
+            })
+            .addCase(fetchUserList.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Beklenmeyen bir hata oluştu.";
+            })
+
+            .addCase(deleteUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.loading = false;
+                const userId = action.meta.arg.id;
+                if (state.allUsers?.items) {
+                    state.allUsers.items = state.allUsers.items.filter(
+                        user => user.id !== userId
+                    );
+                }
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Silme işlemi başarısız';
+            })
+
+            .addCase(updateUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateUser.fulfilled, (state, action: PayloadAction<BaseResponseModel<UserDataModel>>) => {
+                state.loading = false;
+                if (action.payload.success && action.payload.data) {
+                    const updatedUser = action.payload.data;
+                    if (state.allUsers?.items) {
+                        state.allUsers.items = state.allUsers.items.map((user) =>
+                            user.id === updatedUser.id ? { ...user, ...updatedUser } : user
+                        );
+                    }
+                }
+            })
+            .addCase(updateUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Kullanıcı güncellenemedi';
+            })
+
+            .addCase(updateUserStatus.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateUserStatus.fulfilled, (state, action: PayloadAction<BaseResponseModel<UserDataModel>>) => {
+                state.loading = false;
+                if (action.payload.success && action.payload.data && state.allUsers?.items) {
+                    const updatedUser = action.payload.data;
+                    state.allUsers.items = state.allUsers.items.filter(user => user.id !== updatedUser.id);
+                }
+            })
+            .addCase(updateUserStatus.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Kullanıcı durumu güncellenemedi';
+            });
     }
 })
 

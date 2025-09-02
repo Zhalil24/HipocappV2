@@ -1,4 +1,4 @@
 export interface requestModel {
   id: number;
-  page: number;
+  page: number | null;
 }
