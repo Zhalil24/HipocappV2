@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Pagination } from "@/components/Pagination";
 import { PaginationModel } from "@/core/models/pagination/paginationModel";
 import { UserDataModel } from "@/core/models/user/userDataModel";
+import UserModal from "../UserModel";
 
 
 type UserListVariant = "all" | "unapproved";
@@ -13,6 +14,7 @@ export const UserList = ({
   onPageChange,
   onApprove,
   onReject,
+  onCreate,
   variant = "all",
 }: {
   pagination: PaginationModel<UserDataModel>;
@@ -21,6 +23,7 @@ export const UserList = ({
   onPageChange: (page: number) => void;
   onApprove?: (id: number) => void;
   onReject?: (id: number) => void;
+  onCreate?: (user: Partial<UserDataModel>) => void;
   variant?: UserListVariant;
 }) => {
   const [confirmAction, setConfirmAction] = useState<{
@@ -29,9 +32,18 @@ export const UserList = ({
   } | null>(null);
 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<UserDataModel | null>(null);
 
   return (
-    <div>
+    <div className="relative">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setEditingUser({} as any)}
+          className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600"
+        >
+          + Kullanıcı Ekle
+        </button>
+      </div>
       <table className="w-full border border-gray-200">
         <thead className="bg-gray-100">
           <tr>
@@ -90,7 +102,7 @@ export const UserList = ({
                   {variant === "all" ? (
                     <>
                       <button
-                        onClick={() => onEdit && onEdit(user)}
+                        onClick={() => setEditingUser(user)}
                         className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
                       >
                         Güncelle
@@ -174,6 +186,23 @@ export const UserList = ({
           </div>
         </div>
       )}
+      {editingUser && (
+        <UserModal
+          user={editingUser}
+          isEdit={!!editingUser?.id}
+          onClose={() => setEditingUser(null)}
+          onUpdate={(updatedFields) => {
+            if (editingUser?.id) {
+              onEdit?.({ ...editingUser, ...updatedFields });
+            }
+          }}
+          onCreate={(createdFields) => {
+            onCreate?.(createdFields);
+            setEditingUser(null);
+          }}
+        />
+      )}
+
     </div>
   );
 

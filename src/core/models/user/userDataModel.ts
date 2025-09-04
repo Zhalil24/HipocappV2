@@ -13,7 +13,7 @@ export interface UserDataModel {
   identityNumber: string;
   accessToken: AccessToken;
   imageURL: string;
-  image: string | null;
+  image: File | null;
   status: boolean | null;
   photoURL: string | null;
   photo: string | null;
@@ -24,6 +24,7 @@ export interface UserDataModel {
   entries: any[];
   titles: any[];
   degree: any | null;
+  phoneNumber: number | null;
   roleDTO: RoleDTO;
   iconDTO: any | null;
   isOnline: boolean | null;

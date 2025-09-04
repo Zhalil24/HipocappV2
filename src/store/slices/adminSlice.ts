@@ -166,25 +166,40 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk<
     BaseResponseModel<UserDataModel>,
-    UserDataModel
+    Partial<UserDataModel>
 >(
     'user/update',
     async (userModel) => {
         const formData = new FormData();
-        for (const key in userModel) {
-            const value = userModel[key as keyof UserDataModel];
+        const fieldsToSend: (keyof UserDataModel)[] = [
+            'id',
+            'userName',
+            'name',
+            'surname',
+            'email',
+            'identityNumber'
+        ];
+
+        fieldsToSend.forEach((key) => {
+            const value = userModel[key];
             if (value !== undefined && value !== null) {
                 formData.append(key, value as any);
             }
-        }
-        const response = await baseService.put<FormData, UserDataModel>(
+        });
+
+        formData.append("Password", "a");
+        formData.append("PasswordRe", "a");
+
+        const response = await baseService.post<FormData, UserDataModel>(
             '/api/user/Edit',
             formData,
             { headers: { 'Content-Type': 'multipart/form-data' } }
         );
+
         return response;
     }
 );
+
 
 export const updateUserStatus = createAsyncThunk<
     BaseResponseModel<UserDataModel>,
@@ -199,6 +214,27 @@ export const updateUserStatus = createAsyncThunk<
         return response;
     }
 );
+
+export const registerUser = createAsyncThunk<
+    BaseResponseModel<UserDataModel>,
+    FormData,
+    { rejectValue: string }
+>(
+    "register/registerUser",
+    async (formData) => {
+        const response = await baseService.post<FormData, UserDataModel>(
+            "api/user/Register",
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            }
+        );
+        return response;
+    }
+);
+
 
 const adminSlice = createSlice({
     name: 'admin',
@@ -403,15 +439,30 @@ const adminSlice = createSlice({
             })
             .addCase(updateUser.fulfilled, (state, action: PayloadAction<BaseResponseModel<UserDataModel>>) => {
                 state.loading = false;
-                if (action.payload.success && action.payload.data) {
-                    const updatedUser = action.payload.data;
-                    if (state.allUsers?.items) {
-                        state.allUsers.items = state.allUsers.items.map((user) =>
-                            user.id === updatedUser.id ? { ...user, ...updatedUser } : user
-                        );
-                    }
+                state.message = action.payload.message ?? "Bir hata gerçekleşti.";
+                if (!action.payload) {
+                    return;
                 }
+                if (!action.payload.data) {
+                    return;
+                }
+                const updatedUser = action.payload.data;
+                if (!state.allUsers) {
+                    return;
+                }
+                const index = state.allUsers.items.findIndex(u => Number(u.id) === Number(updatedUser.id));
+                if (index === -1) {
+                    return;
+                }
+                const newItems = [
+                    ...state.allUsers.items.slice(0, index),
+                    { ...state.allUsers.items[index], ...updatedUser },
+                    ...state.allUsers.items.slice(index + 1)
+                ];
+                state.allUsers = { ...state.allUsers, items: newItems };
             })
+
+
             .addCase(updateUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Kullanıcı güncellenemedi';
@@ -431,7 +482,22 @@ const adminSlice = createSlice({
             .addCase(updateUserStatus.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Kullanıcı durumu güncellenemedi';
+            })
+
+            .addCase(registerUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(registerUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message ?? "Bir hata oluştu!";
+            })
+            .addCase(registerUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Kayıt başarısız oldu.";
             });
+
+
     }
 })
 

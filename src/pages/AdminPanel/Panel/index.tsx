@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { DegreeChart } from "@/components/DegreeChart";
 import { clearMessage, fetchLastEntries } from "@/store/slices/entrySlice";
-import { addContent, deleteAllEntry, deleteContent, deleteEntry, deleteUser, fetchContent, fetchEntries, fetchUserCount, fetchUserList, fetchUsersCountByDegreeId, updateContent, updateUser, updateUserStatus } from "@/store/slices/adminSlice";
+import { addContent, deleteAllEntry, deleteContent, deleteEntry, deleteUser, fetchContent, fetchEntries, fetchUserCount, fetchUserList, fetchUsersCountByDegreeId, registerUser, updateContent, updateUser, updateUserStatus } from "@/store/slices/adminSlice";
 import { AdminMenuConstants, CrudOperation, Item } from "@/Utilities/constants/panelItems";
 import { ContentList } from "@/components/ContentList";
 import { ContentModel } from "@/core/models/content/contentModel";
@@ -111,6 +111,22 @@ export default function AdminPanel() {
     const handleUserUpdateStatus = (userId: number) => {
         dispatch(updateUserStatus(userId))
     }
+    const handleCreateUser = async (userData: Partial<UserDataModel>) => {
+        const formData = new FormData();
+        if (userData.userName) formData.append("userName", userData.userName);
+        if (userData.name) formData.append("name", userData.name);
+        if (userData.surname) formData.append("surname", userData.surname);
+        if (userData.email) formData.append("email", userData.email);
+        if (userData.phoneNumber) formData.append("phoneNumber", userData.phoneNumber.toString());
+        if (userData.identityNumber) formData.append("identityNumber", userData.identityNumber);
+        if (userData.password) formData.append("password", userData.password);
+        if (userData.degreeId) formData.append("degreeId", userData.degreeId.toString());
+        if (userData.passwordRe) formData.append("PasswordRepeat", userData.passwordRe);
+        if (userData.image) {
+            formData.append("image", userData.image as File);
+        }
+        dispatch(registerUser(formData))
+    };
 
     useEffect(() => {
         handlePageChange(0)
@@ -151,10 +167,11 @@ export default function AdminPanel() {
                 if (operation === "list") {
                     return (
                         <UserList
-                            pagination={adminState.allUsers}  
+                            pagination={adminState.allUsers}
                             onPageChange={handlePageChange}
                             onDelete={handleUserDelete}
                             onEdit={handleUserUpdate}
+                            onCreate={handleCreateUser}
                             variant="all"
                         />
                     );
@@ -162,7 +179,7 @@ export default function AdminPanel() {
                 if (operation === "list2") {
                     return (
                         <UserList
-                            pagination={adminState.allUsers}  
+                            pagination={adminState.allUsers}
                             onPageChange={handlePageChange}
                             onReject={handleUserDelete}
                             onApprove={handleUserUpdateStatus}
