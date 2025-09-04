@@ -33,7 +33,7 @@ export const EndpointMappings: Record<AdminMenuType, Partial<Record<"list" | "cr
     //  delete: Endpoints.DeleteModule,
   },
   [AdminMenuType.Roles]: {
-    //   list: Endpoints.GetRoles,
+    list: Endpoints.GetRoles,
     //   create: Endpoints.CreateRole,
     //  update: Endpoints.UpdateRole,
     //  delete: Endpoints.DeleteRole,

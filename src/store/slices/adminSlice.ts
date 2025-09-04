@@ -1,11 +1,15 @@
 import { BaseResponseModel, LastEntryModel, UserLoginModel, userLoginModelState } from "@/core/models";
 import { ContentModel } from "@/core/models/content/contentModel";
 import { AllEntryModel } from "@/core/models/entries/allEntriesModel";
+import { ModuleRoleModel } from "@/core/models/ModuleRole/modulRoleModel";
 import { PaginationModel } from "@/core/models/pagination/paginationModel";
 import { adminPanelModelState } from "@/core/models/panel/initialPanelModel";
 import { RequestModel } from "@/core/models/request/requestModel";
+import { RoleDTO } from "@/core/models/role/roleModel";
+import { RoleModelResponse } from "@/core/models/RoleModel/roleModulModel";
 import { UserDataModel } from "@/core/models/user/userDataModel";
 import { BaseService } from "@/core/services/baseService";
+import { Endpoints } from "@/Utilities/enums/Endpoints";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const baseService = new BaseService();
@@ -234,6 +238,75 @@ export const registerUser = createAsyncThunk<
         return response;
     }
 );
+
+
+export const fetchRoles = createAsyncThunk<
+    BaseResponseModel<RoleDTO[]>
+>(
+    "roles/fetchRoles",
+    async () => {
+        const url = Endpoints.GetRoles;
+        const response = await baseService.get<RoleDTO[]>(url);
+        return response;
+    }
+);
+
+export const createRole = createAsyncThunk<
+    BaseResponseModel<RoleDTO>,
+    RoleDTO
+>(
+    "roles/createRole",
+    async (role) => {
+        const url = `${Endpoints.CreateRole}`;
+        const response = await baseService.post<RoleDTO, RoleDTO>(url, role);
+        return response;
+
+    }
+);
+
+export const editRole = createAsyncThunk<
+    BaseResponseModel<RoleDTO>,
+    RoleDTO
+>(
+    "roles/editRole",
+    async (role) => {
+        const url = Endpoints.UpdateRole;
+        const response = await baseService.put<RoleDTO, RoleDTO>(url, role);
+        return response;
+    }
+);
+
+export const deleteRole = createAsyncThunk(
+    'role/Delete',
+    async (model: RequestModel) => {
+        const url = Endpoints.DeleteRole;
+        const response = await baseService.delete<BaseResponseModel<null>>(
+            url,
+            { params: { id: model.id } }
+        );
+        return response;
+    }
+);
+
+export const fetchModuleRole = createAsyncThunk<
+    RoleModelResponse,
+    number
+>(
+    "moduleRole/fetchModuleRole",
+    async (roleId: number) => {
+        const url = `https://hipocapp.com${Endpoints.RolAuthentication}?id=${roleId}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const data: RoleModelResponse = await response.json();
+        return data;
+    }
+);
+
 
 
 const adminSlice = createSlice({
@@ -495,8 +568,86 @@ const adminSlice = createSlice({
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Kayıt başarısız oldu.";
-            });
+            })
 
+            .addCase(fetchRoles.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchRoles.fulfilled, (state, action) => {
+                state.loading = false;
+                state.roles = action.payload.data ?? null;
+            })
+            .addCase(fetchRoles.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
+
+            .addCase(createRole.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(createRole.fulfilled, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message ?? "Bir hata oluştu.";
+                if (action.payload.data && state.roles) {
+                    state.roles.push(action.payload.data);
+                }
+            })
+            .addCase(createRole.rejected, (state, action) => {
+                state.loading = false;
+                state.error = (action.payload as string) ?? "Bir hata oluştu";
+            })
+
+            .addCase(editRole.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(editRole.fulfilled, (state, action) => {
+                state.loading = false;
+                const updatedRole = action.payload.data;
+                if (updatedRole) {
+                    const index = state.roles!.findIndex((r) => r.id === updatedRole.id);
+                    if (index !== -1) {
+                        state.roles![index] = updatedRole;
+                    }
+                }
+            })
+            .addCase(editRole.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+
+            .addCase(deleteRole.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteRole.fulfilled, (state, action) => {
+                state.loading = false;
+                const roleId = action.meta.arg.id;
+                if (state.roles) {
+                    state.roles = state.roles.filter(
+                        role => role.id !== roleId
+                    );
+                }
+            })
+            .addCase(deleteRole.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Silme işlemi başarısız';
+            })
+
+            .addCase(fetchModuleRole.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchModuleRole.fulfilled, (state, action) => {
+                state.loading = false;
+                state.moduleRoles = action.payload ?? null;
+            })
+            .addCase(fetchModuleRole.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
 
     }
 })

@@ -1,7 +1,10 @@
 import { ContentModel } from "../content/contentModel";
 import { AllEntryModel } from "../entries/allEntriesModel";
 import { LastEntryModel } from "../entries/lastEntriesModel";
+import { ModuleRoleModel } from "../ModuleRole/modulRoleModel";
 import { PaginationModel } from "../pagination/paginationModel";
+import { RoleDTO } from "../role/roleModel";
+import { RoleModelResponse } from "../RoleModel/roleModulModel";
 import { UserDataModel } from "../user/userDataModel";
 
 export interface InitialAdminPanelModel {
@@ -17,6 +20,8 @@ export interface InitialAdminPanelModel {
   content: ContentModel[];
   allEntries: PaginationModel<AllEntryModel> | null;
   allUsers: PaginationModel<UserDataModel> | null;
+  roles: RoleDTO[] | null;
+  moduleRoles: RoleModelResponse | null;
 }
 
 export const adminPanelModelState: InitialAdminPanelModel = {
@@ -32,4 +37,6 @@ export const adminPanelModelState: InitialAdminPanelModel = {
   content: [],
   allEntries: null,
   allUsers: null,
+  roles: [],
+  moduleRoles: null
 };

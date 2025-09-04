@@ -18,5 +18,10 @@ export enum Endpoints {
     GetAllEntries = '/api/entry/GetList',
     GetUsers = '/api/user/GetAllUser',
     GetApprovedUsers = 'api/user/GetUsersByStatusTrue',
-    GetUnapprovedUsers = '/api/user/GetUsersByStatusFalse'
+    GetUnapprovedUsers = '/api/user/GetUsersByStatusFalse',
+    GetRoles = '/api/role/GetList',
+    CreateRole = '/api/role/Create',
+    UpdateRole = '/api/role/Edit',
+    DeleteRole = '/api/role/Delete',
+     RolAuthentication = '/api/role/RolAuthentication',
 }

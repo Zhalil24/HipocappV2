@@ -69,10 +69,6 @@ export class AdminMenuConstants {
           label: "Yorumlar İşlemleri",
           endpoints: [
               { operation: "list", endpoint: Endpoints.GetAllEntries, hasPage: true, label: "Yorumlar Listesi" },
-            //  { operation: "create", endpoint: Endpoints.CreateUser, hasPage: true, label: "Kullanıcı Ekle" },
-            //  { operation: "update", endpoint: Endpoints.UpdateUser, hasPage: false },
-            //  { operation: "delete", endpoint: Endpoints.DeleteUser, hasPage: false },
-            //  { operation: "detail", endpoint: Endpoints.GetUserDetail, hasPage: true, label: "Kullanıcı Detayı" },
           ],
         },
       ],
@@ -101,10 +97,7 @@ export class AdminMenuConstants {
         {
           label: "Rol İşlemleri",
           endpoints: [
-            // { operation: "list", endpoint: Endpoints.GetRoles, hasPage: true, label: "Rol Listesi" },
-            // { operation: "create", endpoint: Endpoints.CreateRole, hasPage: true, label: "Rol Ekle" },
-            // { operation: "update", endpoint: Endpoints.UpdateRole, hasPage: false },
-            // { operation: "delete", endpoint: Endpoints.DeleteRole, hasPage: false },
+             { operation: "list", endpoint: Endpoints.GetRoles, hasPage: true, label: "Rol Listesi" },
           ],
         },
       ],

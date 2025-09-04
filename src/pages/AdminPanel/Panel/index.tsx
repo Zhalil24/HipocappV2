@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { DegreeChart } from "@/components/DegreeChart";
 import { clearMessage, fetchLastEntries } from "@/store/slices/entrySlice";
-import { addContent, deleteAllEntry, deleteContent, deleteEntry, deleteUser, fetchContent, fetchEntries, fetchUserCount, fetchUserList, fetchUsersCountByDegreeId, registerUser, updateContent, updateUser, updateUserStatus } from "@/store/slices/adminSlice";
+import { addContent, createRole, deleteAllEntry, deleteContent, deleteEntry, deleteRole, deleteUser, editRole, fetchContent, fetchEntries, fetchModuleRole, fetchRoles, fetchUserCount, fetchUserList, fetchUsersCountByDegreeId, registerUser, updateContent, updateUser, updateUserStatus } from "@/store/slices/adminSlice";
 import { AdminMenuConstants, CrudOperation, Item } from "@/Utilities/constants/panelItems";
 import { ContentList } from "@/components/ContentList";
 import { ContentModel } from "@/core/models/content/contentModel";
@@ -18,6 +18,8 @@ import { ToastContainer, toast } from "react-toastify";
 import { EntryList } from "@/components/EntryList";
 import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserList } from "@/components/UserList";
+import RoleList from "@/components/RoleList";
+import { RoleDTO } from "@/core/models/role/roleModel";
 
 export default function AdminPanel() {
     const dispatch = useDispatch<AppDispatch>();
@@ -31,6 +33,8 @@ export default function AdminPanel() {
     const [activeItemType, setActiveItemType] = useState<AdminMenuType | null>(null);
     const [Endpoints, setEndpoints] = useState<Endpoints | null>(null);
     const [operation, setOperation] = useState<CrudOperation | null>(null);
+    const [authorizedRoleId, setAuthorizedRoleId] = useState<number | null>(null);
+
 
     useEffect(() => {
         dispatch(fetchLastEntries());
@@ -128,12 +132,24 @@ export default function AdminPanel() {
         dispatch(registerUser(formData))
     };
 
+    const handleRoleCreate = async (role: RoleDTO) => {
+        await dispatch(createRole(role));
+        dispatch(fetchRoles());
+    };
+
+    const handleRoleDelete = (roleId: number) => {
+        dispatch(deleteRole({ id: roleId, page: 0 }));
+    };
+
     useEffect(() => {
         handlePageChange(0)
     }, [activeItemType, operation, Endpoints]);
 
     useEffect(() => {
-        dispatch(fetchContent(Endpoints!))
+        dispatch(fetchContent(Endpoints!));
+        dispatch(fetchRoles());
+        dispatch(fetchModuleRole(1));
+        //Burada kaldımm static değeri dinamik hale getirelecek
     }, [Endpoints])
 
     useEffect(() => {
@@ -159,6 +175,20 @@ export default function AdminPanel() {
                         onDelete={handleEntryDelete}
                     />
                 );
+            case AdminMenuType.Roles:
+                if (!adminState.roles) return <LoadingWidget isLight={true} />;
+                
+                return (
+                    <RoleList
+                        onAuthorize={() => { }}
+                        onAdd={handleRoleCreate}
+                        onDelete={handleRoleDelete}
+                        roles={adminState.roles}
+                        onSelectionChange={()=>{}}
+                        roleModelResponse={adminState.moduleRoles!}
+                        onAuthorizeClick={(roleId)=> {setAuthorizedRoleId(roleId)}}
+                    />
+                )
             case AdminMenuType.Users:
                 if (adminState.loading) return <LoadingWidget isLight={true} />;
                 if (!adminState.allUsers || adminState.allUsers.items.length === 0) {
