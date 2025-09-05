@@ -118,16 +118,17 @@ const Header = () => {
   return (
     <header className="bg-[#000000FF] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 
       px-4 md:px-6 h-auto md:h-[72px] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 py-3 md:py-0">
-      
+
       <div className="flex items-center md:flex-row md:items-center gap-3 md:gap-6 w-full">
         <div
           className="flex items-center gap-4 cursor-pointer select-none"
           onClick={() => navigate('/')}
         >
           {/* Logo boyutunu mobil için küçülttük */}
-          <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#2b4560] flex items-center justify-center overflow-hidden shadow-inner">
-            <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+          <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden">
+            <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-full" />
           </div>
+
           <h1
             className="hidden md:block text-2xl font-bold tracking-wide select-none leading-none"
             style={{ fontFamily: 'system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif' }}
@@ -201,28 +202,29 @@ const Header = () => {
                 className={[
                   "group relative w-32 px-4 py-1 rounded-md text-sm font-semibold select-none overflow-hidden",
                   "transition-all duration-300 ease-out focus:outline-none",
-                  "bg-[#000000] ring-1 ring-[#0071E3]/55",
+                  "bg-[#000000] ring-1 ring-[#7C3AED]/55",
                   active
-                    ? "text-white shadow-[0_10px_24px_rgba(0,113,227,0.35)]"
-                    : "text-white/85 hover:text-white hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,113,227,0.35)]",
-                  "focus-visible:ring-2 focus-visible:ring-[#0071E3]"
+                    ? "text-white shadow-[0_10px_24px_rgba(124,58,237,0.35)]"
+                    : "text-white/85 hover:text-white hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(124,58,237,0.35)]",
+                  "focus-visible:ring-2 focus-visible:ring-[#7C3AED]"
                 ].join(" ")}
               >
                 <span className="relative z-10">{name}</span>
                 <span
                   className={[
                     "pointer-events-none absolute inset-0 rounded-md",
-                    "bg-[linear-gradient(135deg,#0071E3_0%,#004a98_100%)]",
+                    "bg-[linear-gradient(135deg,#7C3AED_0%,#5B21B6_100%)]",
                     "transform transition-transform duration-300",
                     active ? "translate-y-0" : "translate-y-full group-hover:translate-y-0"
                   ].join(" ")}
                 />
                 <span
                   className="pointer-events-none absolute inset-x-0 -top-6 h-12 rounded-md
-                bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 />
               </button>
             );
+
           })}
         </nav>
       </div>
@@ -230,25 +232,28 @@ const Header = () => {
 
         {user === null ? (
           <>
-            <div className="flex gap-1 sm:gap-3">
+            <div className="flex gap-1 sm:gap-2">
               <button
                 onClick={() => navigate('/login')}
-                className="px-4 py-2 rounded-md bg-[#000000FF] text-white shadow-md 
-                  font-semibold text-xs sm:text-sm md:text-base 
-                  border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
+                className="px-3 py-1.5 rounded-md bg-[#000000FF] text-white shadow-md 
+    font-semibold text-[10px] sm:text-[11px] md:text-[12px] 
+    border-b-2 border-transparent hover:border-[#0071E3] transition-colors
+    whitespace-nowrap"
               >
                 Giriş Yap
               </button>
 
+
               <button
                 onClick={() => navigate('/sign-up')}
-                className="px-4 py-2 rounded-md bg-[#000000FF] text-white shadow-md 
-                  font-semibold text-xs sm:text-sm md:text-base 
-                  border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
+                className="px-3 py-1.5 rounded-md bg-[#000000FF] text-white shadow-md 
+      font-semibold text-[10px] sm:text-[11px] md:text-[12px] 
+      border-b-2 border-transparent hover:border-[#0071E3] transition-colors"
               >
                 Kaydol
               </button>
             </div>
+
           </>
 
         ) : (

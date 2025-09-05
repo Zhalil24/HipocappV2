@@ -49,7 +49,7 @@ const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, 
       : fallbackDescription.slice(0, 250) + '...';
 
   return (
-    <div className="bg-[#FFFDD0] p-5 rounded-xl shadow-md border">
+    <div className="bg-white p-5 rounded-none border-t-2 border-b-2 border-gray-500">
       {titleName && (
         <h3 className="text-[15px] font-semibold text-[#2B4560] mb-2">
           {titleName}
@@ -68,17 +68,16 @@ const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, 
       )}
 
       <p
-        className="text-gray-700 text-[11px] whitespace-pre-line"
+        className="text-gray-700 text-[14px] whitespace-pre-line"
         style={{ wordBreak: 'break-word' }}
       >
         {displayedDescription}
       </p>
 
-
       {isLong && (
         <div className="flex justify-center mt-3">
           <button
-            className="text-[11px] text-[#2B4560] font-medium hover:underline focus:outline-none"
+            className="text-[11px] font-medium text-indigo-500 hover:text-purple-600 hover:underline focus:outline-none transition-colors"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? 'Kısalt' : 'Devamını Oku'}
@@ -86,15 +85,15 @@ const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, 
         </div>
       )}
 
-      {(userNameSurname || userName) && (
+      {userName && (
         <div className="mt-4 text-[10px] text-gray-500 flex flex-col gap-1">
           <p className="flex items-center gap-1">
-            Yazar:{" "}
+            <span className="text-black font-medium">Yazar:</span>{" "}
             <span
               onClick={() => goToProfile(userId)}
-              className="cursor-pointer text-cyan-500 hover:underline hover:text-cyan-400 transition-colors duration-200 flex items-center gap-1"
+              className="cursor-pointer text-indigo-500 hover:text-purple-600 hover:underline transition-colors duration-200 flex items-center gap-1"
             >
-              {userNameSurname || userName}
+              {userName}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-3 w-3"
@@ -112,25 +111,26 @@ const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, 
             </span>
           </p>
 
-          {/* Mesaj Gönder butonu */}
-          {userName && (
-            <button
-              onClick={goToChat}
-              className="self-start text-[11px] px-2 py-1 rounded-md bg-cyan-500 text-white hover:bg-cyan-600 transition"
-            >
-              Mesaj Gönder
-            </button>
-          )}
+
+          <button
+            onClick={goToChat}
+            className="self-start text-[11px] px-2 py-1 rounded-md 
+           bg-gradient-to-r from-indigo-500 to-purple-600 text-white 
+           hover:from-indigo-600 hover:to-purple-700 
+           transition shadow-md"
+          >
+            Mesaj Gönder
+          </button>
         </div>
       )}
 
       {formattedDate && (
-        <p className="text-[10px] text-gray-400 mt-1">{formattedDate}</p>
+        <p className="text-[10px] text-black mt-1">{formattedDate}</p>
       )}
-
-
     </div>
+
   );
+
 
 };
 

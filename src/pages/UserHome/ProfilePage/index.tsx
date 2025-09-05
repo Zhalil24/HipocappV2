@@ -185,13 +185,10 @@ return (
                       `${profile.name} ${profile.surname}`
                     )}&background=0D8ABC&color=fff&size=128`
               }
-              alt={`${profile.name} ${profile.surname}`}
+             
               className="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover ring-4 ring-cyan-500 shadow-md"
             />
 
-            <h2 className="mt-3 sm:mt-4 text-base sm:text-lg font-semibold">
-              {profile.name} {profile.surname}
-            </h2>
             <p className="text-sm text-cyan-400">@{profile.username}</p>
 
             {/* Navigasyon butonları */}

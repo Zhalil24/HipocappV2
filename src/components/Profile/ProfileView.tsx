@@ -36,21 +36,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile }) => {
         Kullanıcı Detayları
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InfoItem
-          icon={<User size={24} />}
-          label="İSİM"
-          value={profile.name}
-        />
-        <InfoItem
-          icon={<User size={24} />}
-          label="SOYİSİM"
-          value={profile.surname}
-        />
-        <InfoItem
-          icon={<Mail size={24} />}
-          label="E-posta Adresi"
-          value={profile.email}
-        />
+
         <InfoItem
           icon={<ShieldCheck size={24} />}
           label="KULLANICI ADI"

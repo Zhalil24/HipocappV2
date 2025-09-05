@@ -211,17 +211,17 @@ const HomePage: React.FC = () => {
     }
   }, [dailyEntriesState.message, dispatch]);
 
-  
+
   const isActive = (p: string) =>
     location.pathname === p || location.pathname.startsWith(p + "/");
 
   return (
     <div
-  className="min-h-screen w-full flex justify-center items-start 
-             bg-gradient-to-br from-[#e0f2fe] via-white to-[#f0f9ff] 
+      className="min-h-screen w-full flex justify-center items-start 
+             bg-gradient-to-br from-[#FFFFFFFF] via-white to-[#FFFFFFFF] 
              font-sans px-4 overflow-x-hidden
-             pt-[30px] md:pt-2"  
->
+             pt-[30px] md:pt-2"
+    >
       <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
         <div className="flex w-full gap-4 md:gap-6 flex-col md:flex-row items-stretch">
           <div className="md:hidden -mx-4 px-4">
@@ -282,26 +282,30 @@ const HomePage: React.FC = () => {
             <main className="flex-1 w-full pb-12 overflow-y-auto">
               <div className="px-1 sm:px-2 lg:px-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 w-full gap-3 sm:gap-4">
-                  <div className="flex space-x-3 mt-2 sm:mt-4">
-                    <button
-                      onClick={() => handleModeChange('daily')}
-                      className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'daily' && !selectedTitle
-                        ? 'bg-[#0071E3] text-white'
-                        : 'bg-white text-[#2B4560] border-[#2B4560]'
-                        }`}
-                    >
-                      Daily
-                    </button>
-                    <button
-                      onClick={() => handleModeChange('stream')}
-                      className={`px-4 py-2 rounded-md border font-medium text-sm ${entryMode === 'stream' && !selectedTitle
-                        ? 'bg-[#0071E3] text-white'
-                        : 'bg-white text-[#2B4560] border-[#2B4560]'
-                        }`}
-                    >
-                      Stream
-                    </button>
-                  </div>
+<div className="flex space-x-3 mt-2 sm:mt-4">
+  <button
+    onClick={() => handleModeChange('daily')}
+    className={`px-4 py-2 rounded-md font-medium text-sm transition-colors
+      ${
+        entryMode === 'daily' && !selectedTitle
+          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+          : 'bg-white text-[#2B4560] border border-[#2B4560] hover:bg-white/80'
+      }`}
+  >
+    Daily
+  </button>
+  <button
+    onClick={() => handleModeChange('stream')}
+    className={`px-4 py-2 rounded-md font-medium text-sm transition-colors
+      ${
+        entryMode === 'stream' && !selectedTitle
+          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+          : 'bg-white text-[#2B4560] border border-[#2B4560] hover:bg-white/80'
+      }`}
+  >
+    Stream
+  </button>
+</div>
 
                   {selectedTitle && (
                     <div className="mt-1 sm:mt-3">

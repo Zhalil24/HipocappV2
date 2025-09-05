@@ -116,25 +116,40 @@ const AdRotator: React.FC<AdRotatorProps> = ({
           </div>
         )}
       </div>
-      <div className="space-y-1 p-3">
+      <div className="space-y-1 p-3 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-b-xl">
         <div className="truncate text-sm font-semibold text-white">{item.title}</div>
 
         {showDescription && (
-          <p className="line-clamp-2 text-xs text-gray-300">{item.description}</p>
+          <p className="line-clamp-2 text-xs text-gray-200">{item.description}</p>
         )}
 
         <a
           href={item.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 hover:underline transition"
+          className="inline-flex items-center gap-1 text-xs 
+               text-indigo-300 hover:text-purple-300 hover:underline 
+               transition-colors"
         >
           {shortHost}
-          <svg width="12" height="12" viewBox="0 0 24 24" className="inline-block">
-            <path fill="currentColor" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14z" /><path fill="currentColor" d="M5 5h5V3H3v7h2z" />
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            className="inline-block"
+          >
+            <path
+              fill="currentColor"
+              d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14z"
+            />
+            <path
+              fill="currentColor"
+              d="M5 5h5V3H3v7h2z"
+            />
           </svg>
         </a>
       </div>
+
     </div>
   );
 };
