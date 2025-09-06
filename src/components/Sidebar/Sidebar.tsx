@@ -170,6 +170,48 @@ const Sidebar: React.FC<SidebarProps> = ({
           </p>
         )}
       </div>
+      {isOpenModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
+            <h2 className="text-lg font-semibold mb-4">Yeni Başlık ve Entry Aç</h2>
+
+            <input
+              type="text"
+              placeholder="Yeni başlık adı"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="mb-3 w-full border border-gray-300 rounded p-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <textarea
+              placeholder="Entry açıklaması"
+              value={newEntry}
+              onChange={(e) => setNewEntry(e.target.value)}
+              className="mb-3 w-full border border-gray-300 rounded p-2 h-48 resize-none text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsOpenModal(false)}
+                className="px-4 py-2 bg-gray-400 rounded text-white hover:bg-gray-500"
+              >
+                İptal
+              </button>
+              <button
+                onClick={() => {
+                  handleCreateTitle();
+                  setIsOpenModal(false);
+                  setNewTitle('');
+                  setNewEntry('');
+                }}
+                className="px-4 py-2 bg-blue-600 rounded text-white hover:bg-blue-700"
+              >
+                Kaydet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
 
   );

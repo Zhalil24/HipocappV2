@@ -217,9 +217,12 @@ const HomePage: React.FC = () => {
   const isActive = (p: string) =>
     location.pathname === p || location.pathname.startsWith(p + "/");
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+
   return (
     <div
-  className="min-h-screen w-full flex justify-center items-start 
+      className="min-h-screen w-full flex justify-center items-start 
              bg-gradient-to-br from-[#FFFFFFFF] via-white to-[#FFFFFFFF] 
              font-sans px-0 overflow-x-hidden
              pt-[30px] md:pt-2"
@@ -227,49 +230,80 @@ const HomePage: React.FC = () => {
       <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
         <div className="flex w-full gap-4 md:gap-6 flex-col md:flex-row items-stretch">
           <div className="md:hidden -mx-4 px-4">
-            <div className="flex gap-2 overflow-x-auto pb-2 pt-1">
-              {pages.map(({ name, path }) => {
-                const active = isActive(path);
-                return (
-                  <button
-                    key={path}
-                    onClick={() => navigate(path)}
-                    className={[
-                      "group relative px-3 py-2 rounded-full text-xs leading-5 font-semibold select-none overflow-hidden",
-                      "transition-all duration-300 ease-out focus:outline-none",
-                      "border border-white/10 bg-[#000000] ring-1 ring-[#0071E3]/55",
-                      "whitespace-nowrap",
-                      active
-                        ? "text-white shadow-[0_10px_24px_rgba(0,113,227,0.35)]"
-                        : "text-white/85 hover:text-white hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,113,227,0.35)]",
-                      "focus-visible:ring-2 focus-visible:ring-[#0071E3]",
-                    ].join(" ")}
-                  >
-                    <span className="relative z-10">{name}</span>
+            <div className="flex gap-2 pb-2 pt-1 items-center">
+              {/* Hamburger Buton */}
+              <button
+                onClick={toggleSidebar}
+                className="flex-shrink-0 bg-indigo-600 text-white border-2 border-[#7B3FE4] transition-all duration-300 focus:outline-none flex items-center justify-center"
+                style={{ width: '32px', height: '32px' }}
+              >
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
 
-                    <span
+              {/* Sayfa Butonları */}
+              <div className="flex gap-2 flex-1">
+                {pages.map(({ name, path }) => {
+                  const active = isActive(path);
+                  return (
+                    <button
+                      key={path}
+                      onClick={() => navigate(path)}
                       className={[
-                        "pointer-events-none absolute inset-0 rounded-full",
-                        "bg-[linear-gradient(135deg,#0071E3_0%,#004a98_100%)]",
-                        "transform transition-transform duration-300",
-                        active ? "translate-y-0" : "translate-y-full group-hover:translate-y-0",
+                        "flex-1 text-xs font-semibold select-none transition-all duration-300 focus:outline-none",
+                        "border-2 bg-white border-[#7B3FE4]",
+                        "flex items-center justify-center",
+                        active ? "text-[#7B3FE4]" : "text-black hover:text-[#7B3FE4]",
                       ].join(" ")}
-                    />
-
-                    <span
-                      className="pointer-events-none absolute inset-x-0 -top-6 h-12 rounded-full
-                       bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    />
-                  </button>
-                );
-              })}
+                      style={{ height: '32px' }}
+                    >
+                      {name}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
 
 
+          <div
+            className={`fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-br from-indigo-500 to-purple-600
+                        transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                        transition-transform duration-300 ease-in-out md:hidden`}
+          >
+            <Sidebar
+              onSelect={handleSidebarSelect}
+              titles={titleListState.titles}
+              loadingTitles={titleListState.loading}
+              titlesError={titleListState.error}
+              onTitleSelect={handleTitleSelect}
+            />
+            <button
+              className="absolute top-4 right-4 text-white text-2xl font-bold"
+              onClick={toggleSidebar}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Overlay */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/40 z-40 md:hidden"
+              onClick={toggleSidebar}
+            ></div>
+          )}
+
           {/* Sidebar */}
-          <div className="w-full md:w-64 md:shrink-0">
+          <div className="hidden md:block w-full md:w-64 md:shrink-0">
             <Sidebar
               onSelect={handleSidebarSelect}
               titles={titleListState.titles}
@@ -278,6 +312,7 @@ const HomePage: React.FC = () => {
               onTitleSelect={handleTitleSelect}
             />
           </div>
+
 
           {/* Content */}
           <div className="flex-1 flex flex-col min-w-0">
@@ -406,7 +441,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
-        <ScrollToTopButton />
+      <ScrollToTopButton />
     </div>
   );
 

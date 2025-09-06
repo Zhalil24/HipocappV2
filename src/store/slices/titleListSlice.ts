@@ -11,6 +11,7 @@ interface TitleListState {
   loading: boolean;
   error: string | null;
   headerId: number | null;
+  message: string | null
 }
 
 const initialState: TitleListState = {
@@ -18,6 +19,7 @@ const initialState: TitleListState = {
   loading: false,
   error: null,
   headerId: null,
+  message: null
 };
 
 export const fetchTitlesByHeaderName = createAsyncThunk(
@@ -68,6 +70,7 @@ const titleListSlice = createSlice({
         state.loading = false;
         state.headerId = action.payload.headerId;
         state.titles = action.payload.titles;
+        state.message = action.payload.message;
         if (action.payload.titles.length === 0) {
           state.error = action.payload.message || 'Başlık bulunamadı.';
         } else {
