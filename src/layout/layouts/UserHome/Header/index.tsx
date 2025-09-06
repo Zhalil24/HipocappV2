@@ -4,8 +4,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import PageButtons from '@/components/PageButtons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { searchTitlesByName } from '@/store/slices/titleEntrySlice';
+import { fetchUsers, searchTitlesByName } from '@/store/slices/titleEntrySlice';
 import { Link } from "react-router-dom";
+import { UserDataModel } from '@/core/models/user/userDataModel';
+
 const Header = () => {
   const navigate = useNavigate();
   const userString = localStorage.getItem('user');
@@ -17,9 +19,27 @@ const Header = () => {
   const location = useLocation();
   const [highlight, setHighlight] = useState<number>(-1);
   const [open, setOpen] = useState(false);
+  const [searchMode, setSearchMode] = useState<'title' | 'user'>('title');
   const boxRef = useRef<HTMLDivElement | null>(null);
+  const [filteredUsers, setFilteredUsers] = useState<UserDataModel[]>([]);
+  const [isLogin, setIsLogin] = useState<boolean>(false);
+
   const isActive = (p: string) =>
     location.pathname === p || location.pathname.startsWith(p + "/");
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [])
+
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      const { id } = JSON.parse(userString);
+      if (id) {
+        setIsLogin(true);
+      }
+    }
+  }, []);
 
 
   const handleLogout = () => {
@@ -50,29 +70,42 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
+
   useEffect(() => {
-    const q = searchTerm.trim();
+    const q = searchTerm.trim().toLowerCase();
     if (q.length < 2) {
       setOpen(false);
+      if (searchMode === 'user') setFilteredUsers([]);
       return;
     }
+
     const t = setTimeout(() => {
-      dispatch(searchTitlesByName({ name: q }));
+      if (searchMode === 'title') {
+        dispatch(searchTitlesByName({ name: q }));
+      } else if (searchMode === 'user') {
+        const filtered = (titleEntryState.users ?? []).filter(u =>
+          (u.userName ?? u.username ?? "").toLowerCase().includes(q)
+        );
+        setFilteredUsers(filtered);
+      }
       setOpen(true);
     }, 300);
+
     return () => clearTimeout(t);
-  }, [searchTerm, dispatch]);
+  }, [searchTerm, dispatch, searchMode, titleEntryState.users]);
+
 
 
   const handleSelect = (name: string, headerId?: number) => {
     setOpen(false);
     setHighlight(-1);
-    setSearchTerm(name);
+    setSearchTerm('');
     const qs = headerId != null
       ? `/?search=${encodeURIComponent(name)}&headerId=${headerId}`
       : `/?search=${encodeURIComponent(name)}`;
     navigate(qs);
   };
+
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     const list = titleEntryState.titles ?? [];
@@ -114,7 +147,6 @@ const Header = () => {
   };
 
 
-
   return (
     <header className="bg-[#000000FF] text-[#FDF6EC] shadow-md fixed top-0 left-0 w-full z-50 
       px-4 md:px-6 h-auto md:h-[72px] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 py-3 md:py-0">
@@ -124,8 +156,7 @@ const Header = () => {
           className="flex items-center gap-4 cursor-pointer select-none"
           onClick={() => navigate('/')}
         >
-          {/* Logo boyutunu mobil için küçülttük */}
-          <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden">
+          <div className="w-12 h-12 md:w-28 md:h-28 rounded-full overflow-hidden">
             <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-full" />
           </div>
 
@@ -139,59 +170,104 @@ const Header = () => {
 
         <div className="relative w-full md:w-64 md:mr-9 mt-2 md:mt-0" ref={boxRef}>
           <form onSubmit={handleSearchSubmit} role="search">
-            <input
-              type="text"
-              name="search"
-              placeholder="Başlık ara..."
-              className="w-full rounded-md py-0.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2B4560]"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={() => searchTerm.trim().length >= 2 && setOpen(true)}
-              onKeyDown={handleKeyDown}
-              aria-label="Başlık ara"
-              autoComplete="off"
-              role="combobox"
-              aria-expanded={open}
-              aria-controls="search-suggest-list"
-              aria-autocomplete="list"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="search"
+                placeholder={searchMode === 'title' ? "Başlık ara..." : "Kullanıcı ara..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => searchTerm.trim().length >= 2 && setOpen(true)}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
+                className="w-full rounded-md border border-gray-300 py-1.5 pl-4 pr-16 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#2B4560] placeholder-black"
+              />
+              <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setSearchMode('title')}
+                  className={`p-1 rounded ${searchMode === 'title' ? 'bg-gray-200' : ''}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M3 8h18M3 12h18M3 16h18M3 20h18" />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSearchMode('user')}
+                  className={`p-1 rounded ${searchMode === 'user' ? 'bg-gray-200' : ''}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M5.121 17.804A12.054 12.054 0 0112 15c2.21 0 4.28.606 6.121 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </form>
 
           {open && (
-            <div
-              id="search-suggest-list"
-              role="listbox"
-              className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg max-h-80 overflow-auto"
-            >
-              {titleEntryState.loading && (
-                <div className="px-4 py-2 text-sm text-gray-500">Yükleniyor…</div>
+            <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg max-h-80 overflow-auto">
+              {searchMode === 'title' && (
+                <>
+                  {titleEntryState.loading && <div className="px-4 py-2 text-sm text-gray-500">Yükleniyor…</div>}
+                  {!titleEntryState.loading && titleEntryState.titles?.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-gray-500">Sonuç yok</div>
+                  )}
+                  {!titleEntryState.loading &&
+                    titleEntryState.titles?.map((item, idx) => (
+                      <button
+                        key={item.id ?? item.name ?? idx}
+                        type="button"
+                        onClick={() => handleSelect(item.name, item.headerId)}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-black"
+                      >
+                        {item.name}
+                      </button>
+                    ))
+                  }
+                </>
               )}
 
-              {!titleEntryState.loading && titleEntryState.titles?.length === 0 && (
-                <div className="px-4 py-2 text-sm text-gray-500">Sonuç yok</div>
+              {searchMode === 'user' && (
+                <>
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map((user, idx) => {
+                      const userName = user.username ?? "İsimsiz kullanıcı";
+                      return (
+                        <button
+                          key={user.id ?? idx}
+                          type="button"
+                          onClick={() => {
+                            if (isLogin) {
+                              navigate(`/chat/${userName}`);
+                            } else {
+                              alert("Önce giriş yapmalısınız!");
+                            }
+                            setOpen(false);
+                            setHighlight(-1);
+                            setSearchTerm("");
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-black"
+                        >
+                          {userName}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-gray-500">Kullanıcı bulunamadı</div>
+                  )}
+                </>
               )}
 
-              {!titleEntryState.loading &&
-                titleEntryState.titles?.map((item, idx) => (
-                  <button
-                    key={item.id ?? item.name ?? idx}
-                    type="button"
-                    role="option"
-                    aria-selected={highlight === idx}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handleSelect(item.name, item.headerId)}
-                    onMouseEnter={() => setHighlight(idx)}
-                    className={[
-                      "w-full text-left px-4 py-2 text-sm",
-                      highlight === idx ? "bg-[#2B4560] text-white" : "text-gray-800 hover:bg-gray-100",
-                    ].join(" ")}
-                  >
-                    {item.name}
-                  </button>
-                ))}
+
             </div>
           )}
         </div>
+
         <nav className="hidden md:flex items-center gap-5">
           {pages.map(({ name, path }) => {
             const active = isActive(path);

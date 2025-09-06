@@ -12,8 +12,9 @@ type EntryCardProps = {
   showDelete?: boolean;
   userId?: number;
   onDelete?: () => void;
+  isLogin?: boolean;
 };
-const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, userName, date, description, createDate, showDelete, onDelete }: EntryCardProps) => {
+const EntryCard = ({ titleName, entryDescription = '', userId, isLogin, userName, date, description, createDate, showDelete, onDelete }: EntryCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const rawDate = date || createDate;
@@ -111,16 +112,17 @@ const EntryCard = ({ titleName, entryDescription = '', userId, userNameSurname, 
             </span>
           </p>
 
-
-          <button
-            onClick={goToChat}
-            className="self-start text-[11px] px-2 py-1 rounded-md 
+          {isLogin &&
+            <button
+              onClick={goToChat}
+              className="self-start text-[11px] px-2 py-1 rounded-md 
            bg-gradient-to-r from-indigo-500 to-purple-600 text-white 
            hover:from-indigo-600 hover:to-purple-700 
            transition shadow-md"
-          >
-            Mesaj Gönder
-          </button>
+            >
+              Mesaj Gönder
+            </button>}
+
         </div>
       )}
 

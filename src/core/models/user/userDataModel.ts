@@ -29,4 +29,5 @@ export interface UserDataModel {
   iconDTO: any | null;
   isOnline: boolean | null;
   isTermsAccepted: boolean | null;
+  username: string | null;
 }

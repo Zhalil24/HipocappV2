@@ -16,6 +16,7 @@ import PageButtons from '@/components/PageButtons';
 import { EntryModel } from '@/core/models/entries/entryModel';
 import AdRotator from '@/components/AdRotatorJobs';
 import { ContentModel } from '@/core/models/content/contentModel';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -48,6 +49,7 @@ const HomePage: React.FC = () => {
       title: j.title ?? j.name ?? "İlan",
       description: j.description ?? j.summary ?? "",
       link: j.link ?? j.url ?? "#",
+      image: j.image ?? j.image ?? "",
     }))
       .filter(it => it.link && it.link !== "#" && it.imageURL);
   }, [jobs]);
@@ -217,9 +219,9 @@ const HomePage: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full flex justify-center items-start 
+  className="min-h-screen w-full flex justify-center items-start 
              bg-gradient-to-br from-[#FFFFFFFF] via-white to-[#FFFFFFFF] 
-             font-sans px-4 overflow-x-hidden
+             font-sans px-0 overflow-x-hidden
              pt-[30px] md:pt-2"
     >
       <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
@@ -282,30 +284,28 @@ const HomePage: React.FC = () => {
             <main className="flex-1 w-full pb-12 overflow-y-auto">
               <div className="px-1 sm:px-2 lg:px-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 w-full gap-3 sm:gap-4">
-<div className="flex space-x-3 mt-2 sm:mt-4">
-  <button
-    onClick={() => handleModeChange('daily')}
-    className={`px-4 py-2 rounded-md font-medium text-sm transition-colors
-      ${
-        entryMode === 'daily' && !selectedTitle
-          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
-          : 'bg-white text-[#2B4560] border border-[#2B4560] hover:bg-white/80'
-      }`}
-  >
-    Daily
-  </button>
-  <button
-    onClick={() => handleModeChange('stream')}
-    className={`px-4 py-2 rounded-md font-medium text-sm transition-colors
-      ${
-        entryMode === 'stream' && !selectedTitle
-          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
-          : 'bg-white text-[#2B4560] border border-[#2B4560] hover:bg-white/80'
-      }`}
-  >
-    Stream
-  </button>
-</div>
+                  <div className="flex space-x-3 mt-2 sm:mt-4">
+                    <button
+                      onClick={() => handleModeChange('daily')}
+                      className={`px-4 py-2 rounded-md font-medium text-sm transition-colors
+      ${entryMode === 'daily' && !selectedTitle
+                          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+                          : 'bg-white text-[#2B4560] border border-[#2B4560] hover:bg-white/80'
+                        }`}
+                    >
+                      Daily
+                    </button>
+                    <button
+                      onClick={() => handleModeChange('stream')}
+                      className={`px-4 py-2 rounded-md font-medium text-sm transition-colors
+      ${entryMode === 'stream' && !selectedTitle
+                          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+                          : 'bg-white text-[#2B4560] border border-[#2B4560] hover:bg-white/80'
+                        }`}
+                    >
+                      Stream
+                    </button>
+                  </div>
 
                   {selectedTitle && (
                     <div className="mt-1 sm:mt-3">
@@ -378,11 +378,12 @@ const HomePage: React.FC = () => {
                   <p className="text-gray-600">Gösterilecek entry yok.</p>
                 )}
 
-                <div className="space-y-5 break-words"> {/* uzun kelimeler taşmasın */}
+                <div className="space-y-5 break-words">
                   {currentEntries?.map((entry) => (
                     <EntryCard
                       key={entry.id}
                       titleName={entry.titleName}
+                      isLogin={isLogin}
                       entryDescription={
                         entry.entryDescription ||
                         entry.description ||
@@ -405,6 +406,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+        <ScrollToTopButton />
     </div>
   );
 

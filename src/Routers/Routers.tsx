@@ -32,7 +32,6 @@ const Routers = () => {
       <Route path="/KVKK" element={<KvkkPage />} />
       <Route path="/chat/:username?" element={<ChatPage />} />
       <Route path="/admin" element={<AdminPanel />} />
-      
     </Routes>
   );
 };

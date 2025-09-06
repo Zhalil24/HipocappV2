@@ -55,13 +55,19 @@ const menuItems = [
     ],
   },
 ];
+type SidebarProps = {
+  activeMenu: string;
+  setActiveMenu: (menu: string) => void;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+};
 
-const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen, setSidebarOpen }) => {
-  const [openDropdown, setOpenDropdown] = useState(null); // hangi dropdown açık
+const Sidebar: React.FC<SidebarProps> = ({ activeMenu, setActiveMenu, sidebarOpen, setSidebarOpen }) => {
+  const [openDropdown, setOpenDropdown] = useState(0);
 
-  const toggleDropdown = (id) => {
+  const toggleDropdown = (id: number) => {
     if (openDropdown === id) {
-      setOpenDropdown(null);
+      setOpenDropdown(0);
     } else {
       setOpenDropdown(id);
     }
@@ -82,18 +88,16 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen, setSidebarOpen }) => 
         <nav className="flex flex-col gap-2 text-[17px] font-medium">
           {menuItems.map(({ id, icon, label, subItems }) => (
             <div key={id}>
-
-              {/* Menü başlığı */}
               <button
                 onClick={() => {
-                  setActiveMenu(id);
+                  setActiveMenu(id.toString());
                   toggleDropdown(id);
                 }}
                 className={`flex items-center justify-between gap-4 w-full px-5 py-3 rounded-xl transition-all duration-300
-                  ${
-                    activeMenu === id
-                      ? "bg-[#FFD700] text-[#2B4560] shadow-md shadow-yellow-300/40 scale-[1.05]"
-                      : "hover:bg-yellow-400/30 hover:text-[#FFD700] hover:scale-105"
+                  ${activeMenu === String(id)
+
+                    ? "bg-[#FFD700] text-[#2B4560] shadow-md shadow-yellow-300/40 scale-[1.05]"
+                    : "hover:bg-yellow-400/30 hover:text-[#FFD700] hover:scale-105"
                   }`}
               >
                 <div className="flex items-center gap-4">
@@ -106,7 +110,6 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen, setSidebarOpen }) => 
                 </span>
               </button>
 
-              {/* Alt menü */}
               {openDropdown === id && (
                 <ul className="mt-1 ml-12 flex flex-col gap-2 text-sm text-[#FFD700]">
                   {subItems.map((subLabel, index) => (
@@ -114,7 +117,6 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen, setSidebarOpen }) => 
                       key={index}
                       className="cursor-pointer hover:underline"
                       onClick={() => {
-                        // İstersen burada alt menü seçeneğine tıklama işlemi yapabilirsin
                         console.log("Seçilen alt menü:", subLabel);
                       }}
                     >
