@@ -65,6 +65,7 @@ const registerSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload.message!;
+        setTimeout(() => { state.message = null }, 20);
         state.isSuccess = action.payload.isSuccess ?? null;
       })
       .addCase(registerUser.rejected, (state, action) => {

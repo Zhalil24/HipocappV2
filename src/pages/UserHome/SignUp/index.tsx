@@ -126,32 +126,40 @@ const Register = () => {
       if (values.institutionIdFile) {
         formData.append("image", values.institutionIdFile);
       }
-
       try {
-        await dispatch(registerUser(formData)).unwrap();
+        const response = await dispatch(registerUser(formData)).unwrap();
+        toast.info(response.message, {
+          autoClose: 5000,
+          position: "top-right",
+        });
       } catch (err: any) {
         if (err?.status === 400) {
-          toast.error("Başarısız, tekrar deneyiniz", { toastId: Date.now().toString() });
+          toast.error("Başarısız, tekrar deneyiniz", {
+            autoClose: 5000,
+            position: "top-right",
+          });
+        } else if (err?.message) {
+          toast.error(err.message, {
+            autoClose: 5000,
+            position: "top-right",
+          });
         }
       }
     },
 
   });
 
-  useEffect(() => {
-    if (serviceMessage) {
-      toast.info(serviceMessage, { toastId: Date.now().toString() });
-      toastId: Date.now()
-      setShowPopup(true);
-    }
-  }, [serviceMessage]);
 
-  useEffect(() => {
-    if (registerState.isSuccess) {
-     toast.info(serviceMessage,{ toastId: Date.now().toString() });
-     navigate("/login");
-    }
-  }, [registerState.isSuccess]);
+useEffect(() => {
+  if (registerState.isSuccess && serviceMessage) {
+    toast.info(serviceMessage, { 
+      toastId: Date.now().toString(),
+      autoClose: 3000,
+      onClose: () => navigate("/login") 
+    });
+  }
+}, [registerState.isSuccess, serviceMessage, navigate]);
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.currentTarget.files && e.currentTarget.files[0]) {
