@@ -3,4 +3,5 @@ export interface BaseResponseModel<T> {
   data: T | null; 
   message?: string;
   error?: string;
+  isSuccess?: boolean;
 }

@@ -8,13 +8,16 @@ interface RegisterState {
   error: string | null;
   success: boolean;
   message: string | null;
+  isSuccess: boolean | null;
+
 }
 
 const initialState: RegisterState = {
   loading: false,
   error: null,
   success: false,
-  message: ''
+  message: '',
+  isSuccess:null,
 };
 
 const baseService = new BaseService();
@@ -28,7 +31,7 @@ export const registerUser = createAsyncThunk<
   async (formData, { rejectWithValue }) => {
     try {
       const response = await baseService.post<FormData, null>(
-        "Auth/Register",
+        "api/user/Register",
         formData,
         {
           headers: {
@@ -62,6 +65,7 @@ const registerSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload.message!;
+        state.isSuccess = action.payload.isSuccess ?? null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;

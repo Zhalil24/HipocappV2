@@ -7,16 +7,16 @@ import { registerUser } from "@/store/slices/registerSlice";
 import logo from "../../../layout/layouts/UserHome/Header/logo.png";
 import { useNavigate } from "react-router";
 import InfoPopup from "@/components/InfoPopup/InfoPopup";
-
+import { toast, ToastContainer } from "react-toastify";
 const titleOptions = [
-  "Doktor",
-  "Diş Hekimi",
-  "Akademisyen",
-  "Sosyal Bilimci",
-  "Doğa Bilimci",
+  { id: 1, label: "Doktor" },
+  { id: 2, label: "Diş Hekimi" },
+  { id: 3, label: "Akademisyen" },
+  { id: 4, label: "Sosyal Bilimci" },
 ];
 
-// Basit SelectInput componenti
+type Option = string | { value: string | number; label: string };
+
 const SelectInput = ({
   label,
   name,
@@ -26,9 +26,9 @@ const SelectInput = ({
 }: {
   label: string;
   name: string;
-  value: string;
+  value: string | number;
   onChange: React.ChangeEventHandler<HTMLSelectElement>;
-  options: string[];
+  options: Option[];
 }) => (
   <div>
     <label className="block text-[#2B4560] font-semibold mb-1">{label}</label>
@@ -42,16 +42,21 @@ const SelectInput = ({
       <option value="" disabled>
         Seçiniz
       </option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
+      {options.map((opt) =>
+        typeof opt === "string" ? (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ) : (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        )
+      )}
     </select>
   </div>
 );
 
-// Basit FileInput componenti
 const FileInput = ({
   label,
   name,
@@ -94,6 +99,7 @@ const Register = () => {
       title: "",
       institutionIdFile: null as File | null,
       isTermsAccepted: false,
+      identityNumber: ""
     },
     validate: (values) => {
       const errors: Record<string, string> = {};
@@ -105,8 +111,7 @@ const Register = () => {
       }
       return errors;
     },
-    onSubmit: (values) => {
-      // FormData ile dosya dahil gönderim
+    onSubmit: async (values) => {
       const formData = new FormData();
       formData.append("name", values.firstName);
       formData.append("surname", values.lastName);
@@ -115,28 +120,38 @@ const Register = () => {
       formData.append("email", values.email);
       formData.append("password", values.password);
       formData.append("passwordRepeat", values.passwordRepeat);
-      formData.append("degreeId", "1");
+      formData.append("degreeId", values.title.toString());
+      formData.append("identityNumber", "a");
       formData.append("isTermsAccepted", values.isTermsAccepted.toString());
       if (values.institutionIdFile) {
         formData.append("image", values.institutionIdFile);
       }
 
-      dispatch(registerUser(formData));
+      try {
+        await dispatch(registerUser(formData)).unwrap();
+      } catch (err: any) {
+        if (err?.status === 400) {
+          toast.error("Başarısız, tekrar deneyiniz", { toastId: Date.now().toString() });
+        }
+      }
     },
+
   });
 
   useEffect(() => {
     if (serviceMessage) {
+      toast.info(serviceMessage, { toastId: Date.now().toString() });
+      toastId: Date.now()
       setShowPopup(true);
     }
   }, [serviceMessage]);
 
-
   useEffect(() => {
-    if (registerState.success) {
-      navigate("/login");
+    if (registerState.isSuccess) {
+     toast.info(serviceMessage,{ toastId: Date.now().toString() });
+     navigate("/login");
     }
-  }, [registerState.success, navigate]);
+  }, [registerState.isSuccess]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.currentTarget.files && e.currentTarget.files[0]) {
@@ -146,13 +161,7 @@ const Register = () => {
 
   return (
     <div>
-      {showPopup && serviceMessage && (
-        <InfoPopup
-          message={serviceMessage}
-          type={registerState.success ? "success" : "error"}
-          onClose={() => setShowPopup(false)}
-        />
-      )}
+
 
       <form onSubmit={formik.handleSubmit}>
         {/* Tam ekran ortalama + kenarlardan boşluk */}
@@ -265,8 +274,9 @@ const Register = () => {
                   name="title"
                   value={formik.values.title}
                   onChange={formik.handleChange}
-                  options={titleOptions}
+                  options={titleOptions.map((t) => ({ value: t.id, label: t.label }))}
                 />
+
 
                 <FileInput
                   label="Kurum Kimliği Seçin"
@@ -309,10 +319,23 @@ const Register = () => {
               </div>
 
 
+
             </div>
           </div>
         </div>
       </form>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
     </div>
   );
 
