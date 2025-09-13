@@ -1,4 +1,5 @@
 import { BaseResponseModel } from '@/core/models';
+import { GroupModel } from '@/core/models/chatMessage/messageModel';
 import { ContentModel } from '@/core/models/content/contentModel';
 import { TitleModel } from '@/core/models/entries/titleModel';
 import { UserDataModel } from '@/core/models/user/userDataModel';
@@ -61,6 +62,13 @@ export const fetchGetJobAdvertisements = createAsyncThunk<
   return response;
 });
 
+export const fetchGetGroups = createAsyncThunk<
+  BaseResponseModel<GroupModel[]>>
+  ("get/groups", async () => {
+    const resp = await baseService.get<GroupModel[]>('api/chat/GetAllGroups')
+    return resp;
+  });
+
 
 const initialState = {
   entries: [] as any[],
@@ -70,6 +78,7 @@ const initialState = {
   titles: [] as any[],
   users: [] as UserDataModel[],
   lastQuery: '',
+  groups: [] as GroupModel[],
 };
 
 const titleEntrySlice = createSlice({
@@ -127,6 +136,19 @@ const titleEntrySlice = createSlice({
 
       })
       .addCase(fetchUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Bir hata oluştu";
+      })
+      .addCase(fetchGetGroups.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGetGroups.fulfilled, (state, action) => {
+        state.groups = action.payload.data ?? [];
+        state.loading = false;
+
+      })
+      .addCase(fetchGetGroups.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) || "Bir hata oluştu";
       });

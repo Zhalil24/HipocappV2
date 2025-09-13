@@ -1,6 +1,9 @@
+import hubService from "@/core/hubService/hubService";
 import { BaseResponseModel, LastEntryModel, UserLoginModel, userLoginModelState } from "@/core/models";
+import { GroupModel } from "@/core/models/chatMessage/messageModel";
 import { ContentModel } from "@/core/models/content/contentModel";
 import { AllEntryModel } from "@/core/models/entries/allEntriesModel";
+import { GetGroupsMemberRequest } from "@/core/models/groupMemberRequest/groupMemberRequestModel";
 import { ModuleRoleModel } from "@/core/models/ModuleRole/modulRoleModel";
 import { PaginationModel } from "@/core/models/pagination/paginationModel";
 import { adminPanelModelState } from "@/core/models/panel/initialPanelModel";
@@ -307,7 +310,84 @@ export const fetchModuleRole = createAsyncThunk<
     }
 );
 
+export const fetchGroupsMemberRequest = createAsyncThunk<
+    BaseResponseModel<PaginationModel<GetGroupsMemberRequest>>,
+    { data: RequestModel }
+>(
+    "chat/groupMemberRequests",
+    async ({ data }) => {
+        const url = `${Endpoints.GetGroupsMemberRequest}?id=${data.id}&page=${data.page}`;
+        const response = await baseService.get<PaginationModel<GetGroupsMemberRequest>>(url);
+        return response;
+    }
+);
 
+export const fetchApprovedGroupsMemberRequest = createAsyncThunk<
+    BaseResponseModel<PaginationModel<GetGroupsMemberRequest>>,
+    { data: RequestModel }
+>(
+    "chat/groupApprovedMemberRequests",
+    async ({ data }) => {
+        const url = `${Endpoints.GetGroupsApprovedMemberRequest}?id=${data.id}&page=${data.page}`;
+        const response = await baseService.get<PaginationModel<GetGroupsMemberRequest>>(url);
+        return response;
+    }
+);
+
+export const updateRquestState = createAsyncThunk<
+    BaseResponseModel<GetGroupsMemberRequest>,
+    GetGroupsMemberRequest
+>(
+    "chat/updateRquestState",
+    async (data) => {
+        const url = `${Endpoints.UpdateRquestState}`;
+        const response = await baseService.put<GetGroupsMemberRequest, GetGroupsMemberRequest>(url, data);
+        return response;
+    }
+);
+
+export const createGroup = createAsyncThunk<
+    BaseResponseModel<GroupModel>,
+    GroupModel
+>(
+    "chat/createGroup",
+    async (data) => {
+        const url = `${Endpoints.CreateGroup}`;
+        await hubService.startConnection();
+        await hubService.invoke("CreateGroup", data.groupName);
+        const response = await baseService.post<GroupModel, GroupModel>(url, data);
+        return response;
+    }
+);
+
+export const fetchGetGroups = createAsyncThunk<
+    BaseResponseModel<GroupModel[]>>
+    ("get/groups", async () => {
+        const resp = await baseService.get<GroupModel[]>(`${Endpoints.GetGroups}`)
+        return resp;
+    });
+
+export const deleteMemberFromGroup = createAsyncThunk<
+    { groupId: number; userId: number },
+    { groupId: number; userId: number },
+    { rejectValue: string }
+>(
+    "chat/deleteMemberFromGroup",
+    async ({ groupId, userId }, { rejectWithValue }) => {
+        if (!groupId || !userId) {
+            return rejectWithValue("Geçersiz grup veya kullanıcı ID.");
+        }
+        const res = await baseService.delete<{ isSuccess: boolean; message?: string }>(
+            "/api/chat/DeleteMemberFromGroup",
+            { params: { groupId, userId } }
+        );
+        if (!res || !(res as any).isSuccess) {
+            return rejectWithValue(res?.message || "Kullanıcı gruptan çıkarılamadı.");
+        }
+
+        return { groupId, userId };
+    }
+);
 
 const adminSlice = createSlice({
     name: 'admin',
@@ -645,6 +725,108 @@ const adminSlice = createSlice({
                 state.moduleRoles = action.payload ?? null;
             })
             .addCase(fetchModuleRole.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
+
+            .addCase(fetchGroupsMemberRequest.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchGroupsMemberRequest.fulfilled, (state, action) => {
+                state.loading = false;
+                state.pendingGroupMemberRequest = action.payload.data;
+            })
+            .addCase(fetchGroupsMemberRequest.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
+
+            .addCase(fetchApprovedGroupsMemberRequest.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchApprovedGroupsMemberRequest.fulfilled, (state, action) => {
+                state.loading = false;
+                state.approvedGroupMemberRequest = action.payload.data;
+
+            })
+            .addCase(fetchApprovedGroupsMemberRequest.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
+
+            .addCase(updateRquestState.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateRquestState.fulfilled, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message ?? "İşlem Başarısız";
+
+                const updatedItem = action.payload.data;
+
+                if (updatedItem && state.pendingGroupMemberRequest?.items) {
+                    state.pendingGroupMemberRequest.items = state.pendingGroupMemberRequest.items.filter(
+                        item => item.id !== updatedItem.id
+                    );
+                }
+            })
+
+            .addCase(updateRquestState.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
+
+
+            .addCase(fetchGetGroups.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchGetGroups.fulfilled, (state, action) => {
+                state.loading = false;
+                state.groups = action.payload.data;
+
+            })
+            .addCase(fetchGetGroups.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
+
+            .addCase(createGroup.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(createGroup.fulfilled, (state, action) => {
+                state.loading = false;
+                const newGroup = action.meta.arg;
+
+                if (newGroup) {
+                    state.groups = [...(state.groups ?? []), newGroup];
+                }
+            })
+            .addCase(createGroup.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? "Bir hata oluştu.";
+            })
+
+            .addCase(deleteMemberFromGroup.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteMemberFromGroup.fulfilled, (state, action) => {
+                state.loading = false;
+
+                const { groupId, userId } = action.payload;
+
+                if (state.approvedGroupMemberRequest?.items) {
+                    state.approvedGroupMemberRequest.items = state.approvedGroupMemberRequest.items.filter(
+                        (item: GetGroupsMemberRequest) => !(item.groupId === groupId && item.userId === userId)
+                    );
+                }
+
+            })
+            .addCase(deleteMemberFromGroup.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message ?? "Bir hata oluştu.";
             })

@@ -23,5 +23,11 @@ export enum Endpoints {
     CreateRole = '/api/role/Create',
     UpdateRole = '/api/role/Edit',
     DeleteRole = '/api/role/Delete',
-     RolAuthentication = '/api/role/RolAuthentication',
+    RolAuthentication = '/api/role/RolAuthentication',
+    GetGroupsMemberRequest = 'api/chat/GetPendingGroupsByUsers',
+    GetGroupsApprovedMemberRequest = 'api/chat/GetApprovedGroupsByUsers',
+    UpdateRquestState = "api/chat/UpdateToRequestGroup",
+    sendToGroupRequest = "api/chat/SendToRequestGroup",
+    CreateGroup = "api/chat/CreateGroup",
+    GetGroups = "api/chat/GetAllGroups",
 }

@@ -70,11 +70,7 @@ export const startConnection = createAsyncThunk<void, number, ThunkConfig>(
 
 export const disconnectUser =
     (userId: number) => async () => {
-        try {
-            await hubService.invoke("DisconnectUserMobil", userId);
-        } catch (err) {
-            console.error("disconnectUser hata:", err);
-        }
+        await hubService.invoke("DisconnectUserMobil", userId);
     };
 
 
@@ -89,7 +85,6 @@ export const joinGroupMobil = createAsyncThunk<
             await hubService.startConnection();
             await hubService.invoke("JoinGroupMobil", groupName);
         } catch (err) {
-            console.error("[SR] JoinGroupMobil failed:", err);
             return rejectWithValue("JoinGroupMobil failed");
         }
     }
@@ -102,11 +97,6 @@ export const getOnlineUsers = createAsyncThunk<number[], void, ThunkConfig>(
         const users = Array.isArray(result)
             ? result.map((e) => Number(e)).filter((e) => !isNaN(e))
             : [];
-        if (users.length > 0) {
-            console.log("Online kullanıcı id'leri:", users);
-        } else {
-            console.log("Şu anda online kullanıcı yok.");
-        }
         return users;
     }
 );
@@ -175,10 +165,11 @@ export const sendGroupMessage = createAsyncThunk<
         if (!groupName) {
             return rejectWithValue("Geçersiz grup ismi!");
         }
+
         const jsonString = JSON.stringify({
             fromUserId: model.fromUserId,
             groupId: model.groupId,
-            messageText: model.messageText,
+            messageText: encryptMessage(String(model.messageText ?? "")),
             fromUserName: model.fromUserName,
             sentAt: model.sentAt,
         });

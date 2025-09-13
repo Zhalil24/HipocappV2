@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { DegreeChart } from "@/components/DegreeChart";
 import { clearMessage, fetchLastEntries } from "@/store/slices/entrySlice";
-import { addContent, createRole, deleteAllEntry, deleteContent, deleteEntry, deleteRole, deleteUser, editRole, fetchContent, fetchEntries, fetchModuleRole, fetchRoles, fetchUserCount, fetchUserList, fetchUsersCountByDegreeId, registerUser, updateContent, updateUser, updateUserStatus } from "@/store/slices/adminSlice";
+import { addContent, createGroup, createRole, deleteAllEntry, deleteContent, deleteEntry, deleteMemberFromGroup, deleteRole, deleteUser, editRole, fetchApprovedGroupsMemberRequest, fetchContent, fetchEntries, fetchGetGroups, fetchGroupsMemberRequest, fetchModuleRole, fetchRoles, fetchUserCount, fetchUserList, fetchUsersCountByDegreeId, registerUser, updateContent, updateRquestState, updateUser, updateUserStatus } from "@/store/slices/adminSlice";
 import { AdminMenuConstants, CrudOperation, Item } from "@/Utilities/constants/panelItems";
 import { ContentList } from "@/components/ContentList";
 import { ContentModel } from "@/core/models/content/contentModel";
@@ -20,6 +20,11 @@ import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserList } from "@/components/UserList";
 import RoleList from "@/components/RoleList";
 import { RoleDTO } from "@/core/models/role/roleModel";
+import GroupMemberRequestsTable from "@/components/GroupMemberRequestList";
+import GroupApprovedMemberRequestsTable from "@/components/GroupApprovedMemberRequest";
+import { GetGroupsMemberRequest } from "@/core/models/groupMemberRequest/groupMemberRequestModel";
+import AdminGroupsTable from "@/components/GroupListTable";
+import { GroupModel } from "@/core/models/chatMessage/messageModel";
 
 export default function AdminPanel() {
     const dispatch = useDispatch<AppDispatch>();
@@ -99,6 +104,27 @@ export default function AdminPanel() {
             }));
             return;
         }
+
+        if (activeItemType === AdminMenuType.Groups) {
+            if (operation === "list") {
+                dispatch(fetchGroupsMemberRequest({
+                    data: { id: 0, page: newPage },
+                }))
+                return;
+            }
+            else if (operation === "list2") {
+                dispatch(fetchApprovedGroupsMemberRequest({
+                    data: { id: 0, page: newPage },
+                }))
+
+                return;
+            }
+            else if (operation === "create") {
+                dispatch(fetchGetGroups())
+                return;
+            }
+            return;
+        }
     };
     const handleEntryDelete = (id: number) => {
         dispatch(deleteAllEntry(id))
@@ -140,6 +166,18 @@ export default function AdminPanel() {
     const handleRoleDelete = (roleId: number) => {
         dispatch(deleteRole({ id: roleId, page: 0 }));
     };
+    const handleGroupMemberRequestUpdate = (model: GetGroupsMemberRequest) => {
+        dispatch(updateRquestState(model));
+    };
+
+    const handleCreateGroup = (model: GroupModel) => {
+        dispatch(createGroup(model));
+    }
+
+    const handleDeleteGroupToMember = (payload: { groupId: number; userId: number }) => {
+        const { groupId, userId } = payload;
+        dispatch(deleteMemberFromGroup({ groupId, userId }));
+    };
 
     useEffect(() => {
         handlePageChange(0)
@@ -161,6 +199,7 @@ export default function AdminPanel() {
 
     const isModalOpen = !!selectedContent || !!newContent;
 
+
     const renderContentComponent = () => {
         if (adminState.loading) {
             return <LoadingWidget isLight={true} />;
@@ -177,18 +216,63 @@ export default function AdminPanel() {
                 );
             case AdminMenuType.Roles:
                 if (!adminState.roles) return <LoadingWidget isLight={true} />;
-                
+
                 return (
                     <RoleList
                         onAuthorize={() => { }}
                         onAdd={handleRoleCreate}
                         onDelete={handleRoleDelete}
                         roles={adminState.roles}
-                        onSelectionChange={()=>{}}
+                        onSelectionChange={() => { }}
                         roleModelResponse={adminState.moduleRoles!}
-                        onAuthorizeClick={(roleId)=> {setAuthorizedRoleId(roleId)}}
+                        onAuthorizeClick={(roleId) => { setAuthorizedRoleId(roleId) }}
                     />
                 )
+            case AdminMenuType.Groups:
+                if (operation === "list") {
+                    if (!adminState.pendingGroupMemberRequest?.items?.length) {
+                        return <p className="text-center text-gray-500">Gösterilecek kullanıcı yok</p>;
+                    }
+
+                    return (
+                        <GroupMemberRequestsTable
+                            data={adminState.pendingGroupMemberRequest.items}
+                            onApprove={handleGroupMemberRequestUpdate}
+                            onPageChange={handlePageChange}
+                            onReject={handleGroupMemberRequestUpdate}
+                            pagination={adminState.pendingGroupMemberRequest}
+                        />
+                    );
+                }
+
+                if (operation === "list2") {
+                    if (!adminState.approvedGroupMemberRequest?.items?.length) {
+                        return <p className="text-center text-gray-500">Gösterilecek onaylanmış kullanıcı yok</p>;
+                    }
+
+                    return (
+                        <GroupApprovedMemberRequestsTable
+                            data={adminState.approvedGroupMemberRequest.items}
+                            onDelete={handleDeleteGroupToMember}
+                            onPageChange={handlePageChange}
+                            pagination={adminState.approvedGroupMemberRequest}
+                        />
+                    );
+                }
+
+                if (operation === "create") {
+
+
+                    return (
+                        <AdminGroupsTable
+                            groups={adminState.groups ?? []}
+                            onAddGroup={handleCreateGroup}
+                        />
+                    );
+                }
+
+                return null;
+
             case AdminMenuType.Users:
                 if (adminState.loading) return <LoadingWidget isLight={true} />;
                 if (!adminState.allUsers || adminState.allUsers.items.length === 0) {

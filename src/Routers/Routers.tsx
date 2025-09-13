@@ -11,8 +11,8 @@ import KvkkPage from '@/pages/UserHome/KVKK/KVKK';
 import ChatPage from '@/pages/UserHome/Chat';
 import ForgotPassword from '@/pages/UserHome/ForgotPassword';
 import AdminPanel from '@/pages/AdminPanel/Panel';
-
-
+import GroupList from '@/pages/UserHome/GroupList';
+import PrivateRoute from './PrivateRoute';
 
 const Routers = () => {
   return (
@@ -30,9 +30,32 @@ const Routers = () => {
       <Route path="/educations" element={<EducationPage />} />
       <Route path="/partners" element={<PartnersPage />} />
       <Route path="/KVKK" element={<KvkkPage />} />
-      <Route path="/chat/:username?" element={<ChatPage />} />
-      <Route path="/admin" element={<AdminPanel />} />
+      <Route
+        path="/chat/:username?"
+        element={
+          <PrivateRoute allowedRoles={["Kullanıcı", "Admin", "Super Admin"]}>
+            <ChatPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute allowedRoles={["Admin", "Super Admin"]}>
+            <AdminPanel />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/groups"
+        element={
+          <PrivateRoute allowedRoles={["Kullanıcı", "Admin", "Super Admin"]}>
+            <GroupList />
+          </PrivateRoute>
+        }
+      />
     </Routes>
+
   );
 };
 

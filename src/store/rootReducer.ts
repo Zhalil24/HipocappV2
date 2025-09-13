@@ -10,6 +10,7 @@ import contentReducer from './slices/contentSlice';
 import chatReducer from './slices/chatSlice';
 import forgotPasswordSlice from './slices/forgotPasswordSlice';
 import adminSlice from './slices/adminSlice';
+import groupListSlice from './slices/groupListSlice';
 
 
 const rootReducer = combineReducers({
@@ -23,7 +24,8 @@ const rootReducer = combineReducers({
   content: contentReducer,
   chat: chatReducer,
   forgotPassword: forgotPasswordSlice,
-  admin: adminSlice
+  admin: adminSlice,
+  groupList: groupListSlice,
 });
 
 export default rootReducer;

@@ -6,7 +6,7 @@ import {
   fetchTitlesByHeaderName,
   clearTitles,
 } from '../../../store/slices/titleListSlice';
-import { fetchEntriesByTitleName, fetchGetJobAdvertisements } from '../../../store/slices/titleEntrySlice';
+import { fetchEntriesByTitleName, fetchGetGroups, fetchGetJobAdvertisements } from '../../../store/slices/titleEntrySlice';
 import EntryCard from '../../../components/EntryCard';
 import Sidebar from '../../../components/Sidebar/Sidebar';
 import { AppDispatch, RootState } from '../../../store/store';
@@ -17,6 +17,8 @@ import { EntryModel } from '@/core/models/entries/entryModel';
 import AdRotator from '@/components/AdRotatorJobs';
 import { ContentModel } from '@/core/models/content/contentModel';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
+import GroupListCard from '@/components/GroupList';
+import { fetchGroups } from '@/store/slices/chatSlice';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -97,6 +99,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchGetJobAdvertisements());
+    dispatch(fetchGetGroups())
   }, [])
 
   useEffect(() => {
@@ -224,10 +227,10 @@ const HomePage: React.FC = () => {
     <div
       className="min-h-screen w-full flex justify-center items-start 
              bg-gradient-to-br from-[#FFFFFFFF] via-white to-[#FFFFFFFF] 
-             font-sans px-0 overflow-x-hidden
+             font-sans overflow-x-hidden
              pt-[30px] md:pt-2"
     >
-      <div className="flex flex-col w-full max-w-[1400px] px-4 lg:px-6 mt-24">
+      <div className="flex flex-col w-full max-w-[1400px] px-2 lg:px-6 mt-24">
         <div className="flex w-full gap-4 md:gap-6 flex-col md:flex-row items-stretch">
           <div className="md:hidden -mx-4 px-4">
             <div className="flex gap-2 pb-2 pt-1 items-center">
@@ -248,31 +251,22 @@ const HomePage: React.FC = () => {
                 </svg>
               </button>
 
-              {/* Sayfa Butonları */}
-              <div className="flex gap-2 flex-1">
-                {pages.map(({ name, path }) => {
-                  const active = isActive(path);
-                  return (
-                    <button
-                      key={path}
-                      onClick={() => navigate(path)}
-                      className={[
-                        "flex-1 text-xs font-semibold select-none transition-all duration-300 focus:outline-none",
-                        "border-2 bg-white border-[#7B3FE4]",
-                        "flex items-center justify-center",
-                        active ? "text-[#7B3FE4]" : "text-black hover:text-[#7B3FE4]",
-                      ].join(" ")}
-                      style={{ height: '32px' }}
-                    >
-                      {name}
-                    </button>
-                  );
-                })}
+              <div className="flex gap-2 flex-1 pl-3">
+                {pages.map(({ name, path }) => (
+                  <button
+                    key={path}
+                    onClick={() => navigate(path)}
+                    className="px-2 py-2 rounded-md font-medium text-xs transition-colors
+                 bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md"
+                    style={{ height: '32px' }}
+                  >
+                    {name}
+                  </button>
+                ))}
               </div>
+
             </div>
           </div>
-
-
 
           <div
             className={`fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-br from-indigo-500 to-purple-600
@@ -438,6 +432,10 @@ const HomePage: React.FC = () => {
           {/* Reklam sütunu */}
           <div className="w-full md:w-64 md:shrink-0">
             <AdRotator items={adItems} />
+            {isLogin && (
+              <GroupListCard groups={titleEntryState.groups} />
+            )}
+
           </div>
         </div>
       </div>

@@ -1,6 +1,8 @@
+import { GroupModel } from "../chatMessage/messageModel";
 import { ContentModel } from "../content/contentModel";
 import { AllEntryModel } from "../entries/allEntriesModel";
 import { LastEntryModel } from "../entries/lastEntriesModel";
+import { GetGroupsMemberRequest } from "../groupMemberRequest/groupMemberRequestModel";
 import { ModuleRoleModel } from "../ModuleRole/modulRoleModel";
 import { PaginationModel } from "../pagination/paginationModel";
 import { RoleDTO } from "../role/roleModel";
@@ -22,6 +24,9 @@ export interface InitialAdminPanelModel {
   allUsers: PaginationModel<UserDataModel> | null;
   roles: RoleDTO[] | null;
   moduleRoles: RoleModelResponse | null;
+  pendingGroupMemberRequest : PaginationModel<GetGroupsMemberRequest> | null;
+  approvedGroupMemberRequest : PaginationModel<GetGroupsMemberRequest> | null;
+  groups: GroupModel[] | null;
 }
 
 export const adminPanelModelState: InitialAdminPanelModel = {
@@ -38,5 +43,8 @@ export const adminPanelModelState: InitialAdminPanelModel = {
   allEntries: null,
   allUsers: null,
   roles: [],
-  moduleRoles: null
+  moduleRoles: null,
+  pendingGroupMemberRequest: null,
+  approvedGroupMemberRequest: null,
+  groups: null
 };

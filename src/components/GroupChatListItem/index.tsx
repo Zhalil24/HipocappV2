@@ -9,11 +9,12 @@ export const GroupChatListItem: React.FC<{
 }> = ({ item, active, onClick, onDelete, onEdit }) => (
     <div
         className={[
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition",
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition cursor-pointer",
             "backdrop-blur [box-shadow:inset_0_1px_0_rgba(255,255,255,.04)]",
             active ? "bg-white/10 ring-1 ring-white/15" : "hover:bg-white/5 ring-1 ring-white/5",
         ].join(" ")}
     >
+
         {/* Sol aksiyonlar */}
         <div className="flex items-center gap-2">
             {onDelete && (

@@ -35,7 +35,7 @@ export const chatModelInitialState: InitialChatModel = {
   messagesByUser: {},
   lastMessages: [],
   unreadCounts: {},
-  messageByGroup: [],
+  messageByGroup: {}, 
   groupMembersByGroup: {},
   groupMembersLoadingByGroup: {},
   groupMembersErrorByGroup: {},

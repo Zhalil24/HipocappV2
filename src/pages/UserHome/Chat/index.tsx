@@ -354,7 +354,8 @@ const ChatPage: React.FC = () => {
     const headerGroup = React.useMemo(() => {
         if (section !== "groups" || !activeGroupId) return null;
         return (chatState.groups ?? []).find(g => Number(g.id) === Number(activeGroupId)) ?? null;
-    }, [section, activeId, chatState.groups]);
+    }, [section, activeGroupId, chatState.groups]);
+
 
 
     const { unreadCounts = {} } = useSelector((s: RootState) => ({
@@ -583,7 +584,7 @@ const ChatPage: React.FC = () => {
                                                                 .unwrap()
                                                                 .catch(() => dispatch(fetchUnreadCounts({ userId })));
                                                         }
-                                                        if (window.innerWidth < 768) setMobileDetailOpen(true); 
+                                                        if (window.innerWidth < 768) setMobileDetailOpen(true);
                                                     }}
                                                     item={{
                                                         id: c.partnerId,
@@ -627,14 +628,15 @@ const ChatPage: React.FC = () => {
                                                 item={{ id: g.id, groupName: g.groupName } as unknown as GroupModel}
                                                 active={activeGroupId === g.id}
                                                 onClick={() => {
-                                                    setActiveGroupId(g.id);
+                                                    setActiveGroupId(g.id!);
                                                     setGroupName(g.groupName);
-                                                    if (window.innerWidth < 768) setMobileDetailOpen(true); // <-- MOBİL
+                                                    if (window.innerWidth < 768) setMobileDetailOpen(true);
                                                 }}
+
                                                 {...(isAdmin && {
-                                                    onEdit: () => openManage(g.id, g.groupName),
+                                                    onEdit: () => openManage(g.id!, g.groupName),
                                                     onDelete: () => {
-                                                        dispatch(deleteGroup({ groupId: g.id }))
+                                                        dispatch(deleteGroup({ groupId: g.id! }))
                                                             .unwrap()
                                                             .then((res) => {
                                                                 toast.success(res?.message || "Grup başarıyla silindi.");

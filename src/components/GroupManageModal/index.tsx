@@ -90,7 +90,7 @@ export const GroupManageModal: React.FC<Props> = ({
                 </div>
 
                 {/* İki kolon: Üyeler / Kullanıcılar */}
-                <div className="grid grid-cols-12 gap-4">
+                <div className="grid grid-cols-24 gap-4">
                     {/* Üyeler */}
                     <section className="col-span-6 rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-h-[340px]">
                         <div className="flex items-center justify-between mb-3">
@@ -129,48 +129,6 @@ export const GroupManageModal: React.FC<Props> = ({
                         )}
                     </section>
 
-                    {/* Kullanıcılar */}
-                    <section className="col-span-6 rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-h-[340px]">
-                        <div className="flex items-center justify-between mb-3">
-                            <h4 className="font-medium">Kullanıcılar</h4>
-                            {usersLoading && (
-                                <span className="text-xs text-white/60">Yükleniyor…</span>
-                            )}
-                        </div>
-
-                        {/* Arama */}
-                        <div className="mb-3">
-                            <input
-                                value={userSearch}
-                                onChange={(e) => setUserSearch(e.target.value)}
-                                className="w-full rounded-lg bg-white/5 ring-1 ring-white/10 px-3 py-2 outline-none focus:ring-indigo-500/60"
-                                placeholder="Kullanıcı ara…"
-                            />
-
-                        </div>
-
-                        {/* Liste */}
-                        {users.length === 0 && !usersLoading ? (
-                            <div className="text-sm text-white/60">Sonuç yok.</div>
-                        ) : (
-                            <ul className="space-y-2 max-h-[360px] overflow-y-auto thin-scroll">
-                                {filteredUsers.map((u) => (
-                                    <li key={u.id} className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2">
-                                        <div className="text-sm font-medium truncate">
-                                            {u.username ?? `Kullanıcı #${u.id}`}
-                                        </div>
-                                        <button
-                                            onClick={() => onAddUser(u.id)}
-                                            className="text-emerald-300 hover:text-emerald-400 text-sm px-2 py-1 rounded"
-                                        >
-                                            Ekle
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-
-                        )}
-                    </section>
                 </div>
             </div>
 

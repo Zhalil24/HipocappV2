@@ -19,10 +19,11 @@ export type GroupMemberModel = {
 };
 
 export type GroupModel = {
-    id: number;
+    id?: number;
     groupName: string;
     createdOn: string;
     members: GroupMemberModel[];
+    description?: string;
 };
 
 export type GroupMessageModel = {

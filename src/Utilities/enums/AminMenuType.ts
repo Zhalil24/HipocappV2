@@ -8,16 +8,14 @@ export enum AdminMenuType {
   Jobs = "jobs",
   Market = "market",
   Partners = "partners",
-  Entries = "entries"
+  Entries = "entries",
+  Groups= "groups"
 }
 
 
 export const EndpointMappings: Record<AdminMenuType, Partial<Record<"list" | "create" | "update" | "delete" | "list2", Endpoints>>> = {
   [AdminMenuType.Users]: {
     list: Endpoints.GetUsers,
-    //  create: Endpoints.CreateUser,
-    //  update: Endpoints.UpdateUser,
-    //  delete: Endpoints.DeleteUser,
     list2: Endpoints.GetUnapprovedUsers,
   },
   [AdminMenuType.Modules]: {
@@ -28,15 +26,9 @@ export const EndpointMappings: Record<AdminMenuType, Partial<Record<"list" | "cr
   },
   [AdminMenuType.Entries]: {
     list: Endpoints.GetAllEntries,
-    //  create: Endpoints.CreateModule,
-    //  update: Endpoints.UpdateModule,
-    //  delete: Endpoints.DeleteModule,
   },
   [AdminMenuType.Roles]: {
     list: Endpoints.GetRoles,
-    //   create: Endpoints.CreateRole,
-    //  update: Endpoints.UpdateRole,
-    //  delete: Endpoints.DeleteRole,
   },
   [AdminMenuType.Trainings]: {
     list: Endpoints.GetDraws,
@@ -62,4 +54,9 @@ export const EndpointMappings: Record<AdminMenuType, Partial<Record<"list" | "cr
     update: Endpoints.UpdateThesisConsultation,
     delete: Endpoints.DeleteThesisConsultation,
   },
+  [AdminMenuType.Groups]:{
+    list: Endpoints.GetGroupsMemberRequest,
+    list2: Endpoints.GetGroupsApprovedMemberRequest,
+    create: Endpoints.CreateGroup,
+  }
 };

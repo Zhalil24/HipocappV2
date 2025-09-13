@@ -7,6 +7,9 @@ import {
   Megaphone,
   ShoppingCart,
   Handshake,
+  Group,
+  UserPlus,
+  FileText, Clipboard 
 } from "lucide-react";
 import { Endpoints } from "../enums/Endpoints";
 import { AdminMenuType } from "../enums/AminMenuType";
@@ -21,7 +24,7 @@ export interface EndpointConfig {
   endpoint: Endpoints;
   hasPage: boolean;
   label?: string;
-  
+
 }
 
 export type Item = {
@@ -45,7 +48,7 @@ export class AdminMenuConstants {
         {
           label: "Kullanıcı İşlemleri",
           endpoints: [
-              { operation: "list", endpoint: Endpoints.GetUsers, hasPage: true, label: "Kullanıcı Listesi" },
+            { operation: "list", endpoint: Endpoints.GetUsers, hasPage: true, label: "Kullanıcı Listesi" },
             //  { operation: "create", endpoint: Endpoints.CreateUser, hasPage: true, label: "Kullanıcı Ekle" },
             //  { operation: "update", endpoint: Endpoints.UpdateUser, hasPage: false },
             //  { operation: "delete", endpoint: Endpoints.DeleteUser, hasPage: false },
@@ -55,20 +58,20 @@ export class AdminMenuConstants {
         {
           label: "Onay İşlemleri",
           endpoints: [
-             { operation: "list2", endpoint: Endpoints.GetUnapprovedUsers, hasPage: true, label: "Onaylanmamış Kullanıcılar" },
+            { operation: "list2", endpoint: Endpoints.GetUnapprovedUsers, hasPage: true, label: "Onaylanmamış Kullanıcılar" },
           ],
         },
       ],
     },
-        {
+    {
       label: "Yorumlar",
-      icon: Users,
+      icon: FileText,
       type: AdminMenuType.Entries,
       children: [
         {
           label: "Yorumlar İşlemleri",
           endpoints: [
-              { operation: "list", endpoint: Endpoints.GetAllEntries, hasPage: true, label: "Yorumlar Listesi" },
+            { operation: "list", endpoint: Endpoints.GetAllEntries, hasPage: true, label: "Yorumlar Listesi" },
           ],
         },
       ],
@@ -97,7 +100,7 @@ export class AdminMenuConstants {
         {
           label: "Rol İşlemleri",
           endpoints: [
-             { operation: "list", endpoint: Endpoints.GetRoles, hasPage: true, label: "Rol Listesi" },
+            { operation: "list", endpoint: Endpoints.GetRoles, hasPage: true, label: "Rol Listesi" },
           ],
         },
       ],
@@ -143,7 +146,7 @@ export class AdminMenuConstants {
           label: "Market İşlemleri",
           endpoints: [
             { operation: "list", endpoint: Endpoints.GetCampaigns, hasPage: true, label: "Market Listesi" },
-            { operation: "create", endpoint: Endpoints.CreateCampaign, hasPage: false,  },
+            { operation: "create", endpoint: Endpoints.CreateCampaign, hasPage: false, },
             { operation: "update", endpoint: Endpoints.UpdateCampaign, hasPage: false },
             { operation: "delete", endpoint: Endpoints.DeleteCampaign, hasPage: false },
           ],
@@ -159,9 +162,24 @@ export class AdminMenuConstants {
           label: "Partner İşlemleri",
           endpoints: [
             { operation: "list", endpoint: Endpoints.GetThesisConsultation, hasPage: true, label: "Partner Listesi" },
-            { operation: "create", endpoint: Endpoints.CreateThesisConsultation, hasPage: false,  },
+            { operation: "create", endpoint: Endpoints.CreateThesisConsultation, hasPage: false, },
             { operation: "update", endpoint: Endpoints.UpdateThesisConsultation, hasPage: false },
             { operation: "delete", endpoint: Endpoints.DeleteThesisConsultation, hasPage: false },
+          ],
+        },
+      ],
+    },
+    {
+      label: "Gruplar",
+      icon: UserPlus,
+      type: AdminMenuType.Groups,
+      children: [
+        {
+          label: "Grup İşlemleri",
+          endpoints: [
+            { operation: "list", endpoint: Endpoints.GetGroupsMemberRequest, hasPage: true, label: "Onay Bekleyen Kullanıcı Listesi" },
+            { operation: "list2", endpoint: Endpoints.GetGroupsApprovedMemberRequest, hasPage: true, label: "Onaylanmış Kullanıcılar" },
+            { operation: "create", endpoint: Endpoints.CreateGroup, hasPage: true, label: "Gruplar" },
           ],
         },
       ],
