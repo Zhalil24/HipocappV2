@@ -17,7 +17,7 @@ export const UserList = ({
   onCreate,
   variant = "all",
 }: {
-  pagination: PaginationModel<UserDataModel>;
+  pagination: PaginationModel<UserDataModel> | null;
   onDelete?: (id: number) => void;
   onEdit?: (user: UserDataModel) => void;
   onPageChange: (page: number) => void;
@@ -26,6 +26,8 @@ export const UserList = ({
   onCreate?: (user: Partial<UserDataModel>) => void;
   variant?: UserListVariant;
 }) => {
+  const safePagination = pagination ?? { index: 0, size: 10, count: 0, pages: 0 };
+
   const [confirmAction, setConfirmAction] = useState<{
     type: 'approve' | 'reject';
     userId: number;
@@ -59,10 +61,10 @@ export const UserList = ({
           </tr>
         </thead>
         <tbody>
-          {pagination.items.length === 0 ? (
+          {!pagination || pagination.items.length === 0 ? (
             <tr>
               <td colSpan={9} className="p-4 text-center text-gray-500 italic">
-                Gösterilecek kullanıcı yok
+                Veri bulunamadı
               </td>
             </tr>
           ) : (
@@ -89,7 +91,6 @@ export const UserList = ({
                   )}
                 </td>
 
-
                 <td className="p-2 border">
                   {{
                     1: 'Süper Admin',
@@ -108,7 +109,7 @@ export const UserList = ({
                         Güncelle
                       </button>
                       <button
-                        onClick={() => onDelete && onDelete(user.id)}
+                        onClick={() => onDelete?.(user.id)}
                         className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
                       >
                         Sil
@@ -136,13 +137,14 @@ export const UserList = ({
           )}
         </tbody>
 
+
       </table>
 
       <Pagination
-        index={pagination.index}
-        size={pagination.size}
-        count={pagination.count}
-        pages={pagination.pages}
+        index={safePagination.index}
+        size={safePagination.size}
+        count={safePagination.count}
+        pages={safePagination.pages}
         onPageChange={onPageChange}
       />
 

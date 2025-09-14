@@ -31,14 +31,14 @@ const UserModal: React.FC<UserModalProps> = ({ user, onUpdate, onCreate, onClose
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-const handleSave = () => {
-    if (isEdit) {
-        onUpdate?.(formData);
-    } else {
-        onCreate?.(formData);
-    }
-    onClose();
-};
+    const handleSave = () => {
+        if (isEdit) {
+            onUpdate?.(formData);
+        } else {
+            onCreate?.(formData);
+        }
+        onClose();
+    };
 
 
 
@@ -121,14 +121,19 @@ const handleSave = () => {
                             </div>
 
                             <div className="grid gap-2">
-                                <label>Derece ID</label>
-                                <input
-                                    type="number"
+                                <label>Derece</label>
+                                <select
                                     name="degreeId"
                                     value={formData.degreeId}
                                     onChange={handleChange}
                                     className="border p-2 rounded-md w-full"
-                                />
+                                >
+                                    <option value="">Seçiniz</option>
+                                    <option value={1}>Doktor</option>
+                                    <option value={2}>Diş Hekimi</option>
+                                    <option value={3}>Akademisyen</option>
+                                    <option value={4}>Sosyal Bilimci</option>
+                                </select>
                             </div>
 
                             <div className="grid gap-2">

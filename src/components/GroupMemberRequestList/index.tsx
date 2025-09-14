@@ -4,11 +4,11 @@ import { Pagination } from "../Pagination";
 import { useEffect, useState } from "react";
 
 interface Props {
-  data: GetGroupsMemberRequest[];
+  data: GetGroupsMemberRequest[] | null;
   onApprove: (request: GetGroupsMemberRequest) => void;
   onReject: (request: GetGroupsMemberRequest) => void;
   onPageChange: (page: number) => void;
-  pagination: PaginationModel<GetGroupsMemberRequest>;
+  pagination: PaginationModel<GetGroupsMemberRequest> | null;
 }
 
 const GroupMemberRequestsTable: React.FC<Props> = ({
@@ -18,10 +18,10 @@ const GroupMemberRequestsTable: React.FC<Props> = ({
   onPageChange,
   pagination,
 }) => {
-  const [localData, setLocalData] = useState<GetGroupsMemberRequest[]>(data);
+  const [localData, setLocalData] = useState<GetGroupsMemberRequest[]>(data ?? []);
 
   useEffect(() => {
-    setLocalData(data);
+    setLocalData(data ?? []);
   }, [data]);
 
 
@@ -64,6 +64,9 @@ const GroupMemberRequestsTable: React.FC<Props> = ({
   const handleCancel = () => {
     setConfirm({ visible: false, action: null, message: "" });
   };
+  const safePagination = pagination ?? { index: 0, size: 10, count: 0, pages: 0 };
+
+
   return (
     <div className="w-full">
       <table className="w-full border border-gray-300 text-sm text-left">
@@ -77,61 +80,73 @@ const GroupMemberRequestsTable: React.FC<Props> = ({
           </tr>
         </thead>
         <tbody>
-          {localData.map((req) => (
-            <tr key={`${req.groupId}-${req.userId}`}>
-              <td className="border px-3 py-2">{req.groupName}</td>
-              <td className="border px-3 py-2">{req.userName}</td>
-              <td className="border px-3 py-2">
-                {new Date(req.requestedOn).toLocaleString()}
-              </td>
-              <td className="border px-3 py-2">
-                {req.status === 1
-                  ? "İstek Bekliyor"
-                  : req.status === 2
-                    ? "İstek Kabul Edilmiş"
-                    : req.status === 3
-                      ? "İstek Reddedilmiş"
-                      : "İstek Atmamış"}
-              </td>
-              <td className="border px-3 py-2 space-x-2">
-                <button
-                  onClick={() =>
-                    setConfirm({
-                      visible: true,
-                      action: () => handleApprove(req),
-                      message: "Bu kullanıcıyı onaylamak istediğinizden emin misiniz?",
-                    })
-                  }
-                  className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                >
-                  Onayla
-                </button>
+          {localData.length > 0 ? (
+            localData.map((req) => (
+              <tr key={`${req.groupId}-${req.userId}`}>
+                <td className="border px-3 py-2">{req.groupName}</td>
+                <td className="border px-3 py-2">{req.userName}</td>
+                <td className="border px-3 py-2">
+                  {new Date(req.requestedOn).toLocaleString()}
+                </td>
+                <td className="border px-3 py-2">
+                  {req.status === 1
+                    ? "İstek Bekliyor"
+                    : req.status === 2
+                      ? "İstek Kabul Edilmiş"
+                      : req.status === 3
+                        ? "İstek Reddedilmiş"
+                        : "İstek Atmamış"}
+                </td>
+                <td className="border px-3 py-2 space-x-2">
+                  <button
+                    onClick={() =>
+                      setConfirm({
+                        visible: true,
+                        action: () => handleApprove(req),
+                        message: "Bu kullanıcıyı onaylamak istediğinizden emin misiniz?",
+                      })
+                    }
+                    className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                  >
+                    Onayla
+                  </button>
 
-                <button
-                  onClick={() =>
-                    setConfirm({
-                      visible: true,
-                      action: () => handleReject(req),
-                      message: "Bu kullanıcıyı reddetmek istediğinizden emin misiniz?",
-                    })
-                  }
-                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Reddet
-                </button>
+                  <button
+                    onClick={() =>
+                      setConfirm({
+                        visible: true,
+                        action: () => handleReject(req),
+                        message: "Bu kullanıcıyı reddetmek istediğinizden emin misiniz?",
+                      })
+                    }
+                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    Reddet
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={5}
+                className="text-center py-4 text-gray-500 bg-gray-50 italic"
+              >
+                Veri bulunamadı
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
+
 
       </table>
 
       <div className="mt-4 flex justify-center">
         <Pagination
-          index={pagination.index}
-          size={pagination.size}
-          count={pagination.count}
-          pages={pagination.pages}
+          index={safePagination.index}
+          size={safePagination.size}
+          count={safePagination.count}
+          pages={safePagination.pages}
           onPageChange={onPageChange}
         />
       </div>

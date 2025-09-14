@@ -215,14 +215,13 @@ export default function AdminPanel() {
                     />
                 );
             case AdminMenuType.Roles:
-                if (!adminState.roles) return <LoadingWidget isLight={true} />;
-
+                if (adminState.loading) return <LoadingWidget isLight={true} />;
                 return (
                     <RoleList
                         onAuthorize={() => { }}
                         onAdd={handleRoleCreate}
                         onDelete={handleRoleDelete}
-                        roles={adminState.roles}
+                        roles={adminState.roles ?? []}
                         onSelectionChange={() => { }}
                         roleModelResponse={adminState.moduleRoles!}
                         onAuthorizeClick={(roleId) => { setAuthorizedRoleId(roleId) }}
@@ -230,13 +229,10 @@ export default function AdminPanel() {
                 )
             case AdminMenuType.Groups:
                 if (operation === "list") {
-                    if (!adminState.pendingGroupMemberRequest?.items?.length) {
-                        return <p className="text-center text-gray-500">Gösterilecek kullanıcı yok</p>;
-                    }
-
+                    if (adminState.loading) return <LoadingWidget isLight={true} />;
                     return (
                         <GroupMemberRequestsTable
-                            data={adminState.pendingGroupMemberRequest.items}
+                            data={adminState.pendingGroupMemberRequest?.items ?? []}
                             onApprove={handleGroupMemberRequestUpdate}
                             onPageChange={handlePageChange}
                             onReject={handleGroupMemberRequestUpdate}
@@ -246,23 +242,18 @@ export default function AdminPanel() {
                 }
 
                 if (operation === "list2") {
-                    if (!adminState.approvedGroupMemberRequest?.items?.length) {
-                        return <p className="text-center text-gray-500">Gösterilecek onaylanmış kullanıcı yok</p>;
-                    }
-
+                    if (adminState.loading) return <LoadingWidget isLight={true} />;
                     return (
                         <GroupApprovedMemberRequestsTable
-                            data={adminState.approvedGroupMemberRequest.items}
+                            data={adminState.approvedGroupMemberRequest?.items ?? []}
                             onDelete={handleDeleteGroupToMember}
                             onPageChange={handlePageChange}
                             pagination={adminState.approvedGroupMemberRequest}
                         />
                     );
                 }
-
                 if (operation === "create") {
-
-
+                    if (adminState.loading) return <LoadingWidget isLight={true} />;
                     return (
                         <AdminGroupsTable
                             groups={adminState.groups ?? []}
@@ -275,9 +266,6 @@ export default function AdminPanel() {
 
             case AdminMenuType.Users:
                 if (adminState.loading) return <LoadingWidget isLight={true} />;
-                if (!adminState.allUsers || adminState.allUsers.items.length === 0) {
-                    return <p className="text-center text-gray-500">Gösterilecek kullanıcı yok</p>;
-                }
                 if (operation === "list") {
                     return (
                         <UserList
