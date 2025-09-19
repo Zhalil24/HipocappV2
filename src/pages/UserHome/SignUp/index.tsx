@@ -8,6 +8,7 @@ import logo from "../../../layout/layouts/UserHome/Header/logo.png";
 import { useNavigate } from "react-router";
 import InfoPopup from "@/components/InfoPopup/InfoPopup";
 import { toast, ToastContainer } from "react-toastify";
+import { resizeImage } from "@/Utilities/helpers/resizeImage";
 const titleOptions = [
   { id: 1, label: "Doktor" },
   { id: 2, label: "Diş Hekimi" },
@@ -16,19 +17,6 @@ const titleOptions = [
 ];
 
 type Option = string | { value: string | number; label: string };
-interface RegisterFormValues {
-  firstName: string;
-  lastName: string;
-  userName: string;
-  phoneNumber: string;
-  email: string;
-  password: string;
-  passwordRepeat: string;
-  title: string | number;
-  institutionIdFile?: File | Blob | string | null;
-  isTermsAccepted: boolean;
-  identityNumber: string;
-}
 
 const SelectInput = ({
   label,
@@ -99,25 +87,8 @@ const Register = () => {
   const [showPopup, setShowPopup] = useState(false);
   const serviceMessage = useSelector((state: RootState) => state.register.message);
 
-  const appendSmartImage = async (formData: FormData, key: string, file: File | Blob | string) => {
-    if (file instanceof File || file instanceof Blob) {
-      formData.append(key, file);
-    } else if (typeof file === "string" && file.startsWith("data:image")) {
-      const base64 = file.split(",")[1];
-      const byteCharacters = atob(base64);
-      const byteNumbers = Array.from(byteCharacters, c => c.charCodeAt(0));
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "image/jpeg" });
-      formData.append(key, blob, "upload.jpg");
-    } else if (typeof file === "string" && file.startsWith("file://")) {
-      const response = await fetch(file);
-      const blob = await response.blob();
-      formData.append(key, blob, "upload.jpg");
-    }
-  };
 
-
-  const formik = useFormik<RegisterFormValues>({
+  const formik = useFormik({
     initialValues: {
       firstName: "",
       lastName: "",
@@ -127,9 +98,9 @@ const Register = () => {
       password: "",
       passwordRepeat: "",
       title: "",
-      institutionIdFile: null,
+      institutionIdFile: null as File | null,
       isTermsAccepted: false,
-      identityNumber: "",
+      identityNumber: ""
     },
     validate: (values) => {
       const errors: Record<string, string> = {};
@@ -153,33 +124,31 @@ const Register = () => {
       formData.append("degreeId", values.title.toString());
       formData.append("identityNumber", "a");
       formData.append("isTermsAccepted", values.isTermsAccepted.toString());
-
       if (values.institutionIdFile) {
-        await appendSmartImage(formData, "image", values.institutionIdFile);
+        const resizedFile = await resizeImage(values.institutionIdFile, 1024, 1024, 0.7);
+        formData.append("image", resizedFile);
       }
-
       try {
         const response = await dispatch(registerUser(formData)).unwrap();
-        toast.info(response.message, { autoClose: 5000, position: "top-right" });
-      } catch (err: any) {
-        // err baseService'den gelmiş olabilir veya thunk/redux hatası olabilir
-        const errorMessage =
-          err?.response?.data?.message || // Axios/Backend hatası varsa
-          err?.message ||                // diğer hata mesajı varsa
-          JSON.stringify(err) ||         // bilinmeyen hata
-          "Bilinmeyen bir hata oluştu";
-
-        // toast ile ekranda göster
-        toast.error("Kayıt başarısız: " + errorMessage, {
-          autoClose: 8000,
+        toast.info(response.message, {
+          autoClose: 5000,
           position: "top-right",
         });
-
-        // console da yine loglayabilirsin, debugging için
-        console.error("Kayıt hatası detay:", err);
+      } catch (err: any) {
+        if (err?.status === 400) {
+          toast.error("Başarısız, tekrar deneyiniz", {
+            autoClose: 5000,
+            position: "top-right",
+          });
+        } else if (err?.message) {
+          toast.error(err.message, {
+            autoClose: 5000,
+            position: "top-right",
+          });
+        }
       }
-
     },
+
   });
 
 

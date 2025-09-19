@@ -72,12 +72,11 @@ export class BaseService {
         await this.axiosInstance.post(url, data, config);
       return response.data;
     } catch (error: any) {
-      console.error("POST Error detay:", error.response);
       return {
         success: false,
         data: null,
-        message: error.response?.data?.message || error.message || 'POST hatası',
-        error: error.response?.data?.error || JSON.stringify(error)
+        message: error.response?.data?.message || 'Daha sonra tekrar deneyiniz.',
+        error: ''
       };
     }
   }
