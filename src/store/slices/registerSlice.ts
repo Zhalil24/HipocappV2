@@ -17,15 +17,15 @@ const initialState: RegisterState = {
   error: null,
   success: false,
   message: '',
-  isSuccess: null,
+  isSuccess:null,
 };
 
 const baseService = new BaseService();
 
 export const registerUser = createAsyncThunk<
   BaseResponseModel<null>,
-  FormData,
-  { rejectValue: string }
+  FormData,               
+  { rejectValue: string } 
 >(
   "register/registerUser",
   async (formData, { rejectWithValue }) => {
@@ -33,10 +33,14 @@ export const registerUser = createAsyncThunk<
       const response = await baseService.post<FormData, null>(
         "api/user/Register",
         formData,
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
-      return response;
+      return response; 
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Kayıt sırasında hata oluştu."

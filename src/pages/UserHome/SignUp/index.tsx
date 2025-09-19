@@ -111,34 +111,41 @@ const Register = () => {
       }
       return errors;
     },
-onSubmit: async (values) => {
-  const formData = new FormData();
-  formData.append("Name", values.firstName);
-  formData.append("Surname", values.lastName);
-  formData.append("UserName", values.userName);
-  formData.append("PhoneNumber", values.phoneNumber);
-  formData.append("Email", values.email);
-  formData.append("Password", values.password);
-  formData.append("PasswordRepeat", values.passwordRepeat);
-  formData.append("DegreeId", values.title.toString());
-  formData.append("IdentityNumber", "a");
-  formData.append("IsTermsAccepted", values.isTermsAccepted.toString());
-  if (values.institutionIdFile) {
-    formData.append("Image", values.institutionIdFile);
-  }
-
-  try {
-    const response = await dispatch(registerUser(formData)).unwrap();
-    toast.info(response.message, { autoClose: 5000, position: "top-right" });
-  } catch (err: any) {
-    if (err?.status === 400) {
-      toast.error("Başarısız, tekrar deneyiniz", { autoClose: 5000, position: "top-right" });
-    } else if (err?.message) {
-      toast.error(err.message, { autoClose: 5000, position: "top-right" });
-    }
-  }
-}
-
+    onSubmit: async (values) => {
+      const formData = new FormData();
+      formData.append("name", values.firstName);
+      formData.append("surname", values.lastName);
+      formData.append("userName", values.userName);
+      formData.append("phoneNumber", values.phoneNumber);
+      formData.append("email", values.email);
+      formData.append("password", values.password);
+      formData.append("passwordRepeat", values.passwordRepeat);
+      formData.append("degreeId", values.title.toString());
+      formData.append("identityNumber", "a");
+      formData.append("isTermsAccepted", values.isTermsAccepted.toString());
+      if (values.institutionIdFile) {
+        formData.append("image", values.institutionIdFile);
+      }
+      try {
+        const response = await dispatch(registerUser(formData)).unwrap();
+        toast.info(response.message, {
+          autoClose: 5000,
+          position: "top-right",
+        });
+      } catch (err: any) {
+        if (err?.status === 400) {
+          toast.error("Başarısız, tekrar deneyiniz", {
+            autoClose: 5000,
+            position: "top-right",
+          });
+        } else if (err?.message) {
+          toast.error(err.message, {
+            autoClose: 5000,
+            position: "top-right",
+          });
+        }
+      }
+    },
 
   });
 
