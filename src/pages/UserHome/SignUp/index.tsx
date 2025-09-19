@@ -138,6 +138,11 @@ const Register = () => {
             autoClose: 5000,
             position: "top-right",
           });
+        } else if (err?.message) {
+          toast.error(err.message, {
+            autoClose: 5000,
+            position: "top-right",
+          });
         }
       }
     },
@@ -156,20 +161,11 @@ const Register = () => {
   }, [registerState.isSuccess, serviceMessage, navigate]);
 
 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.currentTarget.files && e.currentTarget.files[0]) {
-  //     formik.setFieldValue("institutionIdFile", e.currentTarget.files[0]);
-  //   }
-  // };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.currentTarget.files || e.currentTarget.files.length === 0) {
-      toast.error("Dosya seçilemedi. Lütfen tekrar deneyin.");
-      return;
+    if (e.currentTarget.files && e.currentTarget.files[0]) {
+      formik.setFieldValue("institutionIdFile", e.currentTarget.files[0]);
     }
-    formik.setFieldValue("institutionIdFile", e.currentTarget.files[0]);
   };
-
 
   return (
     <div>
@@ -293,8 +289,12 @@ const Register = () => {
                 <input
                   type="file"
                   name="institutionIdFile"
-                  onChange={handleFileChange}
-                  accept="image/*"
+                  accept="image/*,.pdf"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      formik.setFieldValue("institutionIdFile", e.target.files[0]);
+                    }
+                  }}
                 />
               </div>
 
