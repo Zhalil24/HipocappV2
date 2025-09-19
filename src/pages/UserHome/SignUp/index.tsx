@@ -133,18 +133,23 @@ const Register = () => {
           position: "top-right",
         });
       } catch (err: any) {
-        if (err?.status === 400) {
-          toast.error("Başarısız, tekrar deneyiniz", {
-            autoClose: 5000,
-            position: "top-right",
-          });
-        } else if (err?.message) {
-          toast.error(err.message, {
-            autoClose: 5000,
-            position: "top-right",
-          });
+        console.error("Mobil POST Hatası:", err); // 🔥 Ayrıntılı log
+        if (err?.response) {
+          console.error("Response data:", err.response.data);
+          console.error("Response status:", err.response.status);
+          console.error("Response headers:", err.response.headers);
+        } else if (err?.request) {
+          console.error("Request:", err.request);
+        } else {
+          console.error("Error message:", err.message);
         }
+
+        toast.error("Kayıt başarısız: " + (err?.message || "Bilinmeyen hata"), {
+          autoClose: 5000,
+          position: "top-right",
+        });
       }
+
     },
 
   });
