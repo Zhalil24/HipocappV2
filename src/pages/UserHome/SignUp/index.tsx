@@ -126,29 +126,32 @@ const Register = () => {
       if (values.institutionIdFile) {
         formData.append("image", values.institutionIdFile);
       }
-      try {
-        const response = await dispatch(registerUser(formData)).unwrap();
-        toast.info(response.message, {
-          autoClose: 5000,
-          position: "top-right",
-        });
-      } catch (err: any) {
-        console.error("Mobil POST Hatası:", err); // 🔥 Ayrıntılı log
-        if (err?.response) {
-          console.error("Response data:", err.response.data);
-          console.error("Response status:", err.response.status);
-          console.error("Response headers:", err.response.headers);
-        } else if (err?.request) {
-          console.error("Request:", err.request);
-        } else {
-          console.error("Error message:", err.message);
-        }
+try {
+  const response = await dispatch(registerUser(formData)).unwrap();
+  toast.info(response.message, {
+    autoClose: 5000,
+    position: "top-right",
+  });
+} catch (err: any) {
+  let errorMessage = "Mobil POST Hatası: ";
 
-        toast.error("Kayıt başarısız: " + (err?.message || "Bilinmeyen hata"), {
-          autoClose: 5000,
-          position: "top-right",
-        });
-      }
+  if (err?.response) {
+    errorMessage += `\nResponse status: ${err.response.status}`;
+    errorMessage += `\nResponse data: ${JSON.stringify(err.response.data)}`;
+  } else if (err?.request) {
+    errorMessage += `\nRequest: ${JSON.stringify(err.request)}`;
+  } else {
+    errorMessage += `\nMessage: ${err.message}`;
+  }
+
+  // 🔥 Hem console.log, hem ekranda toast göster
+  console.error(errorMessage);
+  toast.error(errorMessage, {
+    autoClose: 7000,
+    position: "top-right",
+  });
+}
+
 
     },
 
