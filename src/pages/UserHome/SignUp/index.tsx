@@ -16,6 +16,19 @@ const titleOptions = [
 ];
 
 type Option = string | { value: string | number; label: string };
+interface RegisterFormValues {
+  firstName: string;
+  lastName: string;
+  userName: string;
+  phoneNumber: string;
+  email: string;
+  password: string;
+  passwordRepeat: string;
+  title: string | number;
+  institutionIdFile?: File | Blob | string | null;
+  isTermsAccepted: boolean;
+  identityNumber: string;
+}
 
 const SelectInput = ({
   label,
@@ -86,8 +99,25 @@ const Register = () => {
   const [showPopup, setShowPopup] = useState(false);
   const serviceMessage = useSelector((state: RootState) => state.register.message);
 
+    const appendSmartImage = async (formData: FormData, key: string, file: File | Blob | string) => {
+    if (file instanceof File || file instanceof Blob) {
+      formData.append(key, file);
+    } else if (typeof file === "string" && file.startsWith("data:image")) {
+      const base64 = file.split(",")[1];
+      const byteCharacters = atob(base64);
+      const byteNumbers = Array.from(byteCharacters, c => c.charCodeAt(0));
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "image/jpeg" });
+      formData.append(key, blob, "upload.jpg");
+    } else if (typeof file === "string" && file.startsWith("file://")) {
+      const response = await fetch(file);
+      const blob = await response.blob();
+      formData.append(key, blob, "upload.jpg");
+    }
+  };
 
-  const formik = useFormik({
+
+ const formik = useFormik<RegisterFormValues>({
     initialValues: {
       firstName: "",
       lastName: "",
@@ -97,9 +127,9 @@ const Register = () => {
       password: "",
       passwordRepeat: "",
       title: "",
-      institutionIdFile: null as File | null,
+      institutionIdFile: null,
       isTermsAccepted: false,
-      identityNumber: ""
+      identityNumber: "",
     },
     validate: (values) => {
       const errors: Record<string, string> = {};
@@ -123,38 +153,25 @@ const Register = () => {
       formData.append("degreeId", values.title.toString());
       formData.append("identityNumber", "a");
       formData.append("isTermsAccepted", values.isTermsAccepted.toString());
+
       if (values.institutionIdFile) {
-        formData.append("image", values.institutionIdFile);
+        await appendSmartImage(formData, "image", values.institutionIdFile);
       }
-try {
-  const response = await dispatch(registerUser(formData)).unwrap();
-  toast.info(response.message, {
-    autoClose: 5000,
-    position: "top-right",
-  });
-} catch (err: any) {
-  let errorMessage = "Mobil POST Hatası: ";
 
-  if (err?.response) {
-    errorMessage += `\nResponse status: ${err.response.status}`;
-    errorMessage += `\nResponse data: ${JSON.stringify(err.response.data)}`;
-  } else if (err?.request) {
-    errorMessage += `\nRequest: ${JSON.stringify(err.request)}`;
-  } else {
-    errorMessage += `\nMessage: ${err.message}`;
-  }
-
-  // 🔥 Hem console.log, hem ekranda toast göster
-  console.error(errorMessage);
-  toast.error(errorMessage, {
-    autoClose: 7000,
-    position: "top-right",
-  });
-}
-
-
+      try {
+        const response = await dispatch(registerUser(formData)).unwrap();
+        toast.info(response.message, { autoClose: 5000, position: "top-right" });
+      } catch (err: any) {
+        console.error("Kayıt hatası:", err);
+        if (err?.status === 400) {
+          toast.error("Başarısız, tekrar deneyiniz", { autoClose: 5000, position: "top-right" });
+        } else if (err?.message) {
+          toast.error(err.message, { autoClose: 5000, position: "top-right" });
+        } else {
+          toast.error("Bilinmeyen bir hata oluştu", { autoClose: 5000, position: "top-right" });
+        }
+      }
     },
-
   });
 
 
