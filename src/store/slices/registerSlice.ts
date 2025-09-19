@@ -33,11 +33,7 @@ export const registerUser = createAsyncThunk<
       const response = await baseService.post<FormData, null>(
         "api/user/Register",
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+
       );
 
       return response; 
