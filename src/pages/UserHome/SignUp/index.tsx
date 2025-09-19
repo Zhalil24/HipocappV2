@@ -138,11 +138,6 @@ const Register = () => {
             autoClose: 5000,
             position: "top-right",
           });
-        } else if (err?.message) {
-          toast.error(err.message, {
-            autoClose: 5000,
-            position: "top-right",
-          });
         }
       }
     },
@@ -150,22 +145,31 @@ const Register = () => {
   });
 
 
-useEffect(() => {
-  if (registerState.isSuccess && serviceMessage) {
-    toast.info(serviceMessage, { 
-      toastId: Date.now().toString(),
-      autoClose: 3000,
-      onClose: () => navigate("/login") 
-    });
-  }
-}, [registerState.isSuccess, serviceMessage, navigate]);
+  useEffect(() => {
+    if (registerState.isSuccess && serviceMessage) {
+      toast.info(serviceMessage, {
+        toastId: Date.now().toString(),
+        autoClose: 3000,
+        onClose: () => navigate("/login")
+      });
+    }
+  }, [registerState.isSuccess, serviceMessage, navigate]);
 
+
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.currentTarget.files && e.currentTarget.files[0]) {
+  //     formik.setFieldValue("institutionIdFile", e.currentTarget.files[0]);
+  //   }
+  // };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.currentTarget.files && e.currentTarget.files[0]) {
-      formik.setFieldValue("institutionIdFile", e.currentTarget.files[0]);
+    if (!e.currentTarget.files || e.currentTarget.files.length === 0) {
+      toast.error("Dosya seçilemedi. Lütfen tekrar deneyin.");
+      return;
     }
+    formik.setFieldValue("institutionIdFile", e.currentTarget.files[0]);
   };
+
 
   return (
     <div>
@@ -286,10 +290,11 @@ useEffect(() => {
                 />
 
 
-                <FileInput
-                  label="Kurum Kimliği Seçin"
+                <input
+                  type="file"
                   name="institutionIdFile"
                   onChange={handleFileChange}
+                  accept="image/*"
                 />
               </div>
 
