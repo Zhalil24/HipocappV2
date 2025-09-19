@@ -99,7 +99,7 @@ const Register = () => {
   const [showPopup, setShowPopup] = useState(false);
   const serviceMessage = useSelector((state: RootState) => state.register.message);
 
-    const appendSmartImage = async (formData: FormData, key: string, file: File | Blob | string) => {
+  const appendSmartImage = async (formData: FormData, key: string, file: File | Blob | string) => {
     if (file instanceof File || file instanceof Blob) {
       formData.append(key, file);
     } else if (typeof file === "string" && file.startsWith("data:image")) {
@@ -117,7 +117,7 @@ const Register = () => {
   };
 
 
- const formik = useFormik<RegisterFormValues>({
+  const formik = useFormik<RegisterFormValues>({
     initialValues: {
       firstName: "",
       lastName: "",
@@ -162,15 +162,23 @@ const Register = () => {
         const response = await dispatch(registerUser(formData)).unwrap();
         toast.info(response.message, { autoClose: 5000, position: "top-right" });
       } catch (err: any) {
-        console.error("Kayıt hatası:", err);
-        if (err?.status === 400) {
-          toast.error("Başarısız, tekrar deneyiniz", { autoClose: 5000, position: "top-right" });
-        } else if (err?.message) {
-          toast.error(err.message, { autoClose: 5000, position: "top-right" });
-        } else {
-          toast.error("Bilinmeyen bir hata oluştu", { autoClose: 5000, position: "top-right" });
-        }
+        // err baseService'den gelmiş olabilir veya thunk/redux hatası olabilir
+        const errorMessage =
+          err?.response?.data?.message || // Axios/Backend hatası varsa
+          err?.message ||                // diğer hata mesajı varsa
+          JSON.stringify(err) ||         // bilinmeyen hata
+          "Bilinmeyen bir hata oluştu";
+
+        // toast ile ekranda göster
+        toast.error("Kayıt başarısız: " + errorMessage, {
+          autoClose: 8000,
+          position: "top-right",
+        });
+
+        // console da yine loglayabilirsin, debugging için
+        console.error("Kayıt hatası detay:", err);
       }
+
     },
   });
 
