@@ -7,12 +7,13 @@ import AdsPage from '@/pages/UserHome/Ads/AdsPage';
 import EducationPage from '@/pages/UserHome/Educations/EducationPage';
 import PartnersPage from '@/pages/UserHome/Partners/PartnersPage';
 import ContactPage from '@/pages/UserHome/Contact';
-import KvkkPage from '@/pages/UserHome/KVKK/KVKK';
+import KvkkPage from '@/pages/UserHome/KVKK&CSAE&CSAM/KVKK&CSAE&CSAM';
 import ChatPage from '@/pages/UserHome/Chat';
 import ForgotPassword from '@/pages/UserHome/ForgotPassword';
 import AdminPanel from '@/pages/AdminPanel/Panel';
 import GroupList from '@/pages/UserHome/GroupList';
 import PrivateRoute from './PrivateRoute';
+import KVKKCSAECSAM from '@/pages/UserHome/KVKK&CSAE&CSAM/KVKK&CSAE&CSAM';
 
 const Routers = () => {
   return (
@@ -29,7 +30,8 @@ const Routers = () => {
       <Route path="/ads" element={<AdsPage />} />
       <Route path="/educations" element={<EducationPage />} />
       <Route path="/partners" element={<PartnersPage />} />
-      <Route path="/KVKK" element={<KvkkPage />} />
+      <Route path="/kvkkandcsaeandcsam" element={<KVKKCSAECSAM />} />
+
       <Route
         path="/chat/:username?"
         element={

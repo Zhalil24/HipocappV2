@@ -38,7 +38,7 @@ const Footer = () => {
               <ul className="space-y-2 text-sm text-[#FDF6EC]/85">
             <li><a href="/about" className="hover:text-[#0071E3] transition-colors">Hakkımızda</a></li>
             <li><a href="/contact" className="hover:text-[#0071E3] transition-colors">İletişim</a></li>
-            <li><a href="/kvkk" className="hover:text-[#0071E3] transition-colors">KVKK</a></li>
+            <li><a href="/kvkkandcsaeandcsam" className="hover:text-[#0071E3] transition-colors">KVKK</a></li>
               </ul>
             </div>
 
