@@ -1,25 +1,45 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { API_BASE_URL, getAccessToken } from "../services/apiConfig";
 
 export class SignalRService {
     private connection: HubConnection | null = null;
-    private readonly hubUrl = "https://hipocapp.com/exampleTypeSafeHub";
-
+    private readonly hubUrl = `${API_BASE_URL}/hubs/chat`;
+    private readonly joinedGroups = new Set<number>();
+    private reconnectedHandler: (() => void) | null = null;
 
     public async startConnection() {
         if (this.connection) return; // Zaten bağlantı varsa tekrar başlatma
 
         this.connection = new HubConnectionBuilder()
-            .withUrl(this.hubUrl)
+            .withUrl(this.hubUrl, { accessTokenFactory: getAccessToken })
             .configureLogging(LogLevel.Information)
             .withAutomaticReconnect()
             .build();
 
+        // Group membership belongs to a connection, so a new connection must join again.
+        this.connection.onreconnected(async () => {
+            for (const groupId of this.joinedGroups) {
+                await this.invoke("JoinGroup", groupId);
+            }
+            this.reconnectedHandler?.();
+        });
+
         try {
             await this.connection.start();
-            console.log("✅ SignalR bağlantısı kuruldu:", this.hubUrl);
         } catch (err) {
+            this.connection = null;
             console.error("❌ SignalR bağlantı hatası:", err);
         }
+    }
+
+    public onReconnected(handler: () => void) {
+        this.reconnectedHandler = handler;
+    }
+
+    public async joinGroup(groupId: number) {
+        await this.startConnection();
+        await this.invoke("JoinGroup", groupId);
+        this.joinedGroups.add(groupId);
     }
 
     /**
@@ -43,11 +63,7 @@ export class SignalRService {
         }
 
         try {
-            const result = await this.connection.invoke(methodName, ...args);
-            if (result === undefined) {
-                console.warn(`ℹ ${methodName} çağrısı herhangi bir değer döndürmedi.`);
-            }
-            return result as T;
+            return await this.connection.invoke<T>(methodName, ...args);
         } catch (err) {
             console.error(`❌ ${methodName} çağrısında hata:`, err);
             return undefined;
@@ -59,7 +75,6 @@ export class SignalRService {
         cb ? this.connection.off(methodName, cb) : this.connection.off(methodName);
     }
 
-
     /**
      * Bağlantıyı kapatır.
      */
@@ -67,7 +82,7 @@ export class SignalRService {
         if (this.connection) {
             await this.connection.stop();
             this.connection = null;
-            console.log("🔌 SignalR bağlantısı kapatıldı.");
+            this.joinedGroups.clear();
         }
     }
 }

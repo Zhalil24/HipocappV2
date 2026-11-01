@@ -5,13 +5,14 @@ import axios, {
 } from 'axios';
 import { BaseResponseModel } from '../models/base/baseResponseModel';
 import { UserDataModel } from '../models/user/userDataModel';
+import { API_BASE_URL, getAccessToken } from './apiConfig';
 
 
 export class BaseService {
   private axiosInstance: AxiosInstance;
 
   constructor() {
-    const baseURL = "https://hipocapp.com/";
+    const baseURL = `${API_BASE_URL}/`;
     this.axiosInstance = axios.create({
       baseURL,
       headers: {
@@ -25,7 +26,7 @@ export class BaseService {
   private setupInterceptors() {
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        const token = getAccessToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -36,7 +37,14 @@ export class BaseService {
 
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      (error) => Promise.reject(error)
+      (error) => {
+        if (error.response?.status === 401 && getAccessToken()) {
+          // The token expired or the account was disabled.
+          localStorage.removeItem('user');
+          window.location.assign('/login');
+        }
+        return Promise.reject(error);
+      }
     );
   }
 

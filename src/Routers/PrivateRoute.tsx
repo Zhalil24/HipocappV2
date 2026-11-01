@@ -6,7 +6,6 @@ interface PrivateRouteProps {
 }
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles }) => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  console.log("user", user)
 
   if (!user || !user.accessToken) {
     return <Navigate to="/login" replace />;

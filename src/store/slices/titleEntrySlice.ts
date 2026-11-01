@@ -5,20 +5,15 @@ import { TitleModel } from '@/core/models/entries/titleModel';
 import { UserDataModel } from '@/core/models/user/userDataModel';
 import { BaseService } from '@/core/services/baseService';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
 
 const baseService = new BaseService();
 
 export const fetchEntriesByTitleName = createAsyncThunk(
   'titleEntry/fetchEntriesByTitleName',
   async (titleName: string) => {
-    const response = await axios.get(
-      `https://hipocapp.com/Entry/GetEntriesByTitleName?name=${encodeURIComponent(
-        titleName
-      )}`
-    );
+    const response = await baseService.get<any>('/Entry/GetEntriesByTitleName', { name: titleName });
 
-    return response.data;
+    return response;
   }
 );
 

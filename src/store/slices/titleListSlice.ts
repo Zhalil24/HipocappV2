@@ -1,5 +1,5 @@
+import { BaseService } from '@/core/services/baseService';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
 
 interface Title {
   id: number;
@@ -26,20 +26,17 @@ export const fetchTitlesByHeaderName = createAsyncThunk(
   'titles/fetchByHeaderName',
   async (headerName: string, { rejectWithValue }) => {
     try {
-      const headerRes = await axios.get(
-        `https://hipocapp.com/Header/GetHeaderIdByHeaderName?name=${headerName}`
-      );
-      const headerId = headerRes.data?.id ?? headerRes.data;
+      const service = new BaseService();
+      const headerRes: any = await service.get('/Header/GetHeaderIdByHeaderName', { name: headerName });
+      const headerId = headerRes?.id ?? headerRes;
 
       if (!headerId) throw new Error('Header ID alınamadı.');
 
-      const titlesRes = await axios.get(
-        `https://hipocapp.com/Title/GetAllTitles?id=${headerId}`
-      );
+      const titlesRes: any = await service.get('/Title/GetAllTitles', { id: headerId });
 
       return {
-        titles: titlesRes.data.data ?? [],
-        message: titlesRes.data.message,
+        titles: titlesRes?.data ?? [],
+        message: titlesRes?.message,
         headerId: headerId,
       };
     } catch (err: any) {

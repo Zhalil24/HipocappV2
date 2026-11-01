@@ -2,7 +2,7 @@ import { ChatListItem } from "@/components/ChatListItem";
 import ChatWindow from "@/components/ChatWindow";
 import LoadingWidget from "@/components/Loading/loadingWidget";
 import { UserDataModel } from "@/core/models/user/userDataModel";
-import { addMembersToGroup, clearUnreadForUser, deleteGroup, deleteMemberFromGroup, disconnectUser, fetchConversationMessages, fetchGroupMembers, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroupMobil, markMessagesAsRead, markPartnerMsgsReadLocal, removeGroupLocal, saveMessage, sendGroupMessage, sendPrivateMessage, startConnection, updateGroup } from "@/store/slices/chatSlice";
+import { addMembersToGroup, clearUnreadForUser, deleteGroup, deleteMemberFromGroup, disconnectUser, fetchConversationMessages, fetchGroupMembers, fetchGroupMessages, fetchGroups, fetchLastMessages, fetchUnreadCounts, fetchUsers, getOnlineUsers, joinGroup, markMessagesAsRead, markPartnerMsgsReadLocal, removeGroupLocal, sendGroupMessage, sendPrivateMessage, startConnection, updateGroup } from "@/store/slices/chatSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -151,8 +151,8 @@ const ChatPage: React.FC = () => {
     }, [activeGroupId])
 
     useEffect(() => {
-        if (groupName) dispatch(joinGroupMobil({ groupName }));
-    }, [groupName])
+        if (activeGroupId) dispatch(joinGroup({ groupId: activeGroupId }));
+    }, [activeGroupId])
 
 
     const groupMessagesById = useSelector(
@@ -245,22 +245,13 @@ const ChatPage: React.FC = () => {
             sentAt: new Date().toISOString(),
             isRead: false
         };
-        dispatch(saveMessage({ message: newMsg }));
         dispatch(sendPrivateMessage({ toUserId: activeId, message: newMsg }));
     };
 
 
     const handleGroupMessageSend = (text: string) => {
-        if (!userId) return;
-
-        const newMesagge: GroupMessageModel = {
-            fromUserId: userId,
-            groupId: activeGroupId ?? 0,
-            sentAt: new Date().toISOString(),
-            fromUserName: userName!,
-            messageText: text,
-        }
-        dispatch(sendGroupMessage({ groupName: groupName!, model: newMesagge }))
+        if (!userId || !activeGroupId) return;
+        dispatch(sendGroupMessage({ groupId: activeGroupId, messageText: text }))
     }
 
     const uniqueMessages = useMemo(() => {

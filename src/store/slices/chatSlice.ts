@@ -4,7 +4,6 @@ import { UserDataModel } from '@/core/models/user/userDataModel';
 import { chatModelInitialState, InitialChatModel } from '@/core/models/chat/chatModel';
 import { SignalRService } from '@/core/hubService/hubService';
 import { AddGroupMemberDto, GroupMemberDto, GroupMessageModel, GroupModel, MarkMessageModel, MessageModel, UnreadCountItem } from '@/core/models/chatMessage/messageModel';
-import { decryptMessage, encryptMessage } from '@/Utilities/helpers/cryptoHelper';
 
 const baseService = new BaseService();
 const hubService = new SignalRService();
@@ -26,7 +25,6 @@ export const startConnection = createAsyncThunk<void, number, ThunkConfig>(
     "chat/startConnection",
     async (userId, { dispatch, rejectWithValue }) => {
         await hubService.startConnection();
-        await hubService.invoke("RegisterUser", userId);
         const initial = await hubService.invoke("GetOnlineUsers");
         if (Array.isArray(initial)) {
             dispatch(setOnlineUsers(initial.map((e: any) => Number(e)).filter((n: number) => !isNaN(n))));
@@ -39,29 +37,15 @@ export const startConnection = createAsyncThunk<void, number, ThunkConfig>(
         hubService.on("UserDisconnected", (disconnectedUserId: number) => {
             dispatch(userDisconnected(Number(disconnectedUserId)));
         });
+        hubService.off("ReceivePrivateMessage");
         hubService.on("ReceivePrivateMessage", (msg: MessageModel) => {
-            const decryptedText = decryptMessage(msg.messageText);
-            dispatch(addIncomingMessage({
-                ...msg,
-                messageText: decryptedText
-            }));
+            dispatch(addIncomingMessage(msg));
         });
-        hubService.off("ReceiveMessageForGroupClients");
-        hubService.on("ReceiveMessageForGroupClients", (payload: any) => {
-            const raw = typeof payload === "string" ? JSON.parse(payload) : payload;
-            const candidate = raw?.sentAt ?? raw?.sentOn ?? null;
-            const parsed = (typeof candidate === "string" || typeof candidate === "number")
-                ? Date.parse(candidate as any) : NaN;
-            const safeSentAt = Number.isNaN(parsed) ? new Date().toISOString() : new Date(parsed).toISOString();
-            const decryptedText = decryptMessage(raw?.messageText ?? "");
-            const normalized = {
-                ...raw,
-                messageText: decryptedText,
-                sentAt: safeSentAt,
-            };
-            dispatch(addIncomingMessageGroup(normalized));
+        hubService.off("ReceiveGroupMessage");
+        hubService.on("ReceiveGroupMessage", (raw: any) => {
+            dispatch(addIncomingMessageGroup({ ...raw, sentAt: raw?.sentOn ?? new Date().toISOString() }));
         });
-        hubService.on?.("reconnected", async () => {
+        hubService.onReconnected(async () => {
             const res = await hubService.invoke("GetOnlineUsers");
             if (Array.isArray(res)) dispatch(setOnlineUsers(res.map(Number)));
         });
@@ -69,23 +53,18 @@ export const startConnection = createAsyncThunk<void, number, ThunkConfig>(
 );
 
 export const disconnectUser =
-    (userId: number) => async () => {
-        await hubService.invoke("DisconnectUserMobil", userId);
+    (_userId: number) => async () => {
+        await hubService.stopConnection();
     };
 
 
-export const joinGroupMobil = createAsyncThunk<
-    void,
-    { groupName: string },
-    ThunkConfig
->(
-    "chat/joinGroupMobil",
-    async ({ groupName }, { dispatch, rejectWithValue }) => {
+export const joinGroup = createAsyncThunk<void, { groupId: number }, ThunkConfig>(
+    "chat/joinGroup",
+    async ({ groupId }, { rejectWithValue }) => {
         try {
-            await hubService.startConnection();
-            await hubService.invoke("JoinGroupMobil", groupName);
+            await hubService.joinGroup(groupId);
         } catch (err) {
-            return rejectWithValue("JoinGroupMobil failed");
+            return rejectWithValue("JoinGroup failed");
         }
     }
 );
@@ -103,79 +82,32 @@ export const getOnlineUsers = createAsyncThunk<number[], void, ThunkConfig>(
 
 export const sendPrivateMessage = createAsyncThunk<
     void,
-    { toUserId: number; message: MessageModel }
+    { toUserId: number; message: MessageModel },
+    { rejectValue: string }
 >(
     "chat/sendPrivateMessage",
     async ({ toUserId, message }, { dispatch, rejectWithValue }) => {
-        const fromId = Number(message.fromUserId);
-        const toIdInMsg = Number(message.toUserId ?? toUserId);
-        if (!fromId || !toIdInMsg || !toUserId) {
-            return rejectWithValue("Geçersiz kullanıcı bilgisi (from/to).");
+        // The server saves the message before delivering it and answers with the saved copy.
+        const saved = await hubService.invoke<MessageModel>("SendPrivateMessage", Number(toUserId), String(message.messageText ?? ""));
+        if (!saved) {
+            return rejectWithValue("Mesaj gönderilemedi.");
         }
-        const encryptedText = encryptMessage(String(message.messageText ?? ""));
-
-        const serverMessage = {
-            Id: message.id ?? 0,
-            FromUserId: fromId,
-            ToUserId: toIdInMsg,
-            MessageText: encryptedText,
-            SentAt: new Date(message.sentAt).toISOString(),
-            IsRead: Boolean(message.isRead ?? false),
-        };
-
-        dispatch(addOutgoingMessage(message));
-        await hubService.invoke("SendPrivateMessage", Number(toUserId), serverMessage);
-    }
-);
-
-export const sendGroupMessageSave = createAsyncThunk<
-    GroupMessageModel,
-    GroupMessageModel,
-    { rejectValue: string }
->(
-    "chat/sendGroupMessage",
-    async (payload, { rejectWithValue }) => {
-        // Gönderirken şifrele
-        const body: GroupMessageModel = {
-            ...payload,
-            messageText: encryptMessage(String(payload.messageText ?? "")),
-        };
-        const res = await baseService.post<GroupMessageModel, GroupMessageModel>(
-            "/api/chat/GroupMessageSave",
-            body
-        );
-        if (!res?.success || !res.data) {
-            return rejectWithValue(res?.message || "Grup mesajı kaydedilemedi.");
-        }
-        const saved = res.data;
-        return {
-            ...saved,
-            messageText: decryptMessage(String(saved.messageText ?? "")),
-        } as GroupMessageModel;
+        dispatch(addOutgoingMessage(saved));
     }
 );
 
 export const sendGroupMessage = createAsyncThunk<
     void,
-    { groupName: string; model: GroupMessageModel },
+    { groupId: number; messageText: string },
     { rejectValue: string }
 >(
     "chat/sendGroupMessage",
-    async ({ groupName, model }, { dispatch, rejectWithValue }) => {
-        if (!groupName) {
-            return rejectWithValue("Geçersiz grup ismi!");
+    async ({ groupId, messageText }, { rejectWithValue }) => {
+        // The server sends the saved message back to every member, this device included.
+        const saved = await hubService.invoke("SendGroupMessage", groupId, messageText);
+        if (!saved) {
+            return rejectWithValue("Mesaj gönderilemedi.");
         }
-
-        const jsonString = JSON.stringify({
-            fromUserId: model.fromUserId,
-            groupId: model.groupId,
-            messageText: encryptMessage(String(model.messageText ?? "")),
-            fromUserName: model.fromUserName,
-            sentAt: model.sentAt,
-        });
-        dispatch(addOutgoingMessageGroup(model));
-        await hubService.invoke("SendGroupMessage", groupName, jsonString);
-        await dispatch(sendGroupMessageSave(model)).unwrap();
     }
 );
 export const fetchGroupMessages = createAsyncThunk<
@@ -193,7 +125,7 @@ export const fetchGroupMessages = createAsyncThunk<
         }
         const items: GroupMessageModel[] = res.data.map(m => ({
             ...m,
-            messageText: decryptMessage(String(m.messageText ?? "")),
+            messageText: String(m.messageText ?? ""),
             sentAt: typeof m.sentOn === "string"
                 ? m.sentOn
                 : new Date(m.sentOn ?? "").toISOString(),
@@ -201,53 +133,6 @@ export const fetchGroupMessages = createAsyncThunk<
         return { groupId, items };
     }
 );
-
-
-
-export const saveMessage = createAsyncThunk<
-    MessageModel,
-    { message: MessageModel },
-    { rejectValue: string }
->(
-    "chat/saveMessage",
-    async ({ message }, { rejectWithValue }) => {
-        const iso = message.sentAt
-            ? new Date(message.sentAt).toISOString()
-            : new Date().toISOString();
-
-        const bodyCamel = {
-            ...message,
-            messageText: encryptMessage(String(message.messageText ?? "")),
-            sentAt: iso,
-        };
-
-        const res = await baseService.post<any, typeof bodyCamel>(
-            "/api/chat/MessageSave",
-            bodyCamel
-        );
-        if (!res?.success || !res.data) {
-            return rejectWithValue(res?.message || "Mesaj kaydedilemedi");
-        }
-        const saved = res.data;
-        const cipherOrPlain =
-            saved.messageText ?? saved.messageText ?? "";
-
-        const normalized: MessageModel = {
-            id: saved.id ?? saved.id ?? null,
-            fromUserId: saved.fromUserId ?? saved.fromUserId ?? null,
-            toUserId: saved.toUserId ?? saved.toUserId,
-            messageText: decryptMessage(String(cipherOrPlain)),
-            sentAt:
-                typeof (saved.sentAt ?? saved.sentAt) === "string"
-                    ? (saved.sentAt ?? saved.sentAt)
-                    : new Date(saved.sentAt ?? saved.sentAt ?? iso).toISOString(),
-            isRead: saved.isRead ?? saved.isRead ?? null,
-        };
-        return normalized;
-    }
-);
-
-
 
 
 
@@ -276,7 +161,7 @@ export const fetchConversationMessages = createAsyncThunk<
             id: m.Id ?? m.id ?? null,
             fromUserId: (m.FromUserId ?? m.fromUserId ?? null) as number | null,
             toUserId: (m.ToUserId ?? m.toUserId) as number,
-            messageText: decryptMessage(m.MessageText ?? m.messageText ?? m.Text ?? "BOŞŞ"),
+            messageText: m.MessageText ?? m.messageText ?? m.Text ?? "BOŞŞ",
             sentAt:
                 typeof (m.SentAt ?? m.sentAt) === "string"
                     ? (m.SentAt ?? m.sentAt)
@@ -305,7 +190,7 @@ export const fetchLastMessages = createAsyncThunk<
             id: m.id ?? m.Id ?? null,
             fromUserId: Number(m.fromUserId ?? m.FromUserId ?? null),
             toUserId: Number(m.toUserId ?? m.ToUserId ?? null),
-            messageText: decryptMessage(String(m.messageText ?? m.MessageText ?? "")),
+            messageText: String(m.messageText ?? m.MessageText ?? ""),
             sentAt:
                 typeof (m.sentAt ?? m.SentAt) === "string"
                     ? (m.sentAt ?? m.SentAt)

@@ -36,10 +36,7 @@ const forgotPasswordSlice = createSlice({
             })
             .addCase(fetchForgotPassword.fulfilled, (state, action) => {
                 state.loading = false;
-                state.data = action.payload.data ?? null;
-                state.userRole = action.payload.data?.roleDTO?.name ?? '';
                 state.message = action.payload.message ?? 'Tekrar Deneyiniz';
-                localStorage.setItem("user", JSON.stringify(action.payload.data));
             })
             .addCase(fetchForgotPassword.rejected, (state, action) => {
                 state.loading = false;

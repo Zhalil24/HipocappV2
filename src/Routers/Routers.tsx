@@ -18,18 +18,18 @@ import KVKKCSAECSAM from '@/pages/UserHome/KVKK&CSAE&CSAM/KVKK&CSAE&CSAM';
 const Routers = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/about" element={<About />} />
       <Route path="/login" element={<Login />} />
       <Route path="/sign-up" element={<SignUp />} />
       <Route path="*" element={<Error />} />
-      <Route path="/profile/:id?" element={<Profile />} />
-      <Route path="/market" element={<MarketPage />} />
+      <Route path="/profile/:id?" element={<PrivateRoute><Profile /></PrivateRoute>} />
+      <Route path="/market" element={<PrivateRoute><MarketPage /></PrivateRoute>} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
-      <Route path="/ads" element={<AdsPage />} />
-      <Route path="/educations" element={<EducationPage />} />
-      <Route path="/partners" element={<PartnersPage />} />
+      <Route path="/ads" element={<PrivateRoute><AdsPage /></PrivateRoute>} />
+      <Route path="/educations" element={<PrivateRoute><EducationPage /></PrivateRoute>} />
+      <Route path="/partners" element={<PrivateRoute><PartnersPage /></PrivateRoute>} />
       <Route path="/kvkkandcsaeandcsam" element={<KVKKCSAECSAM />} />
 
       <Route

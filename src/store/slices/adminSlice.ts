@@ -27,19 +27,16 @@ export const fetchLastEntries = createAsyncThunk<
 export const fetchUserCount = createAsyncThunk<number | null>(
     "users/fetchUserCount",
     async () => {
-        const response = await fetch("https://hipocapp.com/api/user/GetUserCount");
-        const text = await response.text();
-        const count = Number(text);
-        return count;
+        const response = await baseService.get<number>("api/user/GetUserCount");
+        return Number(response);
     }
 );
 
 export const fetchUsersCountByDegreeId = createAsyncThunk<number[]>(
     "api/users/fetchUsersCountByDegreeId",
     async () => {
-        const res = await fetch("https://hipocapp.com/api/user/GetUsersCountByDegreeId");
-        const data: number[] = await res.json();
-        return data;
+        const res = await baseService.get<number[]>("api/user/GetUsersCountByDegreeId");
+        return res as unknown as number[];
     }
 );
 
@@ -297,16 +294,8 @@ export const fetchModuleRole = createAsyncThunk<
 >(
     "moduleRole/fetchModuleRole",
     async (roleId: number) => {
-        const url = `https://hipocapp.com${Endpoints.RolAuthentication}?id=${roleId}`;
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        const data: RoleModelResponse = await response.json();
-        return data;
+        const response = await baseService.get<RoleModelResponse>(Endpoints.RolAuthentication, { id: roleId });
+        return response as unknown as RoleModelResponse;
     }
 );
 
