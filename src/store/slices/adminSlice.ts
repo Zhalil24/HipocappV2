@@ -370,7 +370,7 @@ export const deleteMemberFromGroup = createAsyncThunk<
             "/api/chat/DeleteMemberFromGroup",
             { params: { groupId, userId } }
         );
-        if (!res || !(res as any).isSuccess) {
+        if (!res || !res.isSuccess) {
             return rejectWithValue(res?.message || "Kullanıcı gruptan çıkarılamadı.");
         }
 
@@ -616,7 +616,7 @@ const adminSlice = createSlice({
             })
             .addCase(updateUserStatus.fulfilled, (state, action: PayloadAction<BaseResponseModel<UserDataModel>>) => {
                 state.loading = false;
-                if (action.payload.success && action.payload.data && state.allUsers?.items) {
+                if (action.payload.isSuccess && action.payload.data && state.allUsers?.items) {
                     const updatedUser = action.payload.data;
                     state.allUsers.items = state.allUsers.items.filter(user => user.id !== updatedUser.id);
                 }

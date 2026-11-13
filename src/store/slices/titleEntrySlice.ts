@@ -26,7 +26,7 @@ export const searchTitlesByName = createAsyncThunk<
   async ({ name }, { rejectWithValue, signal }) => {
     const query = (name ?? "").trim();
     if (!query) {
-      return { success: true, data: [], message: "", error: "" };
+      return { isSuccess: true, data: [], message: "", error: "" };
     }
 
     const res = await baseService.get<TitleModel[]>(

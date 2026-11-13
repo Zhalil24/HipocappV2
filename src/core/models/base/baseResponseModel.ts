@@ -1,7 +1,7 @@
+/** Every API answer has this shape: isSuccess, the data and a message for the user. */
 export interface BaseResponseModel<T> {
-  success: boolean;
-  data: T | null; 
+  isSuccess: boolean;
+  data: T | null;
   message?: string;
   error?: string;
-  isSuccess?: boolean;
 }

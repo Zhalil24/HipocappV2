@@ -40,7 +40,7 @@ export default function GroupList() {
             ).unwrap();
             if (resp.message) {
                 toast.success(resp.message);
-            } else if (!resp.success) {
+            } else if (!resp.isSuccess) {
                 toast.error(resp.error || "İstek gönderilemedi.");
             }
         } catch (error: any) {

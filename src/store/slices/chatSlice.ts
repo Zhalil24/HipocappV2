@@ -120,7 +120,7 @@ export const fetchGroupMessages = createAsyncThunk<
         const res = await baseService.get<any[]>(
             `api/chat/GroupMessagesList?groupId=${groupId}`
         );
-        if (!res?.success || !res?.data) {
+        if (!res?.isSuccess || !res?.data) {
             return rejectWithValue(res?.message || "Grup mesajları alınamadı.");
         }
         const items: GroupMessageModel[] = res.data.map(m => ({
@@ -149,7 +149,7 @@ export const fetchConversationMessages = createAsyncThunk<
         );
         const container: any = res ?? {};
         const ok =
-            container.success === true ||
+            container.isSuccess === true ||
             container.IsSuccess === true ||
             container.resultType === 0 ||
             typeof container.data !== "undefined" ||
@@ -183,7 +183,7 @@ export const fetchLastMessages = createAsyncThunk<
     async ({ userId }, { rejectWithValue }) => {
         const res = await baseService.get<MessageModel[]>("/api/chat/LastMessages", { userId });
 
-        if (!res?.success || !Array.isArray(res.data)) {
+        if (!res?.isSuccess || !Array.isArray(res.data)) {
             return rejectWithValue(res?.message || "Son mesajlar alınamadı");
         }
         const list: MessageModel[] = res.data.map((m: any) => ({
@@ -215,7 +215,7 @@ export const fetchUnreadCounts = createAsyncThunk<
             { userId }
         );
 
-        if (!res?.success || !res.data) {
+        if (!res?.isSuccess || !res.data) {
             return rejectWithValue(res?.message || "Okunmamış sayıları alınamadı");
         }
         const arr = Array.isArray(res.data) ? res.data : [res.data];
@@ -240,7 +240,7 @@ export const markMessagesAsRead = createAsyncThunk<
             "/api/chat/MarkMessagesAsRead",
             { fromUserId, toUserId }
         );
-        if (!res?.success) {
+        if (!res?.isSuccess) {
             return rejectWithValue(res?.message ?? "Mesajlar okundu olarak işaretlenemedi");
         }
         return { fromUserId, toUserId };
@@ -287,7 +287,7 @@ export const deleteGroup = createAsyncThunk<
             return rejectWithValue("Geçersiz grup ID.");
         }
         const res = await baseService.delete<any>(`/api/chat/DeleteGroup?groupId=${groupId}`);
-        const ok = res?.success ?? res?.success ?? false;
+        const ok = res?.isSuccess ?? false;
         if (!ok) {
             return rejectWithValue(res?.message || "Grup silinemedi.");
         }
@@ -310,7 +310,7 @@ export const fetchGroupMembers = createAsyncThunk<
             { groupId }
         );
 
-        const ok = (res as any)?.success ?? false;
+        const ok = res?.isSuccess ?? false;
         if (!ok || !res.data) {
             return rejectWithValue(res?.message || "Grup üyeleri alınamadı.");
         }
@@ -331,7 +331,7 @@ export const addMembersToGroup = createAsyncThunk<
         }
         const payload = { groupId, userId: userIds };
         const res = await baseService.post<AddGroupMemberDto, AddGroupMemberDto>("/api/chat/AddMembersToGroup", payload);
-        const ok = (res as any)?.isSuccess ?? (res as any)?.success ?? false;
+        const ok = res?.isSuccess ?? false;
         if (!ok) {
             return rejectWithValue(res?.message || "Üyeler eklenemedi.");
         }

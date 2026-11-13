@@ -62,7 +62,7 @@ export class BaseService {
       return response.data;
     } catch (error: any) {
       return {
-        success: false,
+        isSuccess: false,
         data: null,
         message: error.response?.data?.message || 'GET hatası',
         error: ''
@@ -81,7 +81,7 @@ export class BaseService {
       return response.data;
     } catch (error: any) {
       return {
-        success: false,
+        isSuccess: false,
         data: null,
         message: error.response?.data?.message || 'Daha sonra tekrar deneyiniz.',
         error: ''
@@ -100,7 +100,7 @@ export class BaseService {
       return response.data;
     } catch (error: any) {
       return {
-        success: false,
+        isSuccess: false,
         data: null,
         message: error.response?.data?.message || 'PUT hatası',
         error: ''
@@ -119,7 +119,7 @@ export class BaseService {
       return response.data;
     } catch (error: any) {
       return {
-        success: false,
+        isSuccess: false,
         data: null,
         message: error.response?.data?.message || 'PATCH hatası',
         error: ''
@@ -137,7 +137,7 @@ export class BaseService {
       return response.data;
     } catch (error: any) {
       return {
-        success: false,
+        isSuccess: false,
         data: null,
         message: error.response?.data?.message || 'DELETE hatası',
         error: ''
