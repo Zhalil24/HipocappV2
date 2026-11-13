@@ -1,97 +1,46 @@
+# HipocApp Web
 
+React + Vite web client for HipocApp. It talks to the
+[backend API](https://github.com/Zhalil24/hipocapp-backend) over REST and to its SignalR hub for chat.
 
-```javascript
-npm i
-```
-and
-```javascript
-npm run dev
-```
+## Requirements
 
-```javascript
-React Folder Structure
-.
-├── public
-├── src
-|    ├── assets
-|    |     ├── icons
-|    |     └── images
-|    ├── components
-|    |     ├── Button
-|    |     |     └── index.jsx
-|    |	   ├── inputs
-|    |     |     └── index.jsx
-|    |     └── index.js
-|    ├── layout
-|    |     ├── Header
-|    |     |     └── index.jsx
-|    |     ├── Navbar.jsx
-|    |     |     └── index.jsx
-|    |     ├── Footer.jsx
-|    |     |     └── index.jsx
-|    |     └── index.js
-|    ├── pages
-|    |     ├── Home
-|    |     |     └── index.jsx
-|    |     ├── Login
-|    |     |     └── index.jsx
-|    |     ├── Signup
-|    |     |     └── index.jsx
-|    |     ├── About
-|    |     |     └── index.jsx
-|    |     ├── Error
-|    |     |     └── index.jsx
-|    |     └── index.js
-|    ├── Routers
-|    |     └── Routers.jsx
-|    ├── store
-|    |     ├── slices
-|    |     |     ├── featureSlice1.js
-|    |     |     └── featureSlice2.js
-|    |     ├── rootReducer.js  
-|    |     └── store.js
-|    ├── services
-|    |     ├── api.js                 // API request functions
-|    |     └── dataUtils.js           // Data manipulation functions
-|    ├── utils
-|    |     ├── constants
-|    |     |     ├── Strapi.js        // Example
-|    |     |     └── Firebase.js      // Example
-|    |     ├── helpers
-|    |     |     ├── arrays.js        // Example
-|    |     |     └── helpers.js       // Example
-|    |     └── hooks  
-|    |           └── useIsMobile.js   // Example
-|    ├── App.jsx
-|    ├── index.css
-|    └── main.jsx
-|
-├── .gitignore
-├── index.html
-├── .env
-├── package-lock.json
-├── package.json
-├── README.md
-└── ...                               // Configuration Files
+- Node.js 22
+- A running HipocApp backend
+
+## Setup
+
+```bash
+npm ci
 ```
 
-## Folders include
+The API address comes from `VITE_API_URL`. `.env.development` points to the local backend:
 
-- `public`       : Contains static assets like the HTML entry point and other files.
-- `assests`      : Houses icons and images used throughout the application.
-- `components`   : Reusable UI components organized by type.
-- `layout`       : Reusable layout components.
-- `pages`        : Individual pages or views of your app.
-- `Routers`      : Defines the routing structure of the app.
-- `services`     : API Operations
-- `store`        : Redux store setup and state management.
-- `utils`        : General utility functions and constants.
-  - `Constants`    : Constants used throughout the app (e.g., API endpoints).
-  - `helpers`      : Helper functions for various tasks.
-  - `hooks`        : Custom React hooks (e.g., useIsMobile).
-- `.env`
-- `.eslintrc.cjs`
-- `.prettierrc.cjs`
-- `.gitignore`
-- `package.json`
-- `.vite.config.js`
+```
+VITE_API_URL=http://localhost:5000
+```
+
+For production builds set `VITE_API_URL` in the build environment or in `.env.production`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Development server on http://localhost:5173 |
+| `npm run build` | Production build into `dist/` |
+| `npm run preview` | Serves the production build locally |
+| `npx tsc --noEmit` | Type check |
+
+## Folder layout
+
+| Folder | Purpose |
+|---|---|
+| `src/pages` | Pages, one folder per route |
+| `src/components` | Reusable UI components |
+| `src/layout` | Page layouts (user home, admin panel) |
+| `src/store` | Redux Toolkit store and slices |
+| `src/core/services` | API client and configuration |
+| `src/core/hubService` | SignalR connection |
+| `src/core/models` | Request and response types |
+| `src/Routers` | Routes and route guards |
+| `src/Utilities` | Constants, enums, helpers |
