@@ -10,6 +10,7 @@ import ContactPage from '@/pages/UserHome/Contact';
 import KvkkPage from '@/pages/UserHome/KVKK&CSAE&CSAM/KVKK&CSAE&CSAM';
 import ChatPage from '@/pages/UserHome/Chat';
 import ForgotPassword from '@/pages/UserHome/ForgotPassword';
+import ResetPassword from '@/pages/UserHome/ResetPassword';
 import AdminPanel from '@/pages/AdminPanel/Panel';
 import GroupList from '@/pages/UserHome/GroupList';
 import PrivateRoute from './PrivateRoute';
@@ -27,6 +28,7 @@ const Routers = () => {
       <Route path="/profile/:id?" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/market" element={<PrivateRoute><MarketPage /></PrivateRoute>} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/ads" element={<PrivateRoute><AdsPage /></PrivateRoute>} />
       <Route path="/educations" element={<PrivateRoute><EducationPage /></PrivateRoute>} />
       <Route path="/partners" element={<PrivateRoute><PartnersPage /></PrivateRoute>} />
