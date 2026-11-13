@@ -1,4 +1,5 @@
 import React from 'react';
+import { mediaUrl } from "@/core/services/apiConfig";
 
 interface ItemDetailProps {
   item: {
@@ -23,7 +24,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item }) => {
       {/* İç kutu */}
       <div className="bg-white rounded-lg shadow-md p-6 w-4/5 max-w-lg">
         <img
-          src={`https://hipocapp.com/${item.imageURL}`}
+          src={mediaUrl(item.imageURL)}
           alt={item.title}
           className="w-full h-56 object-cover rounded mb-4"
         />

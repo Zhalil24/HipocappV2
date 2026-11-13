@@ -3,6 +3,7 @@ import { Pagination } from "@/components/Pagination";
 import { PaginationModel } from "@/core/models/pagination/paginationModel";
 import { UserDataModel } from "@/core/models/user/userDataModel";
 import UserModal from "../UserModel";
+import { mediaUrl } from "@/core/services/apiConfig";
 
 
 type UserListVariant = "all" | "unapproved";
@@ -79,11 +80,11 @@ export const UserList = ({
                 <td className="p-2 border">
                   {(variant === "all" ? user.photoURL : user.imageURL) ? (
                     <img
-                      src={`https://hipocapp.com/${variant === "all" ? user.photoURL : user.imageURL ?? ''}`}
+                      src={mediaUrl(variant === "all" ? user.photoURL : user.imageURL ?? '')}
                       alt="User"
                       className="h-10 w-10 rounded-full object-cover mx-auto cursor-pointer"
                       onClick={() =>
-                        setPreviewImage(`https://hipocapp.com/${variant === "all" ? user.photoURL : user.imageURL ?? ''}`)
+                        setPreviewImage(mediaUrl(variant === "all" ? user.photoURL : user.imageURL ?? ''))
                       }
                     />
                   ) : (

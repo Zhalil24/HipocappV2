@@ -1,12 +1,9 @@
 import React from 'react';
 
-interface Item {
-  id: number;
-  imageURL: string;
-  description: string;
-  title: string;
-  link: string;
-}
+import { ContentModel } from '@/core/models/content/contentModel';
+import { mediaUrl } from "@/core/services/apiConfig";
+
+type Item = ContentModel;
 
 interface ItemListProps {
   items: Item[];
@@ -25,7 +22,7 @@ const ItemList: React.FC<ItemListProps> = ({ items, onSelect, selectedId }) => {
             }`}
         >
           <img
-            src={`https://hipocapp.com/${item.imageURL}`}
+            src={mediaUrl(item.imageURL)}
             alt={item.title}
             className="w-16 h-16 object-cover rounded"
           />

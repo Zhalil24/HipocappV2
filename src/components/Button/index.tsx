@@ -1,16 +1,12 @@
-import PropTypes from "prop-types";
-
-const index = ({ onClick,text }) => {
-  return (
-    <button onClick={onClick} className="bg-blue-600 text-white font-semibold">
-      {text}
-    </button>
-  )
+interface ButtonProps {
+  onClick?: () => void;
+  text: string;
 }
 
-index.propTypes = {
-  onClick: PropTypes.func,
-  text: PropTypes.string
-}
+const Button = ({ onClick, text }: ButtonProps) => (
+  <button onClick={onClick} className="bg-blue-600 text-white font-semibold">
+    {text}
+  </button>
+);
 
-export default index
+export default Button;

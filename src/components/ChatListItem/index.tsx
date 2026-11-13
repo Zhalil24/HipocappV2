@@ -1,5 +1,6 @@
 import { UserDataModel } from "@/core/models/user/userDataModel";
 import logo from '../../layout/layouts/UserHome/Header/logo.png';
+import { mediaUrl } from "@/core/services/apiConfig";
 export const ChatListItem: React.FC<{
     item: UserDataModel;
     active?: boolean;
@@ -17,8 +18,8 @@ export const ChatListItem: React.FC<{
     >
         <span className="relative">
             <img
-                src={item.photoURL ? `https://hipocapp.com/${item.photoURL}` : logo}
-                alt={item.username}
+                src={item.photoURL ? mediaUrl(item.photoURL) : logo}
+                alt={item.username ?? item.userName}
                 className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
             />
             <span

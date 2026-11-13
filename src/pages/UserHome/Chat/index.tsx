@@ -16,6 +16,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { GroupManageModal } from "@/components/GroupManageModal";
 import { useNavigate, useParams } from "react-router";
 import { useSearchParams } from "react-router-dom";
+import { mediaUrl } from "@/core/services/apiConfig";
 
 const EmptyState: React.FC = () => (
     <div className="h-full w-full flex flex-col items-center justify-center text-center">
@@ -682,7 +683,7 @@ const ChatPage: React.FC = () => {
                                     ) : headerUser ? (
                                         <>
                                             <img
-                                                src={headerUser.photoURL ? `https://hipocapp.com/${headerUser.photoURL}` : logo}
+                                                src={headerUser.photoURL ? mediaUrl(headerUser.photoURL) : logo}
                                                 alt={headerUser.userName ?? headerUser.name}
                                                 className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10"
                                             />

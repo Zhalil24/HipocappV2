@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserProfileModel } from '../../core/models/user/userDataModel';
+import { UserProfileModel } from '@/core/models/user/userProfileModel';
 import { Mail, ShieldCheck, User } from 'lucide-react';
 
 

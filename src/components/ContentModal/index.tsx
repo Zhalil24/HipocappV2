@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ContentModel } from "@/core/models/content/contentModel";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { mediaUrl } from "@/core/services/apiConfig";
 
 interface ContentModalProps {
     content?: ContentModel; 
@@ -77,7 +78,7 @@ export const ContentModal: React.FC<ContentModalProps> = ({
                         <label>Görsel</label>
                         <input type="file" accept="image/*" onChange={handleFileChange} />
                         {formData.imageURL && (
-                            <img src={`https://hipocapp.com/${formData.imageURL}`} alt="Preview" className="h-24 mt-2 rounded-md object-cover" />
+                            <img src={mediaUrl(formData.imageURL)} alt="Preview" className="h-24 mt-2 rounded-md object-cover" />
                         )}
                     </div>
                 </div>

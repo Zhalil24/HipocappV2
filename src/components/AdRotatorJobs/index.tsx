@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ContentModel } from "@/core/models/content/contentModel";
+import { mediaUrl } from "@/core/services/apiConfig";
 
 type AdRotatorProps = {
   items: ContentModel[];
@@ -65,7 +66,7 @@ const AdRotator: React.FC<AdRotatorProps> = ({
     >
       <div className="relative h-44 w-full bg-black/20">
         <img
-          src={`https://hipocapp.com/${item.imageURL}`}
+          src={mediaUrl(item.imageURL)}
           alt={item.title}
           className="h-full w-full object-cover"
           loading="lazy"

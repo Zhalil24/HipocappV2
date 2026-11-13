@@ -1,6 +1,7 @@
 import { MessageModel } from "@/core/models/chatMessage/messageModel";
 import { formatTime } from "@/Utilities/helpers/formatDateHelper";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { mediaUrl } from "@/core/services/apiConfig";
 
 
 type Props = {
@@ -99,7 +100,7 @@ const ChatWindow: React.FC<Props> = ({
                         <div key={key} className="w-full flex items-start gap-2">
                             {/* Opsiyonel avatar */}
                             {/* <img
-                src={peer?.photoUrl ? `https://hipocapp.com/${peer.photoUrl}` : logo}
+                src={peer?.photoUrl ? mediaUrl(peer.photoUrl) : logo}
                 className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10 mt-0.5"
                 alt={peer?.name ?? "user"}
               /> */}

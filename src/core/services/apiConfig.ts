@@ -9,3 +9,7 @@ export const getAccessToken = (): string => {
         return "";
     }
 };
+
+/** Full address of a file uploaded to the backend (profile photos, content images). */
+export const mediaUrl = (path?: string | null): string =>
+    path ? `${API_BASE_URL}/${path.replace(/^\/+/, "")}` : "";

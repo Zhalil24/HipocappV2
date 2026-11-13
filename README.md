@@ -27,9 +27,9 @@ For production builds set `VITE_API_URL` in the build environment or in `.env.pr
 | Command | What it does |
 |---|---|
 | `npm run dev` | Development server on http://localhost:5173 |
-| `npm run build` | Production build into `dist/` |
+| `npm run build` | Type check, then production build into `dist/` |
 | `npm run preview` | Serves the production build locally |
-| `npx tsc --noEmit` | Type check |
+| `npm run typecheck` | Type check only |
 
 ## Folder layout
 

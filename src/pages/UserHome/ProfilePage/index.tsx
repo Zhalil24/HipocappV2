@@ -20,6 +20,7 @@ import LoadingWidget from '@/components/Loading/loadingWidget';
 import { UserProfileModel } from '@/core/models/user/userProfileModel';
 import { fileToBase64 } from '@/Utilities/helpers/fileToBase64Helper';
 import { useParams } from 'react-router';
+import { mediaUrl } from "@/core/services/apiConfig";
 
 
 
@@ -180,7 +181,7 @@ return (
             <img
               src={
                 profile.photoURL
-                  ? `https://hipocapp.com/${profile.photoURL}`
+                  ? mediaUrl(profile.photoURL)
                   : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                       `${profile.name} ${profile.surname}`
                     )}&background=0D8ABC&color=fff&size=128`

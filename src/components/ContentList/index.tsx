@@ -1,5 +1,6 @@
 import { ContentModel } from '@/core/models/content/contentModel';
 import React, { useState } from 'react';
+import { mediaUrl } from "@/core/services/apiConfig";
 
 interface ContentListProps {
   data: ContentModel[];
@@ -54,7 +55,7 @@ export const ContentList: React.FC<ContentListProps> = ({ data, onEdit, onDelete
             <div className="flex items-center space-x-4">
               {item.imageURL && (
                 <img
-                  src={`https://hipocapp.com/${item.imageURL}`}
+                  src={mediaUrl(item.imageURL)}
                   alt={item.title}
                   className="h-16 w-16 rounded-md object-cover"
                 />
